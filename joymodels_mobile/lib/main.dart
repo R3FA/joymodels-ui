@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
+import 'package:joymodels_mobile/ui/welcome_page/view_model/welcome_page_view_model.dart';
 
 void main() {
-  runApp(const JoyModelsApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => WelcomePageViewModel(),
+      child: const JoyModelsApp(),
+    ),
+  );
 }
 
 class JoyModelsApp extends StatelessWidget {
@@ -10,8 +18,9 @@ class JoyModelsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'JoyModelsApp',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
+      home: const WelcomePageScreen(),
+      darkTheme: ThemeData.dark(),
+      themeMode: ThemeMode.dark,
     );
   }
 }
