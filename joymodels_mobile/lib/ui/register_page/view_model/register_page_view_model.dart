@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-
+import 'package:image_picker/image_picker.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
+import 'package:joymodels_mobile/ui/core/view_model/user_profile_picture_view_model.dart';
 
 class RegisterPageScreenViewModel with ChangeNotifier {
+  bool isLoading = false;
+
   final firstNameController = TextEditingController();
   final lastNameController = TextEditingController();
   final nicknameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  File? avatarImage;
+  File? userProfilePicture;
 
-  String? avatarError;
-
-  bool isLoading = false;
+  String? userProfilePictureError;
   String? submitError;
 
   // Form field validations
@@ -33,32 +34,43 @@ class RegisterPageScreenViewModel with ChangeNotifier {
     return RegexValidationViewModel.validatePassword(password);
   }
 
-  // Upload avatara
-  String? setAvatar(File? file) {
-    avatarImage = file;
-    avatarError = (file == null) ? 'Avatar is required' : null;
+  Future<void> pickUserProfilePicture() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+
+    if (picked != null) {
+      userProfilePicture = File(picked.path);
+      notifyListeners();
+    }
+  }
+
+  void setProfilePicture(File? file) {
+    userProfilePicture = file;
     notifyListeners();
   }
 
-  // SUBMIT
+  Future<String?> validateUserPicture(File? file) async {
+    userProfilePictureError =
+        await UserProfilePictureValidationViewModel.validateUserPicture(file);
+
+    notifyListeners();
+
+    return userProfilePictureError;
+  }
+
+  // TODO: Kada napravis servise, repo, domain klase itd onda ovu metodu zavrsi
   Future<bool> submitForm(BuildContext context) async {
-    submitError = null;
-    avatarError = (avatarImage == null) ? 'Avatar is required' : null;
-    isLoading = true;
-    notifyListeners();
+    await validateUserPicture(userProfilePicture);
 
-    await Future.delayed(const Duration(milliseconds: 700)); // simulate API
+    // submitError = null;
+    // isLoading = true;
+    // notifyListeners();
 
-    isLoading = false;
-    notifyListeners();
+    // await Future.delayed(const Duration(milliseconds: 5000));
 
-    // Validacija za avatar
-    if (avatarError != null) {
-      submitError = null; // poništi prethodnu grešku
-      notifyListeners();
-      return false;
-    }
-    // success example
+    // isLoading = false;
+    // notifyListeners();
+
     return true;
   }
 

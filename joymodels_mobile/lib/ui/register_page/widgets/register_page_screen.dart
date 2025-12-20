@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:joymodels_mobile/ui/core/ui/form_input_decoration.dart';
+import 'package:joymodels_mobile/ui/core/ui/success_snack_bar.dart';
 import 'package:joymodels_mobile/ui/register_page/view_model/register_page_view_model.dart';
 import 'package:provider/provider.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 
 import 'package:joymodels_mobile/ui/core/themes/color_palette.dart';
 
@@ -39,21 +39,15 @@ class RegisterPageScreen extends StatelessWidget {
               children: [
                 GestureDetector(
                   onTap: () async {
-                    final picker = ImagePicker();
-                    final picked = await picker.pickImage(
-                      source: ImageSource.gallery,
-                    );
-                    if (picked != null) {
-                      viewModel.setAvatar(File(picked.path));
-                    }
+                    await viewModel.pickUserProfilePicture();
                   },
                   child: CircleAvatar(
                     radius: 44,
                     backgroundColor: ColorPallete.accent,
-                    backgroundImage: viewModel.avatarImage != null
-                        ? FileImage(viewModel.avatarImage!)
+                    backgroundImage: viewModel.userProfilePicture != null
+                        ? FileImage(viewModel.userProfilePicture!)
                         : null,
-                    child: viewModel.avatarImage == null
+                    child: viewModel.userProfilePicture == null
                         ? const Icon(
                             Icons.camera_alt,
                             size: 38,
@@ -62,18 +56,25 @@ class RegisterPageScreen extends StatelessWidget {
                         : null,
                   ),
                 ),
-                if (viewModel.avatarError != null)
+                if (viewModel.userProfilePictureError != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      viewModel.avatarError!,
-                      style: const TextStyle(color: Colors.red),
+                    child: Center(
+                      child: Text(
+                        viewModel.userProfilePictureError!,
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
                 const SizedBox(height: 18),
                 TextFormField(
                   controller: viewModel.firstNameController,
-                  decoration: _inputDecoration(
+                  decoration: formInputDecoration(
                     'First name',
                     Icons.person_outline,
                   ),
@@ -83,8 +84,8 @@ class RegisterPageScreen extends StatelessWidget {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: viewModel.lastNameController,
-                  decoration: _inputDecoration(
-                    'Last name (optional)',
+                  decoration: formInputDecoration(
+                    'Last name',
                     Icons.person_outline,
                   ),
                   style: const TextStyle(color: Colors.white),
@@ -96,14 +97,17 @@ class RegisterPageScreen extends StatelessWidget {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: viewModel.nicknameController,
-                  decoration: _inputDecoration('Nickname', Icons.face),
+                  decoration: formInputDecoration('Nickname', Icons.face),
                   validator: viewModel.validateNickname,
                   style: const TextStyle(color: Colors.white),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: viewModel.emailController,
-                  decoration: _inputDecoration('Email', Icons.email_outlined),
+                  decoration: formInputDecoration(
+                    'Email',
+                    Icons.email_outlined,
+                  ),
                   keyboardType: TextInputType.emailAddress,
                   validator: viewModel.validateEmail,
                   style: const TextStyle(color: Colors.white),
@@ -111,7 +115,10 @@ class RegisterPageScreen extends StatelessWidget {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: viewModel.passwordController,
-                  decoration: _inputDecoration('Šifra', Icons.lock_outline),
+                  decoration: formInputDecoration(
+                    'Password',
+                    Icons.lock_outline,
+                  ),
                   obscureText: true,
                   validator: viewModel.validatePassword,
                   style: const TextStyle(color: Colors.white),
@@ -142,11 +149,11 @@ class RegisterPageScreen extends StatelessWidget {
                               final success = await viewModel.submitForm(
                                 context,
                               );
+                              if (!context.mounted) return;
                               if (success) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Registration success!'),
-                                  ),
+                                showSuccessSnackBar(
+                                  context,
+                                  'Registration success',
                                 );
                               }
                             }
@@ -174,29 +181,6 @@ class RegisterPageScreen extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  InputDecoration _inputDecoration(String label, IconData icon) {
-    return InputDecoration(
-      prefixIcon: Icon(icon, color: ColorPallete.accent),
-      labelText: label,
-      labelStyle: const TextStyle(color: ColorPallete.accent),
-      enabledBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: ColorPallete.accent),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: ColorPallete.accent, width: 2),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      errorMaxLines: 6,
-      errorStyle: TextStyle(
-        color: Colors.redAccent,
-        fontWeight: FontWeight.bold,
-        fontSize: 14, // Povećaj font
-        height: 1.0,
       ),
     );
   }
