@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/ui/core/themes/color_palette.dart';
-import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_constants.dart';
 import 'package:provider/provider.dart';
 import '../view_model/welcome_page_view_model.dart';
 
@@ -18,7 +17,7 @@ class WelcomePageScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              WelcomePageConstants.welcomePageMainTextConstant,
+              "Welcome",
               style: TextStyle(
                 fontSize: 38,
                 fontWeight: FontWeight.bold,
@@ -30,7 +29,7 @@ class WelcomePageScreen extends StatelessWidget {
             const SizedBox(height: 10),
 
             Text(
-              WelcomePageConstants.welcomePageDescriptionTextConstant,
+              "Explore awesome 3D models & artists!",
               style: TextStyle(fontSize: 18, color: Colors.white70),
               textAlign: TextAlign.center,
             ),
@@ -67,7 +66,7 @@ class WelcomePageScreen extends StatelessWidget {
                     ? null
                     : () => viewModel.onLoginPressed(context),
                 child: Text(
-                  WelcomePageConstants.welcomePageLoginTextConstant,
+                  "Login",
                   style: TextStyle(
                     color: ColorPallete.darkBackground,
                     fontSize: 18,
@@ -93,7 +92,7 @@ class WelcomePageScreen extends StatelessWidget {
                     ? null
                     : () => viewModel.onRegisterPressed(context),
                 child: Text(
-                  WelcomePageConstants.welcomePageRegisterTextConstant,
+                  "Register",
                   style: TextStyle(
                     color: ColorPallete.accent,
                     fontSize: 18,

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
+import 'package:joymodels_mobile/data/model/sso/request_types/sso_user_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/sso_repository.dart';
-import 'package:joymodels_mobile/domain/models/sso/request_types/sso_user_create_request.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 import 'package:joymodels_mobile/ui/core/view_model/user_profile_picture_view_model.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
@@ -68,16 +68,17 @@ class RegisterPageScreenViewModel with ChangeNotifier {
       return false;
     }
 
-    final SsoUserCreateRequest domainModel = SsoUserCreateRequest(
-      firstName: firstNameController.text,
-      lastName: lastNameController.text.isNotEmpty
-          ? lastNameController.text
-          : null,
-      nickname: nicknameController.text,
-      email: emailController.text,
-      password: passwordController.text,
-      userPicture: userProfilePicture!,
-    );
+    final SsoUserCreateRequestApiModel domainModel =
+        SsoUserCreateRequestApiModel(
+          firstName: firstNameController.text,
+          lastName: lastNameController.text.isNotEmpty
+              ? lastNameController.text
+              : null,
+          nickname: nicknameController.text,
+          email: emailController.text,
+          password: passwordController.text,
+          userPicture: userProfilePicture!,
+        );
 
     try {
       await ssoRepository.createUser(domainModel);
