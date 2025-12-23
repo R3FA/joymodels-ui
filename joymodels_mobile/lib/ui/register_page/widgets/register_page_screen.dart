@@ -56,12 +56,12 @@ class RegisterPageScreen extends StatelessWidget {
                         : null,
                   ),
                 ),
-                if (viewModel.userProfilePictureError != null)
+                if (viewModel.profilePictureErrorMessage != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Center(
                       child: Text(
-                        viewModel.userProfilePictureError!,
+                        viewModel.profilePictureErrorMessage!,
                         style: const TextStyle(
                           color: Colors.red,
                           fontWeight: FontWeight.bold,
@@ -124,12 +124,17 @@ class RegisterPageScreen extends StatelessWidget {
                   style: const TextStyle(color: Colors.white),
                 ),
                 const SizedBox(height: 24),
-                if (viewModel.submitError != null)
+                if (viewModel.responseErrorMessage != null)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.only(bottom: 12),
                     child: Text(
-                      viewModel.submitError!,
-                      style: const TextStyle(color: Colors.red),
+                      viewModel.responseErrorMessage!,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 SizedBox(
@@ -145,17 +150,16 @@ class RegisterPageScreen extends StatelessWidget {
                     onPressed: viewModel.isLoading
                         ? null
                         : () async {
-                            if (formKey.currentState?.validate() ?? false) {
-                              final success = await viewModel.submitForm(
+                            if (!formKey.currentState!.validate()) {
+                              return;
+                            }
+                            final success = await viewModel.submitForm(context);
+                            if (!context.mounted) return;
+                            if (success) {
+                              showSuccessSnackBar(
                                 context,
+                                'Registration success',
                               );
-                              if (!context.mounted) return;
-                              if (success) {
-                                showSuccessSnackBar(
-                                  context,
-                                  'Registration success',
-                                );
-                              }
                             }
                           },
                     child: viewModel.isLoading
