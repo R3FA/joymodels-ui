@@ -13,6 +13,7 @@ class RegisterPageScreenViewModel with ChangeNotifier {
 
   bool isLoading = false;
 
+  final formKey = GlobalKey<FormState>();
   final firstNameController = TextEditingController();
   final lastNameController = TextEditingController();
   final nicknameController = TextEditingController();
@@ -60,28 +61,32 @@ class RegisterPageScreenViewModel with ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
-    profilePictureErrorMessage = await validateUserPicture(userProfilePicture);
+    if (!formKey.currentState!.validate()) {
+      isLoading = false;
+      notifyListeners();
+      return false;
+    }
 
+    profilePictureErrorMessage = await validateUserPicture(userProfilePicture);
     if (profilePictureErrorMessage != null) {
       isLoading = false;
       notifyListeners();
       return false;
     }
 
-    final SsoUserCreateRequestApiModel domainModel =
-        SsoUserCreateRequestApiModel(
-          firstName: firstNameController.text,
-          lastName: lastNameController.text.isNotEmpty
-              ? lastNameController.text
-              : null,
-          nickname: nicknameController.text,
-          email: emailController.text,
-          password: passwordController.text,
-          userPicture: userProfilePicture!,
-        );
+    final SsoUserCreateRequestApiModel request = SsoUserCreateRequestApiModel(
+      firstName: firstNameController.text,
+      lastName: lastNameController.text.isNotEmpty
+          ? lastNameController.text
+          : null,
+      nickname: nicknameController.text,
+      email: emailController.text,
+      password: passwordController.text,
+      userPicture: userProfilePicture!,
+    );
 
     try {
-      await ssoRepository.createUser(domainModel);
+      await ssoRepository.create(request);
 
       isLoading = false;
       responseErrorMessage = null;

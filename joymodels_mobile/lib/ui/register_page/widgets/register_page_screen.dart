@@ -12,7 +12,6 @@ class RegisterPageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<RegisterPageScreenViewModel>();
-    final formKey = GlobalKey<FormState>();
 
     return Scaffold(
       backgroundColor: ColorPallete.darkBackground,
@@ -33,7 +32,7 @@ class RegisterPageScreen extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(26),
           child: Form(
-            key: formKey,
+            key: viewModel.formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -150,9 +149,6 @@ class RegisterPageScreen extends StatelessWidget {
                     onPressed: viewModel.isLoading
                         ? null
                         : () async {
-                            if (!formKey.currentState!.validate()) {
-                              return;
-                            }
                             final success = await viewModel.submitForm(context);
                             if (!context.mounted) return;
                             if (success) {

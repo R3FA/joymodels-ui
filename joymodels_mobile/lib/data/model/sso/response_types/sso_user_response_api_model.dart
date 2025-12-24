@@ -38,18 +38,4 @@ class SsoUserResponseApiModel {
       ),
     );
   }
-
-  Map<String, dynamic> toJson() {
-    return {
-      "uuid": uuid,
-      "firstName": firstName,
-      "lastName": lastName,
-      "nickName": nickName,
-      "email": email,
-      "createdAt": createdAt.toIso8601String(),
-      "userAccessToken": userAccessToken,
-      "userPictureLocation": userPictureLocation,
-      "userRole": userRole.toJson(),
-    };
-  }
 }

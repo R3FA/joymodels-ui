@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/ui/core/themes/color_palette.dart';
+import 'package:joymodels_mobile/ui/core/ui/form_input_decoration.dart';
+import 'package:joymodels_mobile/ui/core/ui/success_snack_bar.dart';
+import 'package:joymodels_mobile/ui/login_page/view_model/login_page_view_model.dart';
+import 'package:provider/provider.dart';
 
-class LoginPageScreen extends StatefulWidget {
+class LoginPageScreen extends StatelessWidget {
   const LoginPageScreen({super.key});
 
   @override
-  State<LoginPageScreen> createState() => _LoginPageScreenState();
-}
-
-class _LoginPageScreenState extends State<LoginPageScreen> {
-  final _formKey = GlobalKey<FormState>();
-  String? username, password;
-
-  @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<LoginPageScreenViewModel>();
+
     return Scaffold(
       backgroundColor: ColorPallete.darkBackground,
       appBar: AppBar(
@@ -25,6 +23,7 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
           style: TextStyle(
             color: ColorPallete.accent,
             fontWeight: FontWeight.bold,
+            fontSize: 22,
           ),
         ),
         centerTitle: true,
@@ -33,94 +32,91 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(26),
           child: Form(
-            key: _formKey,
+            key: viewModel.formKey,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // USERNAME
-                TextFormField(
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.person_outline,
-                      color: ColorPallete.accent,
-                    ),
-                    labelText: 'Username',
-                    labelStyle: const TextStyle(color: ColorPallete.accent),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: ColorPallete.accent),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: ColorPallete.accent,
-                        width: 2,
+                const SizedBox(height: 8),
+                CircleAvatar(
+                  radius: 46,
+                  backgroundColor: ColorPallete.accent,
+                  child: const Icon(
+                    Icons.person,
+                    color: ColorPallete.darkBackground,
+                    size: 46,
+                  ),
+                ),
+                if (viewModel.errorMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12.0),
+                    child: Text(
+                      viewModel.errorMessage!,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
                       ),
-                      borderRadius: BorderRadius.circular(12),
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                  validator: (value) =>
-                      value!.isEmpty ? 'Enter username' : null,
-                  onSaved: (value) => username = value,
-                ),
-                const SizedBox(height: 24),
-                // PASSWORD
+                const SizedBox(height: 26),
                 TextFormField(
+                  controller: viewModel.nicknameController,
+                  decoration: formInputDecoration(
+                    "Nickname",
+                    Icons.person_outline,
+                  ),
+                  style: const TextStyle(color: Colors.white),
+                  validator: viewModel.validateNickname,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: viewModel.passwordController,
+                  decoration: formInputDecoration(
+                    "Password",
+                    Icons.lock_outline,
+                  ),
                   style: const TextStyle(color: Colors.white),
                   obscureText: true,
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.lock_outline,
-                      color: ColorPallete.accent,
-                    ),
-                    labelText: 'Šifra',
-                    labelStyle: const TextStyle(color: ColorPallete.accent),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: ColorPallete.accent),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: ColorPallete.accent,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  validator: (value) => value!.isEmpty ? 'Unesi šifru' : null,
-                  onSaved: (value) => password = value,
+                  validator: viewModel.validatePassword,
                 ),
-                const SizedBox(height: 32),
-                // LOGIN BUTTON
+                const SizedBox(height: 28),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ColorPallete.accent,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(13),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _formKey.currentState!.save();
-                        // TODO: Ovdje pozovi login funkciju, API, provjeru...
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Login...')),
-                        );
-                      }
-                    },
-                    child: const Text(
-                      'Login',
-                      style: TextStyle(
-                        color: ColorPallete.darkBackground,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    onPressed: viewModel.isLoading
+                        ? null
+                        : () async {
+                            if (await viewModel.login(context)) {
+                              if (context.mounted) {
+                                showSuccessSnackBar(context, 'Login success!');
+                              }
+                            }
+                          },
+                    child: viewModel.isLoading
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              color: ColorPallete.darkBackground,
+                              strokeWidth: 2.4,
+                            ),
+                          )
+                        : const Text(
+                            'Login',
+                            style: TextStyle(
+                              color: ColorPallete.darkBackground,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ],
