@@ -1,4 +1,4 @@
-enum JwtClaimKeyApiModel {
+enum JwtClaimKeyApiEnum {
   nameIdentifier(
     'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier',
   ),
@@ -9,5 +9,5 @@ enum JwtClaimKeyApiModel {
   aud('aud');
 
   final String key;
-  const JwtClaimKeyApiModel(this.key);
+  const JwtClaimKeyApiEnum(this.key);
 }

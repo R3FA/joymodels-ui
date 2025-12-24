@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:joymodels_mobile/data/model/sso/request_types/sso_new_otp_code_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_user_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_user_login_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/response_types/sso_login_response_api_model.dart';
@@ -21,6 +22,20 @@ class SsoRepository {
     } else {
       throw Exception(
         'Failed to create user: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  Future<bool> requestNewOtpCode(
+    SsoNewOtpCodeRequestApiModel apiRequest,
+  ) async {
+    final response = await _service.requestNewOtpCode(apiRequest);
+
+    if (response.statusCode == 201 || response.statusCode == 204) {
+      return true;
+    } else {
+      throw Exception(
+        'Failed to send new otp code: ${response.statusCode} - ${response.body}',
       );
     }
   }

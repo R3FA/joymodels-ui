@@ -95,7 +95,8 @@ class LoginPageScreen extends StatelessWidget {
                         ? null
                         : () async {
                             if (await viewModel.login(context)) {
-                              if (context.mounted) {
+                              if (context.mounted &&
+                                  !viewModel.isVerifyScreenLoading) {
                                 showSuccessSnackBar(context, 'Login success!');
                               }
                             }

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
+import 'package:joymodels_mobile/data/model/enums/jwt_claim_key_api_enum.dart';
+import 'package:joymodels_mobile/data/model/enums/user_role_api_enum.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_user_login_request_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/sso_repository.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
+import 'package:joymodels_mobile/ui/verify_page/widgets/verify_page_screen.dart';
+import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 
 class LoginPageScreenViewModel with ChangeNotifier {
   final ssoRepository = sl<SsoRepository>();
@@ -11,6 +15,7 @@ class LoginPageScreenViewModel with ChangeNotifier {
   final nicknameController = TextEditingController();
   final passwordController = TextEditingController();
   bool isLoading = false;
+  bool isVerifyScreenLoading = false;
   String? errorMessage;
 
   String? validateNickname(String? nickname) {
@@ -44,15 +49,24 @@ class LoginPageScreenViewModel with ChangeNotifier {
       errorMessage = null;
       notifyListeners();
       await TokenStorage.saveAccessToken(loginResponse.accessToken);
-      // final accessTokenPayloadMap = TokenStorage.decodeAccessToken(
-      //   loginResponse.accessToken,
-      // );
+      final accessTokenPayloadMap = TokenStorage.decodeAccessToken(
+        loginResponse.accessToken,
+      );
 
-      // if (context.mounted) {
-      //   Navigator.of(context).pushReplacement(
-      //     MaterialPageRoute(builder: (context) => WelcomePageScreen()),
-      //   );
-      // }
+      if (context.mounted) {
+        if (accessTokenPayloadMap[JwtClaimKeyApiEnum.role.key] ==
+            UserRoleApiEnum.Unverified.name) {
+          isVerifyScreenLoading = true;
+          notifyListeners();
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (context) => VerifyPageScreen()));
+        } else {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => WelcomePageScreen()),
+          );
+        }
+      }
 
       return true;
     } catch (e) {

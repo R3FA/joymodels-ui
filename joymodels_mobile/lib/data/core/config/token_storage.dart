@@ -17,6 +17,16 @@ class TokenStorage {
     await _storage.delete(key: _accessTokenKey);
   }
 
+  static Future<void> setNewAccessToken(String token) async {
+    await clearAccessToken();
+    await saveAccessToken(token);
+  }
+
+  Future<bool> hasAccessToken() async {
+    final token = await getAccessToken();
+    return token != null && token.isNotEmpty;
+  }
+
   static Map<String, dynamic> decodeAccessToken(String token) {
     final parts = token.split('.');
     if (parts.length != 3) {
