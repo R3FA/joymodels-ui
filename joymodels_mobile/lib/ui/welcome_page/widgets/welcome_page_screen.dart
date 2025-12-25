@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:joymodels_mobile/ui/core/themes/color_palette.dart';
 import 'package:provider/provider.dart';
 import '../view_model/welcome_page_view_model.dart';
 
@@ -11,7 +10,6 @@ class WelcomePageScreen extends StatelessWidget {
     final viewModel = context.watch<WelcomePageViewModel>();
 
     return Scaffold(
-      backgroundColor: ColorPallete.darkBackground,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -21,7 +19,6 @@ class WelcomePageScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 38,
                 fontWeight: FontWeight.bold,
-                color: ColorPallete.accent,
                 letterSpacing: 1.3,
               ),
             ),
@@ -30,7 +27,7 @@ class WelcomePageScreen extends StatelessWidget {
 
             Text(
               "Explore awesome 3D models & artists!",
-              style: TextStyle(fontSize: 18, color: Colors.white70),
+              style: TextStyle(fontSize: 18),
               textAlign: TextAlign.center,
             ),
 
@@ -41,7 +38,7 @@ class WelcomePageScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Text(
                   viewModel.errorMessage!,
-                  style: const TextStyle(color: Colors.red, fontSize: 16),
+                  style: const TextStyle(fontSize: 16),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -49,17 +46,13 @@ class WelcomePageScreen extends StatelessWidget {
             if (viewModel.isLoading)
               const Padding(
                 padding: EdgeInsets.only(bottom: 20),
-                child: CircularProgressIndicator(color: ColorPallete.accent),
+                child: CircularProgressIndicator(),
               ),
 
             SizedBox(
               width: 220,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorPallete.accent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 onPressed: viewModel.isLoading
@@ -67,11 +60,7 @@ class WelcomePageScreen extends StatelessWidget {
                     : () => viewModel.onLoginPressed(context),
                 child: Text(
                   "Login",
-                  style: TextStyle(
-                    color: ColorPallete.darkBackground,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -80,12 +69,8 @@ class WelcomePageScreen extends StatelessWidget {
 
             SizedBox(
               width: 220,
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: ColorPallete.accent, width: 2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+              child: FilledButton.tonal(
+                style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 onPressed: viewModel.isLoading
@@ -93,11 +78,7 @@ class WelcomePageScreen extends StatelessWidget {
                     : () => viewModel.onRegisterPressed(context),
                 child: Text(
                   "Register",
-                  style: TextStyle(
-                    color: ColorPallete.accent,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

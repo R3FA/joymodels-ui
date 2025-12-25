@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
+import 'package:joymodels_mobile/ui/core/themes/themes.dart';
 import 'package:joymodels_mobile/ui/login_page/view_model/login_page_view_model.dart';
 import 'package:joymodels_mobile/ui/register_page/view_model/register_page_view_model.dart';
 import 'package:joymodels_mobile/ui/verify_page/view_model/verify_page_view_model.dart';
@@ -30,8 +31,9 @@ class JoyModelsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: const WelcomePageScreen(),
-      darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.dark,
+      theme: ThemeManager.generateLightTheme(),
+      darkTheme: ThemeManager.generateDarkTheme(),
+      themeMode: ThemeMode.light,
     );
   }
 }

@@ -4,8 +4,6 @@ import 'package:joymodels_mobile/ui/core/ui/success_snack_bar.dart';
 import 'package:joymodels_mobile/ui/register_page/view_model/register_page_view_model.dart';
 import 'package:provider/provider.dart';
 
-import 'package:joymodels_mobile/ui/core/themes/color_palette.dart';
-
 class RegisterPageScreen extends StatelessWidget {
   const RegisterPageScreen({super.key});
 
@@ -14,17 +12,12 @@ class RegisterPageScreen extends StatelessWidget {
     final viewModel = context.watch<RegisterPageScreenViewModel>();
 
     return Scaffold(
-      backgroundColor: ColorPallete.darkBackground,
       appBar: AppBar(
-        backgroundColor: ColorPallete.darkBackground,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(),
         title: const Text(
           'Register',
-          style: TextStyle(
-            color: ColorPallete.accent,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -42,16 +35,11 @@ class RegisterPageScreen extends StatelessWidget {
                   },
                   child: CircleAvatar(
                     radius: 44,
-                    backgroundColor: ColorPallete.accent,
                     backgroundImage: viewModel.userProfilePicture != null
                         ? FileImage(viewModel.userProfilePicture!)
                         : null,
                     child: viewModel.userProfilePicture == null
-                        ? const Icon(
-                            Icons.camera_alt,
-                            size: 38,
-                            color: ColorPallete.darkBackground,
-                          )
+                        ? const Icon(Icons.camera_alt, size: 38)
                         : null,
                   ),
                 ),
@@ -62,7 +50,6 @@ class RegisterPageScreen extends StatelessWidget {
                       child: Text(
                         viewModel.profilePictureErrorMessage!,
                         style: const TextStyle(
-                          color: Colors.red,
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),
@@ -78,7 +65,7 @@ class RegisterPageScreen extends StatelessWidget {
                     Icons.person_outline,
                   ),
                   validator: viewModel.validateName,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -87,7 +74,7 @@ class RegisterPageScreen extends StatelessWidget {
                     'Last name',
                     Icons.person_outline,
                   ),
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(),
                   validator: (lastName) =>
                       (lastName == null || lastName.trim().isEmpty)
                       ? null
@@ -98,7 +85,7 @@ class RegisterPageScreen extends StatelessWidget {
                   controller: viewModel.nicknameController,
                   decoration: formInputDecoration('Nickname', Icons.face),
                   validator: viewModel.validateNickname,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -109,7 +96,7 @@ class RegisterPageScreen extends StatelessWidget {
                   ),
                   keyboardType: TextInputType.emailAddress,
                   validator: viewModel.validateEmail,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -120,7 +107,7 @@ class RegisterPageScreen extends StatelessWidget {
                   ),
                   obscureText: true,
                   validator: viewModel.validatePassword,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(),
                 ),
                 const SizedBox(height: 24),
                 if (viewModel.responseErrorMessage != null)
@@ -129,7 +116,6 @@ class RegisterPageScreen extends StatelessWidget {
                     child: Text(
                       viewModel.responseErrorMessage!,
                       style: const TextStyle(
-                        color: Colors.red,
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
                       ),
@@ -140,7 +126,6 @@ class RegisterPageScreen extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: ColorPallete.accent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -162,15 +147,11 @@ class RegisterPageScreen extends StatelessWidget {
                         ? const SizedBox(
                             height: 22,
                             width: 22,
-                            child: CircularProgressIndicator(
-                              color: ColorPallete.darkBackground,
-                              strokeWidth: 2.6,
-                            ),
+                            child: CircularProgressIndicator(strokeWidth: 2.6),
                           )
                         : const Text(
                             'Register',
                             style: TextStyle(
-                              color: ColorPallete.darkBackground,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),

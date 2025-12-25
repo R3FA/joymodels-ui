@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:joymodels_mobile/ui/core/themes/color_palette.dart';
 import 'package:joymodels_mobile/ui/core/ui/form_input_decoration.dart';
 import 'package:joymodels_mobile/ui/verify_page/view_model/verify_page_view_model.dart';
 import 'package:provider/provider.dart';
@@ -12,18 +11,12 @@ class VerifyPageScreen extends StatelessWidget {
     final viewModel = context.watch<VerifyPageScreenViewModel>();
 
     return Scaffold(
-      backgroundColor: ColorPallete.darkBackground,
       appBar: AppBar(
-        backgroundColor: ColorPallete.darkBackground,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(),
         title: const Text(
           'OTP Verification',
-          style: TextStyle(
-            color: ColorPallete.accent,
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
         ),
         centerTitle: true,
       ),
@@ -34,22 +27,13 @@ class VerifyPageScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 8),
-              CircleAvatar(
-                radius: 46,
-                backgroundColor: ColorPallete.accent,
-                child: Icon(
-                  Icons.lock,
-                  color: ColorPallete.darkBackground,
-                  size: 46,
-                ),
-              ),
+              CircleAvatar(radius: 46, child: Icon(Icons.lock, size: 46)),
               if (viewModel.errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 12.0),
                   child: Text(
                     viewModel.errorMessage!,
                     style: const TextStyle(
-                      color: Colors.red,
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                     ),
@@ -62,7 +46,6 @@ class VerifyPageScreen extends StatelessWidget {
                   child: Text(
                     viewModel.successMessage!,
                     style: const TextStyle(
-                      color: Colors.green,
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                     ),
@@ -77,7 +60,7 @@ class VerifyPageScreen extends StatelessWidget {
                   "Enter OTP code",
                   Icons.vpn_key,
                 ),
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(),
                 keyboardType: TextInputType.text,
                 textAlign: TextAlign.left,
                 maxLength: 12,
@@ -96,29 +79,23 @@ class VerifyPageScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
-                      icon: const Icon(
-                        Icons.refresh,
-                        color: ColorPallete.darkBackground,
-                      ),
+                      icon: const Icon(Icons.refresh),
                       label: viewModel.isRequestingNewOtpCode
                           ? const SizedBox(
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(
-                                color: ColorPallete.darkBackground,
                                 strokeWidth: 2.2,
                               ),
                             )
                           : const Text(
                               'Request new OTP',
                               style: TextStyle(
-                                color: ColorPallete.darkBackground,
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: ColorPallete.accent,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(13),
                         ),
@@ -138,7 +115,6 @@ class VerifyPageScreen extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorPallete.accent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(13),
                     ),
@@ -153,15 +129,11 @@ class VerifyPageScreen extends StatelessWidget {
                       ? const SizedBox(
                           width: 22,
                           height: 22,
-                          child: CircularProgressIndicator(
-                            color: ColorPallete.darkBackground,
-                            strokeWidth: 2.4,
-                          ),
+                          child: CircularProgressIndicator(strokeWidth: 2.4),
                         )
                       : const Text(
                           'Submit',
                           style: TextStyle(
-                            color: ColorPallete.darkBackground,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
