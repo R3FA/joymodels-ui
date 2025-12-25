@@ -33,7 +33,7 @@ class JoyModelsApp extends StatelessWidget {
       home: const WelcomePageScreen(),
       theme: ThemeManager.generateLightTheme(),
       darkTheme: ThemeManager.generateDarkTheme(),
-      themeMode: ThemeMode.light,
+      themeMode: ThemeMode.dark,
     );
   }
 }
