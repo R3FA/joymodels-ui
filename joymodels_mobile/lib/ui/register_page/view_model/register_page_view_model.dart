@@ -105,7 +105,8 @@ class RegisterPageScreenViewModel with ChangeNotifier {
     }
   }
 
-  void disposeControllers() {
+  @override
+  void dispose() {
     firstNameController.dispose();
     lastNameController.dispose();
     nicknameController.dispose();
