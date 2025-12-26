@@ -1,0 +1,91 @@
+import 'package:flutter/material.dart';
+import 'package:joymodels_mobile/core/di/di.dart';
+import 'package:joymodels_mobile/data/core/config/token_storage.dart';
+import 'package:joymodels_mobile/data/model/enums/jwt_claim_key_api_enum.dart';
+import 'package:joymodels_mobile/data/model/enums/user_role_api_enum.dart';
+import 'package:joymodels_mobile/data/model/sso/request_types/sso_user_login_request_api_model.dart';
+import 'package:joymodels_mobile/data/repositories/sso_repository.dart';
+import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
+import 'package:joymodels_mobile/ui/home_page/widgets/home_page_screen.dart';
+import 'package:joymodels_mobile/ui/verify_page/widgets/verify_page_screen.dart';
+
+class LoginPageScreenViewModel with ChangeNotifier {
+  final ssoRepository = sl<SsoRepository>();
+  final formKey = GlobalKey<FormState>();
+  final nicknameController = TextEditingController();
+  final passwordController = TextEditingController();
+  bool isLoading = false;
+  bool isVerifyScreenLoading = false;
+  String? errorMessage;
+
+  String? validateNickname(String? nickname) {
+    return RegexValidationViewModel.validateNickname(nickname);
+  }
+
+  String? validatePassword(String? password) {
+    return RegexValidationViewModel.validatePassword(password);
+  }
+
+  Future<bool> login(BuildContext context) async {
+    errorMessage = null;
+    isLoading = true;
+    notifyListeners();
+
+    if (!formKey.currentState!.validate()) {
+      isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    final SsoUserLoginRequestApiModel request = SsoUserLoginRequestApiModel(
+      nickname: nicknameController.text,
+      password: passwordController.text,
+    );
+
+    try {
+      final loginResponse = await ssoRepository.login(request);
+
+      isLoading = false;
+      errorMessage = null;
+      notifyListeners();
+
+      await TokenStorage.setNewAuthToken(
+        loginResponse.accessToken,
+        loginResponse.refreshToken,
+      );
+
+      final accessTokenPayloadMap = TokenStorage.decodeAccessToken(
+        loginResponse.accessToken,
+      );
+
+      if (context.mounted) {
+        if (accessTokenPayloadMap[JwtClaimKeyApiEnum.role.key] ==
+            UserRoleApiEnum.Unverified.name) {
+          isVerifyScreenLoading = true;
+          notifyListeners();
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (context) => VerifyPageScreen()));
+        } else {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => HomePageScreen()),
+          );
+        }
+      }
+
+      return true;
+    } catch (e) {
+      errorMessage = e.toString();
+      isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  @override
+  void dispose() {
+    nicknameController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+}
