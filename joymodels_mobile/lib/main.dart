@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/ui/core/themes/themes.dart';
+import 'package:joymodels_mobile/ui/core/view_model/auth_view_model.dart';
 import 'package:joymodels_mobile/ui/home_page/view_model/home_page_view_model.dart';
 import 'package:joymodels_mobile/ui/login_page/view_model/login_page_view_model.dart';
 import 'package:joymodels_mobile/ui/register_page/view_model/register_page_view_model.dart';
 import 'package:joymodels_mobile/ui/verify_page/view_model/verify_page_view_model.dart';
 import 'package:provider/provider.dart';
-import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:joymodels_mobile/ui/welcome_page/view_model/welcome_page_view_model.dart';
 
 void main() {
@@ -32,7 +32,15 @@ class JoyModelsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: const WelcomePageScreen(),
+      home: FutureBuilder<Widget>(
+        future: AuthViewModel.widgetHomePageScreen(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return snapshot.data!;
+          }
+          return const Scaffold(body: Text("Error loading home page!"));
+        },
+      ),
       theme: ThemeManager.generateLightTheme(),
       darkTheme: ThemeManager.generateDarkTheme(),
       themeMode: ThemeMode.dark,

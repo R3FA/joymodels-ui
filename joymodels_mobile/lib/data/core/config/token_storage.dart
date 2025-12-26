@@ -38,7 +38,7 @@ class TokenStorage {
     await _storage.delete(key: _refreshTokenKey);
   }
 
-  Future<bool> hasAuthToken() async {
+  static Future<bool> hasAuthToken() async {
     final accessToken = await getAccessToken();
     final refreshToken = await getRefreshToken();
     return accessToken != null &&
