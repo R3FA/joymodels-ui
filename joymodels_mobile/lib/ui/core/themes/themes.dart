@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 abstract class ThemeManager {
-  static Color seedColor = const Color(0xFF004E64);
+  static Color seedColor = const Color(0xFF66FFB3);
 
   static ThemeData generateLightTheme() {
     return ThemeData(

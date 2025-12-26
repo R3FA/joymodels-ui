@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:joymodels_mobile/ui/core/ui/custom_button_style.dart';
 import 'package:joymodels_mobile/ui/core/ui/form_input_decoration.dart';
 import 'package:joymodels_mobile/ui/core/ui/success_snack_bar.dart';
 import 'package:joymodels_mobile/ui/login_page/view_model/login_page_view_model.dart';
@@ -10,15 +11,13 @@ class LoginPageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<LoginPageScreenViewModel>();
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text(
-          'Login',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-        ),
         centerTitle: true,
+        title: const Text('Login'),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -29,18 +28,18 @@ class LoginPageScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 8),
-                CircleAvatar(
+                const CircleAvatar(
                   radius: 46,
-                  child: const Icon(Icons.person, size: 46),
+                  child: Icon(Icons.person, size: 46),
                 ),
                 if (viewModel.errorMessage != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 12.0),
                     child: Text(
                       viewModel.errorMessage!,
-                      style: const TextStyle(
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.error,
                         fontWeight: FontWeight.bold,
-                        fontSize: 15,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -52,8 +51,8 @@ class LoginPageScreen extends StatelessWidget {
                     "Nickname",
                     Icons.person_outline,
                   ),
-                  style: const TextStyle(),
                   validator: viewModel.validateNickname,
+                  autofillHints: const [AutofillHints.username],
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -62,20 +61,15 @@ class LoginPageScreen extends StatelessWidget {
                     "Password",
                     Icons.lock_outline,
                   ),
-                  style: const TextStyle(),
                   obscureText: true,
                   validator: viewModel.validatePassword,
+                  autofillHints: const [AutofillHints.password],
                 ),
                 const SizedBox(height: 28),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(13),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
+                    style: customButtonStyle(context),
                     onPressed: viewModel.isLoading
                         ? null
                         : () async {
@@ -92,13 +86,7 @@ class LoginPageScreen extends StatelessWidget {
                             height: 22,
                             child: CircularProgressIndicator(strokeWidth: 2.4),
                           )
-                        : const Text(
-                            'Login',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        : const Text('Login'),
                   ),
                 ),
               ],

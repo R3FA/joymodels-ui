@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:joymodels_mobile/ui/core/ui/custom_button_style.dart';
 import 'package:joymodels_mobile/ui/core/ui/form_input_decoration.dart';
 import 'package:joymodels_mobile/ui/verify_page/view_model/verify_page_view_model.dart';
 import 'package:provider/provider.dart';
@@ -9,16 +10,13 @@ class VerifyPageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<VerifyPageScreenViewModel>();
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        iconTheme: const IconThemeData(),
-        title: const Text(
-          'OTP Verification',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-        ),
         centerTitle: true,
+        title: const Text('OTP Verification'),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -27,15 +25,15 @@ class VerifyPageScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 8),
-              CircleAvatar(radius: 46, child: Icon(Icons.lock, size: 46)),
+              const CircleAvatar(radius: 46, child: Icon(Icons.lock, size: 46)),
               if (viewModel.errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 12.0),
                   child: Text(
                     viewModel.errorMessage!,
-                    style: const TextStyle(
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.error,
                       fontWeight: FontWeight.bold,
-                      fontSize: 15,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -45,9 +43,9 @@ class VerifyPageScreen extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 12.0),
                   child: Text(
                     viewModel.successMessage!,
-                    style: const TextStyle(
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.secondary,
                       fontWeight: FontWeight.bold,
-                      fontSize: 15,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -61,9 +59,6 @@ class VerifyPageScreen extends StatelessWidget {
                     "Enter OTP code",
                     Icons.vpn_key,
                   ),
-                  style: const TextStyle(),
-                  keyboardType: TextInputType.text,
-                  textAlign: TextAlign.left,
                   maxLength: 12,
                   buildCounter:
                       (
@@ -72,8 +67,11 @@ class VerifyPageScreen extends StatelessWidget {
                         required isFocused,
                         maxLength,
                       }) => null,
+                  keyboardType: TextInputType.text,
+                  textAlign: TextAlign.left,
                   obscureText: false,
                   validator: viewModel.validateOtpCode,
+                  autofillHints: const [AutofillHints.oneTimeCode],
                 ),
               ),
               const SizedBox(height: 16),
@@ -81,6 +79,7 @@ class VerifyPageScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
+                      style: customButtonStyle(context),
                       icon: const Icon(Icons.refresh),
                       label: viewModel.isRequestingNewOtpCode
                           ? const SizedBox(
@@ -90,19 +89,7 @@ class VerifyPageScreen extends StatelessWidget {
                                 strokeWidth: 2.2,
                               ),
                             )
-                          : const Text(
-                              'Request new OTP',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(13),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
+                          : const Text('Request new OTP'),
                       onPressed: viewModel.isRequestingNewOtpCode
                           ? null
                           : () async {
@@ -116,12 +103,7 @@ class VerifyPageScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(13),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
+                  style: customButtonStyle(context),
                   onPressed: viewModel.isVerifying
                       ? null
                       : () async {
@@ -133,13 +115,7 @@ class VerifyPageScreen extends StatelessWidget {
                           height: 22,
                           child: CircularProgressIndicator(strokeWidth: 2.4),
                         )
-                      : const Text(
-                          'Submit',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                      : const Text('Verify'),
                 ),
               ),
             ],
