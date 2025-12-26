@@ -3,8 +3,10 @@ import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/model/enums/jwt_claim_key_api_enum.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_new_otp_code_request_api_model.dart';
+import 'package:joymodels_mobile/data/model/sso/request_types/sso_verify_request_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/sso_repository.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
+import 'package:joymodels_mobile/ui/home_page/widgets/home_page_screen.dart';
 
 class VerifyPageScreenViewModel with ChangeNotifier {
   final ssoRepository = sl<SsoRepository>();
@@ -21,7 +23,7 @@ class VerifyPageScreenViewModel with ChangeNotifier {
     return RegexValidationViewModel.validateOtpCode(otpCode);
   }
 
-  Future<void> verify() async {
+  Future<bool> verify(BuildContext context) async {
     errorMessage = null;
     successMessage = null;
     isVerifying = true;
@@ -30,14 +32,39 @@ class VerifyPageScreenViewModel with ChangeNotifier {
     if (!formKey.currentState!.validate()) {
       isVerifying = false;
       notifyListeners();
-      return;
+      return false;
     }
 
-    // Simulacija requesta
-    await Future.delayed(Duration(seconds: 2));
-    successMessage = "OTP uspješno verifikovan!";
-    isVerifying = false;
-    notifyListeners();
+    final accessTokenPayloadMap = TokenStorage.decodeAccessToken(
+      (await TokenStorage.getAccessToken())!,
+    );
+
+    final SsoVerifyRequestApiModel request = SsoVerifyRequestApiModel(
+      userUuid: accessTokenPayloadMap[JwtClaimKeyApiEnum.nameIdentifier.key],
+      otpCode: otpCodeController.text,
+      userRefreshToken: (await TokenStorage.getRefreshToken())!,
+    );
+
+    try {
+      final ssoUserResponse = await ssoRepository.verify(request);
+      isVerifying = false;
+      errorMessage = null;
+      TokenStorage.setNewAccessToken(ssoUserResponse.userAccessToken!);
+      successMessage = "User successfully verified. Logging in...";
+      await Future.delayed(Duration(seconds: 2));
+      if (context.mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => HomePageScreen()),
+        );
+      }
+      notifyListeners();
+      return true;
+    } catch (e) {
+      errorMessage = e.toString();
+      isVerifying = false;
+      notifyListeners();
+      return false;
+    }
   }
 
   Future<bool> requestNewOtpCode() async {
@@ -60,7 +87,6 @@ class VerifyPageScreenViewModel with ChangeNotifier {
       errorMessage = null;
       successMessage = "New OTP Code has been sent!";
       notifyListeners();
-
       return true;
     } catch (e) {
       errorMessage = e.toString();

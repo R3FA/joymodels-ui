@@ -4,27 +4,47 @@ import 'dart:convert';
 class TokenStorage {
   static const _storage = FlutterSecureStorage();
   static const _accessTokenKey = 'accessToken';
+  static const _refreshTokenKey = 'refreshToken';
 
-  static Future<void> saveAccessToken(String token) async {
-    await _storage.write(key: _accessTokenKey, value: token);
+  static Future<void> _setAuthTokens(
+    String accessToken,
+    String refreshToken,
+  ) async {
+    await _storage.write(key: _accessTokenKey, value: accessToken);
+    await _storage.write(key: _refreshTokenKey, value: refreshToken);
   }
 
   static Future<String?> getAccessToken() async {
     return await _storage.read(key: _accessTokenKey);
   }
 
-  static Future<void> clearAccessToken() async {
+  static Future<String?> getRefreshToken() async {
+    return await _storage.read(key: _refreshTokenKey);
+  }
+
+  static Future<void> setNewAccessToken(String accessToken) async {
+    await _storage.write(key: _accessTokenKey, value: accessToken);
+  }
+
+  static Future<void> setNewAuthToken(
+    String accessToken,
+    String refreshToken,
+  ) async {
+    await _setAuthTokens(accessToken, refreshToken);
+  }
+
+  static Future<void> clearAuthToken() async {
     await _storage.delete(key: _accessTokenKey);
+    await _storage.delete(key: _refreshTokenKey);
   }
 
-  static Future<void> setNewAccessToken(String token) async {
-    await clearAccessToken();
-    await saveAccessToken(token);
-  }
-
-  Future<bool> hasAccessToken() async {
-    final token = await getAccessToken();
-    return token != null && token.isNotEmpty;
+  Future<bool> hasAuthToken() async {
+    final accessToken = await getAccessToken();
+    final refreshToken = await getRefreshToken();
+    return accessToken != null &&
+        accessToken.isNotEmpty &&
+        refreshToken != null &&
+        refreshToken.isNotEmpty;
   }
 
   static Map<String, dynamic> decodeAccessToken(String token) {

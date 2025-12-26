@@ -53,26 +53,28 @@ class VerifyPageScreen extends StatelessWidget {
                   ),
                 ),
               const SizedBox(height: 26),
-              TextFormField(
+              Form(
                 key: viewModel.formKey,
-                controller: viewModel.otpCodeController,
-                decoration: formInputDecoration(
-                  "Enter OTP code",
-                  Icons.vpn_key,
+                child: TextFormField(
+                  controller: viewModel.otpCodeController,
+                  decoration: formInputDecoration(
+                    "Enter OTP code",
+                    Icons.vpn_key,
+                  ),
+                  style: const TextStyle(),
+                  keyboardType: TextInputType.text,
+                  textAlign: TextAlign.left,
+                  maxLength: 12,
+                  buildCounter:
+                      (
+                        _, {
+                        required currentLength,
+                        required isFocused,
+                        maxLength,
+                      }) => null,
+                  obscureText: false,
+                  validator: viewModel.validateOtpCode,
                 ),
-                style: const TextStyle(),
-                keyboardType: TextInputType.text,
-                textAlign: TextAlign.left,
-                maxLength: 12,
-                buildCounter:
-                    (
-                      _, {
-                      required currentLength,
-                      required isFocused,
-                      maxLength,
-                    }) => null,
-                obscureText: false,
-                validator: viewModel.validateOtpCode,
               ),
               const SizedBox(height: 16),
               Row(
@@ -123,7 +125,7 @@ class VerifyPageScreen extends StatelessWidget {
                   onPressed: viewModel.isVerifying
                       ? null
                       : () async {
-                          await viewModel.verify();
+                          await viewModel.verify(context);
                         },
                   child: viewModel.isVerifying
                       ? const SizedBox(
