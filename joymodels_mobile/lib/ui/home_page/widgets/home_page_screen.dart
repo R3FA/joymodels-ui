@@ -122,7 +122,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                     width: 95,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
-                      color: theme.colorScheme.surfaceVariant,
+                      color: theme.colorScheme.surfaceContainerHighest,
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -177,7 +177,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                     width: 150,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
-                      color: theme.colorScheme.surfaceVariant,
+                      color: theme.colorScheme.surfaceContainerHighest,
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
