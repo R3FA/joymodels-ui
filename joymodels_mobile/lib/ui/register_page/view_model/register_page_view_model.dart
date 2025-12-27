@@ -56,6 +56,19 @@ class RegisterPageScreenViewModel with ChangeNotifier {
     }
   }
 
+  void clearControllers() {
+    isLoading = false;
+    firstNameController.clear();
+    lastNameController.clear();
+    nicknameController.clear();
+    emailController.clear();
+    passwordController.clear();
+    userProfilePicture = null;
+    profilePictureErrorMessage = null;
+    responseErrorMessage = null;
+    notifyListeners();
+  }
+
   Future<bool> submitForm(BuildContext context) async {
     responseErrorMessage = null;
     isLoading = true;
@@ -88,14 +101,14 @@ class RegisterPageScreenViewModel with ChangeNotifier {
     try {
       await ssoRepository.create(request);
 
-      isLoading = false;
-      responseErrorMessage = null;
-      notifyListeners();
+      clearControllers();
+
       if (context.mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => WelcomePageScreen()),
         );
       }
+
       return true;
     } catch (e) {
       responseErrorMessage = e.toString();

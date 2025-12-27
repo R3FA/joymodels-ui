@@ -23,6 +23,15 @@ class VerifyPageScreenViewModel with ChangeNotifier {
     return RegexValidationViewModel.validateOtpCode(otpCode);
   }
 
+  void clearControllers() {
+    otpCodeController.clear();
+    isVerifying = false;
+    isRequestingNewOtpCode = false;
+    errorMessage = null;
+    successMessage = null;
+    notifyListeners();
+  }
+
   Future<bool> verify(BuildContext context) async {
     errorMessage = null;
     successMessage = null;
@@ -47,17 +56,21 @@ class VerifyPageScreenViewModel with ChangeNotifier {
 
     try {
       final ssoUserResponse = await ssoRepository.verify(request);
-      isVerifying = false;
-      errorMessage = null;
+
       TokenStorage.setNewAccessToken(ssoUserResponse.userAccessToken!);
+
       successMessage = "User successfully verified. Logging in...";
+
       await Future.delayed(Duration(seconds: 2));
+
       if (context.mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => HomePageScreen()),
         );
       }
-      notifyListeners();
+
+      clearControllers();
+
       return true;
     } catch (e) {
       errorMessage = e.toString();

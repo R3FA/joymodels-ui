@@ -26,6 +26,15 @@ class LoginPageScreenViewModel with ChangeNotifier {
     return RegexValidationViewModel.validatePassword(password);
   }
 
+  void clearControllers() {
+    nicknameController.clear();
+    passwordController.clear();
+    isLoading = false;
+    isVerifyScreenLoading = false;
+    errorMessage = null;
+    notifyListeners();
+  }
+
   Future<bool> login(BuildContext context) async {
     errorMessage = null;
     isLoading = true;
@@ -45,10 +54,6 @@ class LoginPageScreenViewModel with ChangeNotifier {
     try {
       final loginResponse = await ssoRepository.login(request);
 
-      isLoading = false;
-      errorMessage = null;
-      notifyListeners();
-
       await TokenStorage.setNewAuthToken(
         loginResponse.accessToken,
         loginResponse.refreshToken,
@@ -57,6 +62,8 @@ class LoginPageScreenViewModel with ChangeNotifier {
       final accessTokenPayloadMap = TokenStorage.decodeAccessToken(
         loginResponse.accessToken,
       );
+
+      clearControllers();
 
       if (context.mounted) {
         if (accessTokenPayloadMap[JwtClaimKeyApiEnum.role.key] ==
