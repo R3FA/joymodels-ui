@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/ui/core/ui/custom_button_style.dart';
+import 'package:joymodels_mobile/ui/core/ui/error_message_text.dart';
 import 'package:joymodels_mobile/ui/core/ui/form_input_decoration.dart';
-import 'package:joymodels_mobile/ui/core/ui/success_snack_bar.dart';
+import 'package:joymodels_mobile/ui/core/ui/success_message_text.dart';
 import 'package:joymodels_mobile/ui/login_page/view_model/login_page_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -11,7 +12,6 @@ class LoginPageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<LoginPageScreenViewModel>();
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -33,17 +33,9 @@ class LoginPageScreen extends StatelessWidget {
                   child: Icon(Icons.person, size: 46),
                 ),
                 if (viewModel.errorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12.0),
-                    child: Text(
-                      viewModel.errorMessage!,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.error,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+                  ErrorMessageText(message: viewModel.errorMessage!),
+                if (viewModel.successMessage != null)
+                  SuccessMessageText(message: viewModel.successMessage!),
                 const SizedBox(height: 26),
                 TextFormField(
                   controller: viewModel.nicknameController,
@@ -73,12 +65,7 @@ class LoginPageScreen extends StatelessWidget {
                     onPressed: viewModel.isLoading
                         ? null
                         : () async {
-                            if (await viewModel.login(context)) {
-                              if (context.mounted &&
-                                  !viewModel.isVerifyScreenLoading) {
-                                showSuccessSnackBar(context, 'Login success!');
-                              }
-                            }
+                            await viewModel.login(context);
                           },
                     child: viewModel.isLoading
                         ? const SizedBox(

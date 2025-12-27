@@ -11,20 +11,22 @@ import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dar
 class RegisterPageScreenViewModel with ChangeNotifier {
   final ssoRepository = sl<SsoRepository>();
 
-  bool isLoading = false;
-
   final formKey = GlobalKey<FormState>();
+
   final firstNameController = TextEditingController();
   final lastNameController = TextEditingController();
   final nicknameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
   File? userProfilePicture;
+
+  bool isLoading = false;
 
   String? profilePictureErrorMessage;
   String? responseErrorMessage;
+  String? successMessage;
 
-  // Form field validations
   String? validateName(String? name) {
     return RegexValidationViewModel.validateName(name);
   }
@@ -66,6 +68,7 @@ class RegisterPageScreenViewModel with ChangeNotifier {
     userProfilePicture = null;
     profilePictureErrorMessage = null;
     responseErrorMessage = null;
+    successMessage = null;
     notifyListeners();
   }
 
@@ -101,7 +104,10 @@ class RegisterPageScreenViewModel with ChangeNotifier {
     try {
       await ssoRepository.create(request);
 
-      clearControllers();
+      successMessage =
+          'Registration successful! Redirecting to welcome page...';
+      notifyListeners();
+      await Future.delayed(const Duration(seconds: 3));
 
       if (context.mounted) {
         Navigator.of(context).pushReplacement(
@@ -109,6 +115,7 @@ class RegisterPageScreenViewModel with ChangeNotifier {
         );
       }
 
+      clearControllers();
       return true;
     } catch (e) {
       responseErrorMessage = e.toString();

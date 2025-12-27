@@ -11,12 +11,17 @@ import 'package:joymodels_mobile/ui/verify_page/widgets/verify_page_screen.dart'
 
 class LoginPageScreenViewModel with ChangeNotifier {
   final ssoRepository = sl<SsoRepository>();
+
   final formKey = GlobalKey<FormState>();
+
   final nicknameController = TextEditingController();
   final passwordController = TextEditingController();
+
   bool isLoading = false;
   bool isVerifyScreenLoading = false;
+
   String? errorMessage;
+  String? successMessage;
 
   String? validateNickname(String? nickname) {
     return RegexValidationViewModel.validateNickname(nickname);
@@ -32,6 +37,7 @@ class LoginPageScreenViewModel with ChangeNotifier {
     isLoading = false;
     isVerifyScreenLoading = false;
     errorMessage = null;
+    successMessage = null;
     notifyListeners();
   }
 
@@ -63,7 +69,9 @@ class LoginPageScreenViewModel with ChangeNotifier {
         loginResponse.accessToken,
       );
 
-      clearControllers();
+      successMessage = 'Login successful! Redirecting...';
+      notifyListeners();
+      await Future.delayed(const Duration(seconds: 3));
 
       if (context.mounted) {
         if (accessTokenPayloadMap[JwtClaimKeyApiEnum.role.key] ==
@@ -80,6 +88,7 @@ class LoginPageScreenViewModel with ChangeNotifier {
         }
       }
 
+      clearControllers();
       return true;
     } catch (e) {
       errorMessage = e.toString();

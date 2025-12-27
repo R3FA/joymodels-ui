@@ -10,7 +10,9 @@ import 'package:joymodels_mobile/ui/home_page/widgets/home_page_screen.dart';
 
 class VerifyPageScreenViewModel with ChangeNotifier {
   final ssoRepository = sl<SsoRepository>();
+
   final formKey = GlobalKey<FormState>();
+
   final otpCodeController = TextEditingController();
 
   bool isVerifying = false;
@@ -59,9 +61,10 @@ class VerifyPageScreenViewModel with ChangeNotifier {
 
       TokenStorage.setNewAccessToken(ssoUserResponse.userAccessToken!);
 
-      successMessage = "User successfully verified. Logging in...";
+      successMessage = "User successfully verified.";
+      notifyListeners();
 
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 3));
 
       if (context.mounted) {
         Navigator.of(context).pushReplacement(
@@ -70,7 +73,6 @@ class VerifyPageScreenViewModel with ChangeNotifier {
       }
 
       clearControllers();
-
       return true;
     } catch (e) {
       errorMessage = e.toString();

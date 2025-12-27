@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/ui/core/ui/custom_button_style.dart';
+import 'package:joymodels_mobile/ui/core/ui/error_message_text.dart';
 import 'package:joymodels_mobile/ui/core/ui/form_input_decoration.dart';
+import 'package:joymodels_mobile/ui/core/ui/success_message_text.dart';
 import 'package:joymodels_mobile/ui/verify_page/view_model/verify_page_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -10,7 +12,6 @@ class VerifyPageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<VerifyPageScreenViewModel>();
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -27,29 +28,9 @@ class VerifyPageScreen extends StatelessWidget {
               const SizedBox(height: 8),
               const CircleAvatar(radius: 46, child: Icon(Icons.lock, size: 46)),
               if (viewModel.errorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12.0),
-                  child: Text(
-                    viewModel.errorMessage!,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.error,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                ErrorMessageText(message: viewModel.errorMessage!),
               if (viewModel.successMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12.0),
-                  child: Text(
-                    viewModel.successMessage!,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.secondary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                SuccessMessageText(message: viewModel.successMessage!),
               const SizedBox(height: 26),
               Form(
                 key: viewModel.formKey,

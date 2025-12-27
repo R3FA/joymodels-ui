@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/ui/core/ui/custom_button_style.dart';
+import 'package:joymodels_mobile/ui/core/ui/error_message_text.dart';
 import 'package:joymodels_mobile/ui/core/ui/form_input_decoration.dart';
-import 'package:joymodels_mobile/ui/core/ui/success_snack_bar.dart';
+import 'package:joymodels_mobile/ui/core/ui/success_message_text.dart';
 import 'package:joymodels_mobile/ui/register_page/view_model/register_page_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -40,19 +41,11 @@ class RegisterPageScreen extends StatelessWidget {
                   ),
                 ),
                 if (viewModel.profilePictureErrorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Center(
-                      child: Text(
-                        viewModel.profilePictureErrorMessage!,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.error,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
+                  ErrorMessageText(
+                    message: viewModel.profilePictureErrorMessage!,
                   ),
+                if (viewModel.successMessage != null)
+                  SuccessMessageText(message: viewModel.successMessage!),
                 const SizedBox(height: 18),
                 TextFormField(
                   controller: viewModel.firstNameController,
@@ -125,14 +118,8 @@ class RegisterPageScreen extends StatelessWidget {
                     onPressed: viewModel.isLoading
                         ? null
                         : () async {
-                            final success = await viewModel.submitForm(context);
+                            await viewModel.submitForm(context);
                             if (!context.mounted) return;
-                            if (success) {
-                              showSuccessSnackBar(
-                                context,
-                                'Registration success',
-                              );
-                            }
                           },
                     child: viewModel.isLoading
                         ? const SizedBox(
