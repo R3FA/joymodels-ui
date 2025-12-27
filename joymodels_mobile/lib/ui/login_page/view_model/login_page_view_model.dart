@@ -11,12 +11,17 @@ import 'package:joymodels_mobile/ui/verify_page/widgets/verify_page_screen.dart'
 
 class LoginPageScreenViewModel with ChangeNotifier {
   final ssoRepository = sl<SsoRepository>();
+
   final formKey = GlobalKey<FormState>();
+
   final nicknameController = TextEditingController();
   final passwordController = TextEditingController();
+
   bool isLoading = false;
   bool isVerifyScreenLoading = false;
+
   String? errorMessage;
+  String? successMessage;
 
   String? validateNickname(String? nickname) {
     return RegexValidationViewModel.validateNickname(nickname);
@@ -24,6 +29,16 @@ class LoginPageScreenViewModel with ChangeNotifier {
 
   String? validatePassword(String? password) {
     return RegexValidationViewModel.validatePassword(password);
+  }
+
+  void clearControllers() {
+    nicknameController.clear();
+    passwordController.clear();
+    isLoading = false;
+    isVerifyScreenLoading = false;
+    errorMessage = null;
+    successMessage = null;
+    notifyListeners();
   }
 
   Future<bool> login(BuildContext context) async {
@@ -45,10 +60,6 @@ class LoginPageScreenViewModel with ChangeNotifier {
     try {
       final loginResponse = await ssoRepository.login(request);
 
-      isLoading = false;
-      errorMessage = null;
-      notifyListeners();
-
       await TokenStorage.setNewAuthToken(
         loginResponse.accessToken,
         loginResponse.refreshToken,
@@ -57,6 +68,10 @@ class LoginPageScreenViewModel with ChangeNotifier {
       final accessTokenPayloadMap = TokenStorage.decodeAccessToken(
         loginResponse.accessToken,
       );
+
+      successMessage = 'Login successful! Redirecting...';
+      notifyListeners();
+      await Future.delayed(const Duration(seconds: 3));
 
       if (context.mounted) {
         if (accessTokenPayloadMap[JwtClaimKeyApiEnum.role.key] ==
@@ -73,6 +88,7 @@ class LoginPageScreenViewModel with ChangeNotifier {
         }
       }
 
+      clearControllers();
       return true;
     } catch (e) {
       errorMessage = e.toString();

@@ -10,7 +10,9 @@ import 'package:joymodels_mobile/ui/home_page/widgets/home_page_screen.dart';
 
 class VerifyPageScreenViewModel with ChangeNotifier {
   final ssoRepository = sl<SsoRepository>();
+
   final formKey = GlobalKey<FormState>();
+
   final otpCodeController = TextEditingController();
 
   bool isVerifying = false;
@@ -21,6 +23,15 @@ class VerifyPageScreenViewModel with ChangeNotifier {
 
   String? validateOtpCode(String? otpCode) {
     return RegexValidationViewModel.validateOtpCode(otpCode);
+  }
+
+  void clearControllers() {
+    otpCodeController.clear();
+    isVerifying = false;
+    isRequestingNewOtpCode = false;
+    errorMessage = null;
+    successMessage = null;
+    notifyListeners();
   }
 
   Future<bool> verify(BuildContext context) async {
@@ -47,17 +58,21 @@ class VerifyPageScreenViewModel with ChangeNotifier {
 
     try {
       final ssoUserResponse = await ssoRepository.verify(request);
-      isVerifying = false;
-      errorMessage = null;
+
       TokenStorage.setNewAccessToken(ssoUserResponse.userAccessToken!);
-      successMessage = "User successfully verified. Logging in...";
-      await Future.delayed(Duration(seconds: 2));
+
+      successMessage = "User successfully verified.";
+      notifyListeners();
+
+      await Future.delayed(const Duration(seconds: 3));
+
       if (context.mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => HomePageScreen()),
         );
       }
-      notifyListeners();
+
+      clearControllers();
       return true;
     } catch (e) {
       errorMessage = e.toString();
