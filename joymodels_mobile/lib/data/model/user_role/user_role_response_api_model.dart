@@ -10,8 +10,4 @@ class UserRoleResponseApiModel {
       roleName: json["roleName"] as String,
     );
   }
-
-  Map<String, dynamic> toJson() {
-    return {"uuid": uuid, "roleName": roleName};
-  }
 }
