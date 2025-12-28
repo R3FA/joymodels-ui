@@ -89,30 +89,110 @@ class _HomePageScreenState extends State<HomePageScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: theme.colorScheme.outline.withOpacity(0.3),
-                ),
+                border: Border.all(color: theme.colorScheme.outlineVariant),
               ),
               child: GridView.count(
                 crossAxisCount: 3,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 childAspectRatio: 1.55,
-                children: viewModel.categories
-                    .map(
-                      (cat) => Column(
+                children: [
+                  ...((viewModel.categories?.data ?? []).take(8).map((cat) {
+                    final bool isSelected =
+                        cat.uuid == viewModel.selectedCategory;
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () => viewModel.onCategoryTap(cat),
+                      child: Container(
+                        decoration: isSelected
+                            ? BoxDecoration(
+                                color: theme.colorScheme.outlineVariant,
+                                borderRadius: BorderRadius.circular(12),
+                              )
+                            : null,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 3,
+                          horizontal: 0,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              viewModel.iconForCategory(cat.categoryName),
+                              size: 32,
+                              color: isSelected
+                                  ? theme.colorScheme.primary
+                                  : theme.iconTheme.color,
+                            ),
+                            const SizedBox(height: 5),
+                            Flexible(
+                              child: Text(
+                                cat.categoryName,
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.labelLarge?.copyWith(
+                                  color: isSelected
+                                      ? theme.colorScheme.primary
+                                      : theme.textTheme.labelLarge?.color,
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                                softWrap: true,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  })),
+                  // Deveta pozicija: VIEW ALL dugme
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => viewModel.selectedCategory = 'View All',
+                    child: Container(
+                      decoration: viewModel.selectedCategory == 'View All'
+                          ? BoxDecoration(
+                              color: theme.colorScheme.outlineVariant,
+                              borderRadius: BorderRadius.circular(12),
+                            )
+                          : null,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 3,
+                        horizontal: 0,
+                      ),
+                      child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(cat['icon'], size: 30),
+                          Icon(
+                            viewModel.iconForCategory('View All'),
+                            size: 32,
+                            color: viewModel.selectedCategory == 'View All'
+                                ? theme.colorScheme.primary
+                                : theme.iconTheme.color,
+                          ),
                           const SizedBox(height: 5),
-                          Text(
-                            cat['label'],
-                            style: theme.textTheme.labelMedium,
+                          Flexible(
+                            child: Text(
+                              "View All",
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: viewModel.selectedCategory == 'View All'
+                                    ? theme.colorScheme.primary
+                                    : theme.textTheme.labelLarge?.color,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                              softWrap: true,
+                            ),
                           ),
                         ],
                       ),
-                    )
-                    .toList(),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 24),

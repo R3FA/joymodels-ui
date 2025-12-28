@@ -14,7 +14,7 @@ class NavigationBarWidget extends StatelessWidget {
 
     return NavigationBar(
       height: navBarHeight,
-      selectedIndex: viewModel.selectedIndex,
+      selectedIndex: viewModel.selectedNavBarItem,
       onDestinationSelected: viewModel.onNavigationBarItemTapped,
       destinations: const [
         NavigationDestination(

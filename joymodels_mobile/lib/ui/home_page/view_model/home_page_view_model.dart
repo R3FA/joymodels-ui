@@ -2,7 +2,11 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
+import 'package:joymodels_mobile/data/model/category/request_types/category_request_api_model.dart';
+import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/enums/jwt_claim_key_api_enum.dart';
+import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
+import 'package:joymodels_mobile/data/repositories/category_repository.dart';
 import 'package:joymodels_mobile/data/repositories/users_repository.dart';
 
 class ArtistModel {
@@ -27,22 +31,39 @@ class TopModel {
 
 class HomePageScreenViewModel with ChangeNotifier {
   final usersRepository = sl<UsersRepository>();
+  final categoryRepository = sl<CategoryRepository>();
 
   late String loggedUsername = '';
   late Uint8List loggedUserAvatarUrl = Uint8List(0);
+  PaginationResponseApiModel<CategoryResponseApiModel>? categories;
 
-  int selectedIndex = 0;
+  int selectedNavBarItem = 0;
+  String? selectedCategory;
 
   String? errorMessage;
+
   bool? isLoggedUserDataLoading = false;
+  bool? isCategoriesLoading = false;
 
   Future<void> init() async {
     await getLoggedUserDataFromToken();
     await getLoggedUserProfilePicture();
+    await getCategories();
   }
 
   void onNavigationBarItemTapped(int index) {
-    selectedIndex = index;
+    selectedNavBarItem = index;
+    notifyListeners();
+  }
+
+  void onCategoryTap(CategoryResponseApiModel cat) {
+    if (selectedCategory == cat.uuid) {
+      selectedCategory = null;
+      notifyListeners();
+      return;
+    }
+
+    selectedCategory = cat.uuid;
     notifyListeners();
   }
 
@@ -79,15 +100,97 @@ class HomePageScreenViewModel with ChangeNotifier {
     }
   }
 
-  List<Map<String, dynamic>> categories = [
-    {"icon": Icons.account_circle, "label": "Creatures"},
-    {"icon": Icons.directions_car, "label": "Vehicles"},
-    {"icon": Icons.account_balance, "label": "History"},
-    {"icon": Icons.set_meal, "label": "Food & Drinks"},
-    {"icon": Icons.chair, "label": "Furniture"},
-    {"icon": Icons.science, "label": "Science"},
-    {"icon": Icons.grid_view, "label": "More"},
-  ];
+  Future<bool> getCategories() async {
+    errorMessage = null;
+    isCategoriesLoading = true;
+    notifyListeners();
+
+    try {
+      final categoryRequest = CategorySearchRequestApiModel(
+        categoryName: null,
+        pageNumber: 1,
+        pageSize: 8,
+      );
+
+      categories = await categoryRepository.search(categoryRequest);
+      isCategoriesLoading = false;
+      notifyListeners();
+
+      return true;
+    } catch (e) {
+      errorMessage = e.toString();
+      isCategoriesLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  IconData iconForCategory(String categoryName) {
+    switch (categoryName) {
+      case "Characters":
+        return Icons.people_alt;
+      case "Humans":
+        return Icons.person;
+      case "Robots & Mechanics":
+        return Icons.smart_toy;
+      case "Animals":
+        return Icons.pets;
+      case "Plants & Vegetation":
+        return Icons.local_florist;
+      case "Rocks & Minerals":
+        return Icons.terrain;
+      case "Terrain & Landscapes":
+        return Icons.landscape;
+      case "Buildings":
+        return Icons.location_city;
+      case "Interiors":
+        return Icons.chair;
+      case "Props":
+        return Icons.toys;
+      case "Industrial & Factory":
+        return Icons.factory;
+      case "Tools & Hardware":
+        return Icons.handyman;
+      case "Electronics & Gadgets":
+        return Icons.devices;
+      case "Clothing & Accessories":
+        return Icons.checkroom;
+      case "Jewelry":
+        return Icons.emoji_objects;
+      case "Sports & Fitness":
+        return Icons.sports;
+      case "Medical & Anatomy":
+        return Icons.medical_services;
+      case "Military":
+        return Icons.military_tech;
+      case "Sci‑Fi":
+        return Icons.auto_awesome;
+      case "Fantasy":
+        return Icons.whatshot;
+      case "Horror":
+        return Icons.nightlight_round;
+      case "Musical Instruments":
+        return Icons.music_note;
+      case "Office & Education":
+        return Icons.school;
+      case "Boats & Ships":
+        return Icons.directions_boat;
+      case "Aircraft & Drones":
+        return Icons.flight;
+      case "Spacecraft":
+        return Icons.rocket;
+      case "Trains & Rail":
+        return Icons.train;
+      case "Nature Elements":
+        return Icons.nature;
+      case "History":
+        return Icons.menu_book;
+      case "View All":
+        return Icons.grid_view;
+      default:
+        return Icons.grid_view;
+    }
+  }
 
   List<ArtistModel> topArtists = [
     ArtistModel(

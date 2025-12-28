@@ -1,6 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
-
 import 'package:joymodels_mobile/data/model/enums/jwt_claim_key_api_enum.dart';
 
 class TokenStorage {
