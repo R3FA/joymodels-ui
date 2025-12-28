@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
@@ -28,7 +29,7 @@ class HomePageScreenViewModel with ChangeNotifier {
   final usersRepository = sl<UsersRepository>();
 
   late String loggedUsername = '';
-  late String loggedUserAvatarUrl = '';
+  late Uint8List loggedUserAvatarUrl = Uint8List(0);
 
   int selectedIndex = 0;
 
@@ -36,7 +37,8 @@ class HomePageScreenViewModel with ChangeNotifier {
   bool? isLoggedUserDataLoading = false;
 
   Future<void> init() async {
-    await getLoggedUserData();
+    await getLoggedUserDataFromToken();
+    await getLoggedUserProfilePicture();
   }
 
   void onNavigationBarItemTapped(int index) {
@@ -44,24 +46,28 @@ class HomePageScreenViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> getLoggedUserData() async {
+  Future<void> getLoggedUserDataFromToken() async {
+    loggedUsername = (await TokenStorage.getClaimFromToken(
+      JwtClaimKeyApiEnum.userName,
+    ))!;
+    notifyListeners();
+  }
+
+  Future<bool> getLoggedUserProfilePicture() async {
     errorMessage = null;
     isLoggedUserDataLoading = true;
     notifyListeners();
 
     try {
-      final accessTokenPayloadMap = TokenStorage.decodeAccessToken(
-        (await TokenStorage.getAccessToken())!,
-      );
-
-      final usersResponse = await usersRepository.getByUuid(
-        accessTokenPayloadMap[JwtClaimKeyApiEnum.nameIdentifier.key],
+      final usersAvatar = await usersRepository.getUserAvatar(
+        (await TokenStorage.getClaimFromToken(
+          JwtClaimKeyApiEnum.nameIdentifier,
+        ))!,
       );
 
       isLoggedUserDataLoading = false;
 
-      loggedUsername = usersResponse.nickName;
-      loggedUserAvatarUrl = usersResponse.userPictureLocation;
+      loggedUserAvatarUrl = usersAvatar.fileBytes;
 
       notifyListeners();
       return true;

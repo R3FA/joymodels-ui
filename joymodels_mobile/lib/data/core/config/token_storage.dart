@@ -1,6 +1,8 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 
+import 'package:joymodels_mobile/data/model/enums/jwt_claim_key_api_enum.dart';
+
 class TokenStorage {
   static const _storage = FlutterSecureStorage();
   static const _accessTokenKey = 'accessToken';
@@ -59,5 +61,13 @@ class TokenStorage {
     final Map<String, dynamic> accessTokenPayloadMap = json.decode(payload);
 
     return accessTokenPayloadMap;
+  }
+
+  static Future<String?> getClaimFromToken(JwtClaimKeyApiEnum claimKey) async {
+    final accessToken = await TokenStorage.getAccessToken();
+    if (accessToken == null) return null;
+
+    final accessTokenPayloadMap = TokenStorage.decodeAccessToken(accessToken);
+    return accessTokenPayloadMap[claimKey.key] as String?;
   }
 }

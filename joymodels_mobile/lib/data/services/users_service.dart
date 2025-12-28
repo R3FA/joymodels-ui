@@ -17,4 +17,17 @@ class UsersService {
 
     return response;
   }
+
+  Future<http.Response> getUserAvatar(String userUuid) async {
+    final url = Uri.parse("$usersUrl/get/$userUuid/avatar");
+
+    final token = await TokenStorage.getAccessToken();
+
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    return response;
+  }
 }

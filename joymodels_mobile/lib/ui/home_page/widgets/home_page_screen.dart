@@ -33,11 +33,26 @@ class _HomePageScreenState extends State<HomePageScreen> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // TODO: Pronadji nacin kako da se ucita avatar korisnika
                 CircleAvatar(
                   radius: 32,
                   backgroundColor: theme.colorScheme.primary,
-                  child: Icon(Icons.person, size: 42, color: Colors.white),
+                  child: (viewModel.loggedUserAvatarUrl.isNotEmpty)
+                      ? ClipOval(
+                          child: Image.memory(
+                            viewModel.loggedUserAvatarUrl,
+                            width: 64,
+                            height: 64,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(
+                                Icons.person,
+                                size: 42,
+                                color: Colors.white,
+                              );
+                            },
+                          ),
+                        )
+                      : Icon(Icons.person, size: 42, color: Colors.white),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
