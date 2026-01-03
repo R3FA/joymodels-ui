@@ -12,6 +12,7 @@ class AuthService {
   ) async {
     http.Response response = await request();
 
+    // TODO: Add Forbidden Exception handling
     if (response.statusCode == 401) {
       final refreshed = await _authRepository.requestAccessTokenChange();
       if (refreshed) {

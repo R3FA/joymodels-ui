@@ -87,6 +87,7 @@ class VerifyPageScreenViewModel with ChangeNotifier {
           (route) => false,
         );
       }
+      clearControllers();
       return false;
     } catch (e) {
       errorMessage = e.toString();
