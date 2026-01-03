@@ -65,29 +65,26 @@ class LoginPageScreenViewModel with ChangeNotifier {
         loginResponse.refreshToken,
       );
 
-      final accessTokenPayloadMap = TokenStorage.decodeAccessToken(
-        loginResponse.accessToken,
-      );
-
       successMessage = 'Login successful! Redirecting...';
       notifyListeners();
-      await Future.delayed(const Duration(seconds: 3));
+      await Future.delayed(const Duration(seconds: 2));
 
-      if (context.mounted) {
-        if (accessTokenPayloadMap[JwtClaimKeyApiEnum.role.key] ==
-            UserRoleApiEnum.Unverified.name) {
-          isVerifyScreenLoading = true;
-          notifyListeners();
+      if (await TokenStorage.getClaimFromToken(JwtClaimKeyApiEnum.role) ==
+          UserRoleApiEnum.Unverified.name) {
+        isVerifyScreenLoading = true;
+        notifyListeners();
+        if (context.mounted) {
           Navigator.of(
             context,
           ).push(MaterialPageRoute(builder: (context) => VerifyPageScreen()));
-        } else {
+        }
+      } else {
+        if (context.mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => HomePageScreen()),
           );
         }
       }
-
       clearControllers();
       return true;
     } catch (e) {

@@ -7,14 +7,6 @@ class TokenStorage {
   static const _accessTokenKey = 'accessToken';
   static const _refreshTokenKey = 'refreshToken';
 
-  static Future<void> _setAuthTokens(
-    String accessToken,
-    String refreshToken,
-  ) async {
-    await _storage.write(key: _accessTokenKey, value: accessToken);
-    await _storage.write(key: _refreshTokenKey, value: refreshToken);
-  }
-
   static Future<String?> getAccessToken() async {
     return await _storage.read(key: _accessTokenKey);
   }
@@ -23,20 +15,36 @@ class TokenStorage {
     return await _storage.read(key: _refreshTokenKey);
   }
 
-  static Future<void> setNewAccessToken(String accessToken) async {
-    await _storage.write(key: _accessTokenKey, value: accessToken);
-  }
-
-  static Future<void> setNewAuthToken(
+  static Future<bool> setNewAuthToken(
     String accessToken,
     String refreshToken,
   ) async {
-    await _setAuthTokens(accessToken, refreshToken);
+    try {
+      await _storage.write(key: _accessTokenKey, value: accessToken);
+      await _storage.write(key: _refreshTokenKey, value: refreshToken);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
-  static Future<void> clearAuthToken() async {
-    await _storage.delete(key: _accessTokenKey);
-    await _storage.delete(key: _refreshTokenKey);
+  static Future<bool> setNewAccessToken(String accessToken) async {
+    try {
+      await _storage.write(key: _accessTokenKey, value: accessToken);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<bool> clearAuthToken() async {
+    try {
+      await _storage.delete(key: _accessTokenKey);
+      await _storage.delete(key: _refreshTokenKey);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   static Future<bool> hasAuthToken() async {

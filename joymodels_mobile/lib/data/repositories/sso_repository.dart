@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:joymodels_mobile/data/core/services/auth_service.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_new_otp_code_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_user_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_user_login_request_api_model.dart';
@@ -9,8 +10,9 @@ import 'package:joymodels_mobile/data/services/sso_service.dart';
 
 class SsoRepository {
   final SsoService _service;
+  final AuthService _authService;
 
-  SsoRepository(this._service);
+  SsoRepository(this._service, this._authService);
 
   Future<SsoUserResponseApiModel> create(
     SsoUserCreateRequestApiModel request,
@@ -30,7 +32,7 @@ class SsoRepository {
   Future<SsoUserResponseApiModel> verify(
     SsoVerifyRequestApiModel request,
   ) async {
-    final response = await _service.verify(request);
+    final response = await _authService.request(() => _service.verify(request));
 
     if (response.statusCode == 200) {
       final jsonMap = jsonDecode(response.body);
@@ -43,7 +45,9 @@ class SsoRepository {
   }
 
   Future<bool> requestNewOtpCode(SsoNewOtpCodeRequestApiModel request) async {
-    final response = await _service.requestNewOtpCode(request);
+    final response = await _authService.request(
+      () => _service.requestNewOtpCode(request),
+    );
 
     if (response.statusCode == 201 || response.statusCode == 204) {
       return true;

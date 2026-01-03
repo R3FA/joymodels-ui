@@ -12,6 +12,7 @@ class VerifyPageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<VerifyPageScreenViewModel>();
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -25,83 +26,97 @@ class VerifyPageScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(height: 8),
-              const CircleAvatar(radius: 46, child: Icon(Icons.lock, size: 46)),
+              _buildAvatar(theme),
               if (viewModel.errorMessage != null)
                 ErrorMessageText(message: viewModel.errorMessage!),
               if (viewModel.successMessage != null)
                 SuccessMessageText(message: viewModel.successMessage!),
               const SizedBox(height: 26),
-              Form(
-                key: viewModel.formKey,
-                child: TextFormField(
-                  controller: viewModel.otpCodeController,
-                  decoration: formInputDecoration(
-                    "Enter OTP code",
-                    Icons.vpn_key,
-                  ),
-                  maxLength: 12,
-                  buildCounter:
-                      (
-                        _, {
-                        required currentLength,
-                        required isFocused,
-                        maxLength,
-                      }) => null,
-                  keyboardType: TextInputType.text,
-                  textAlign: TextAlign.left,
-                  obscureText: false,
-                  validator: viewModel.validateOtpCode,
-                  autofillHints: const [AutofillHints.oneTimeCode],
-                ),
-              ),
+              _buildOtpForm(viewModel, context),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      style: customButtonStyle(context),
-                      icon: const Icon(Icons.refresh),
-                      label: viewModel.isRequestingNewOtpCode
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.2,
-                              ),
-                            )
-                          : const Text('Request new OTP'),
-                      onPressed: viewModel.isRequestingNewOtpCode
-                          ? null
-                          : () async {
-                              await viewModel.requestNewOtpCode();
-                            },
-                    ),
-                  ),
-                ],
-              ),
+              _buildRequestNewOtpButton(viewModel, context),
               const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: customButtonStyle(context),
-                  onPressed: viewModel.isVerifying
-                      ? null
-                      : () async {
-                          await viewModel.verify(context);
-                        },
-                  child: viewModel.isVerifying
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2.4),
-                        )
-                      : const Text('Verify'),
-                ),
-              ),
+              _buildVerifyButton(viewModel, context),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildAvatar(ThemeData theme) {
+    return const Padding(
+      padding: EdgeInsets.only(bottom: 8),
+      child: CircleAvatar(radius: 46, child: Icon(Icons.lock, size: 46)),
+    );
+  }
+
+  Widget _buildOtpForm(
+    VerifyPageScreenViewModel viewModel,
+    BuildContext context,
+  ) {
+    return Form(
+      key: viewModel.formKey,
+      child: TextFormField(
+        controller: viewModel.otpCodeController,
+        decoration: formInputDecoration('Enter OTP code', Icons.vpn_key),
+        maxLength: 12,
+        buildCounter:
+            (_, {required currentLength, required isFocused, maxLength}) =>
+                null,
+        keyboardType: TextInputType.text,
+        textAlign: TextAlign.left,
+        validator: viewModel.validateOtpCode,
+        autofillHints: const [AutofillHints.oneTimeCode],
+        textInputAction: TextInputAction.done,
+        onFieldSubmitted: (_) => viewModel.verify(context),
+      ),
+    );
+  }
+
+  Widget _buildRequestNewOtpButton(
+    VerifyPageScreenViewModel viewModel,
+    BuildContext context,
+  ) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        style: customButtonStyle(context),
+        icon: viewModel.isRequestingNewOtpCode
+            ? const SizedBox.shrink()
+            : const Icon(Icons.refresh),
+        label: viewModel.isRequestingNewOtpCode
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2.2),
+              )
+            : const Text('Request new OTP'),
+        onPressed: viewModel.isRequestingNewOtpCode
+            ? null
+            : () async => viewModel.requestNewOtpCode(context),
+      ),
+    );
+  }
+
+  Widget _buildVerifyButton(
+    VerifyPageScreenViewModel viewModel,
+    BuildContext context,
+  ) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: customButtonStyle(context),
+        onPressed: viewModel.isVerifying
+            ? null
+            : () async => viewModel.verify(context),
+        child: viewModel.isVerifying
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(strokeWidth: 2.4),
+              )
+            : const Text('Verify'),
       ),
     );
   }

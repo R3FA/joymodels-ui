@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
+import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/category/request_types/category_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/enums/jwt_claim_key_api_enum.dart';
@@ -41,9 +42,10 @@ class HomePageScreenViewModel with ChangeNotifier {
   String? selectedCategory;
 
   String? errorMessage;
+  VoidCallback? onSessionExpired;
 
-  bool? isLoggedUserDataLoading = false;
-  bool? isCategoriesLoading = false;
+  bool isLoggedUserDataLoading = false;
+  bool isCategoriesLoading = false;
 
   Future<void> init() async {
     await getLoggedUserDataFromToken();
@@ -68,10 +70,18 @@ class HomePageScreenViewModel with ChangeNotifier {
   }
 
   Future<void> getLoggedUserDataFromToken() async {
-    loggedUsername = (await TokenStorage.getClaimFromToken(
+    final username = await TokenStorage.getClaimFromToken(
       JwtClaimKeyApiEnum.userName,
-    ))!;
-    notifyListeners();
+    );
+
+    if (username != null) {
+      loggedUsername = username;
+      notifyListeners();
+    } else {
+      errorMessage = SessionExpiredException().toString();
+      notifyListeners();
+      onSessionExpired?.call();
+    }
   }
 
   Future<bool> getLoggedUserProfilePicture() async {
@@ -92,6 +102,12 @@ class HomePageScreenViewModel with ChangeNotifier {
 
       notifyListeners();
       return true;
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      notifyListeners();
+      await Future.delayed(const Duration(seconds: 3));
+      onSessionExpired?.call();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isLoggedUserDataLoading = false;
@@ -117,6 +133,12 @@ class HomePageScreenViewModel with ChangeNotifier {
       notifyListeners();
 
       return true;
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      isCategoriesLoading = false;
+      notifyListeners();
+      onSessionExpired?.call();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isCategoriesLoading = false;
@@ -195,7 +217,7 @@ class HomePageScreenViewModel with ChangeNotifier {
   List<ArtistModel> topArtists = [
     ArtistModel(
       name: "Sam Lake",
-      imageUrl: "https://i.imgur.com/9wN3OQp.png", // zamijeni svojim slikama
+      imageUrl: "https://i.imgur.com/9wN3OQp.png",
       count: 437,
     ),
     ArtistModel(
@@ -222,4 +244,11 @@ class HomePageScreenViewModel with ChangeNotifier {
       price: "",
     ),
   ];
+
+  @override
+  void dispose() {
+    onSessionExpired = null;
+    errorMessage = null;
+    super.dispose();
+  }
 }
