@@ -1,4 +1,4 @@
-import 'package:joymodels_mobile/data/model/user_role/user_role_response_api_model.dart';
+import 'package:joymodels_mobile/data/model/user_role/response_types/user_role_response_api_model.dart';
 
 class SsoUserResponseApiModel {
   final String uuid;

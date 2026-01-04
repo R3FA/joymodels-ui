@@ -28,18 +28,7 @@ class RegisterPageScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                GestureDetector(
-                  onTap: viewModel.pickUserProfilePicture,
-                  child: CircleAvatar(
-                    radius: 44,
-                    backgroundImage: viewModel.userProfilePicture != null
-                        ? FileImage(viewModel.userProfilePicture!)
-                        : null,
-                    child: viewModel.userProfilePicture == null
-                        ? const Icon(Icons.camera_alt, size: 38)
-                        : null,
-                  ),
-                ),
+                _buildProfilePicture(viewModel),
                 if (viewModel.profilePictureErrorMessage != null)
                   ErrorMessageText(
                     message: viewModel.profilePictureErrorMessage!,
@@ -47,93 +36,135 @@ class RegisterPageScreen extends StatelessWidget {
                 if (viewModel.successMessage != null)
                   SuccessMessageText(message: viewModel.successMessage!),
                 const SizedBox(height: 18),
-                TextFormField(
-                  controller: viewModel.firstNameController,
-                  decoration: formInputDecoration(
-                    'First name',
-                    Icons.person_outline,
-                  ),
-                  validator: viewModel.validateName,
-                  autofillHints: const [AutofillHints.givenName],
-                ),
+                _buildFirstNameField(viewModel),
                 const SizedBox(height: 12),
-                TextFormField(
-                  controller: viewModel.lastNameController,
-                  decoration: formInputDecoration(
-                    'Last name',
-                    Icons.person_outline,
-                  ),
-                  validator: (lastName) =>
-                      (lastName == null || lastName.trim().isEmpty)
-                      ? null
-                      : viewModel.validateName(lastName),
-                  autofillHints: const [AutofillHints.familyName],
-                ),
+                _buildLastNameField(viewModel),
                 const SizedBox(height: 12),
-                TextFormField(
-                  controller: viewModel.nicknameController,
-                  decoration: formInputDecoration('Nickname', Icons.face),
-                  validator: viewModel.validateNickname,
-                  autofillHints: const [AutofillHints.nickname],
-                ),
+                _buildNicknameField(viewModel),
                 const SizedBox(height: 12),
-                TextFormField(
-                  controller: viewModel.emailController,
-                  decoration: formInputDecoration(
-                    'Email',
-                    Icons.email_outlined,
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: viewModel.validateEmail,
-                  autofillHints: const [AutofillHints.email],
-                ),
+                _buildEmailField(viewModel),
                 const SizedBox(height: 12),
-                TextFormField(
-                  controller: viewModel.passwordController,
-                  decoration: formInputDecoration(
-                    'Password',
-                    Icons.lock_outline,
-                  ),
-                  obscureText: true,
-                  validator: viewModel.validatePassword,
-                  autofillHints: const [AutofillHints.newPassword],
-                ),
+                _buildPasswordField(viewModel, context),
                 const SizedBox(height: 24),
                 if (viewModel.responseErrorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(
-                      viewModel.responseErrorMessage!,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.error,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: customButtonStyle(context),
-                    onPressed: viewModel.isLoading
-                        ? null
-                        : () async {
-                            await viewModel.submitForm(context);
-                            if (!context.mounted) return;
-                          },
-                    child: viewModel.isLoading
-                        ? const SizedBox(
-                            height: 22,
-                            width: 22,
-                            child: CircularProgressIndicator(strokeWidth: 2.6),
-                          )
-                        : const Text('Register'),
-                  ),
-                ),
+                  _buildResponseError(viewModel, theme),
+                _buildRegisterButton(viewModel, context),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildProfilePicture(RegisterPageScreenViewModel viewModel) {
+    return GestureDetector(
+      onTap: viewModel.pickUserProfilePicture,
+      child: CircleAvatar(
+        radius: 44,
+        backgroundImage: viewModel.userProfilePicture != null
+            ? FileImage(viewModel.userProfilePicture!)
+            : null,
+        child: viewModel.userProfilePicture == null
+            ? const Icon(Icons.camera_alt, size: 38)
+            : null,
+      ),
+    );
+  }
+
+  Widget _buildFirstNameField(RegisterPageScreenViewModel viewModel) {
+    return TextFormField(
+      controller: viewModel.firstNameController,
+      decoration: formInputDecoration('First name', Icons.person_outline),
+      validator: viewModel.validateName,
+      autofillHints: const [AutofillHints.givenName],
+      textInputAction: TextInputAction.next,
+    );
+  }
+
+  Widget _buildLastNameField(RegisterPageScreenViewModel viewModel) {
+    return TextFormField(
+      controller: viewModel.lastNameController,
+      decoration: formInputDecoration('Last name', Icons.person_outline),
+      validator: (lastName) => (lastName == null || lastName.trim().isEmpty)
+          ? null
+          : viewModel.validateName(lastName),
+      autofillHints: const [AutofillHints.familyName],
+      textInputAction: TextInputAction.next,
+    );
+  }
+
+  Widget _buildNicknameField(RegisterPageScreenViewModel viewModel) {
+    return TextFormField(
+      controller: viewModel.nicknameController,
+      decoration: formInputDecoration('Nickname', Icons.face),
+      validator: viewModel.validateNickname,
+      autofillHints: const [AutofillHints.nickname],
+      textInputAction: TextInputAction.next,
+    );
+  }
+
+  Widget _buildEmailField(RegisterPageScreenViewModel viewModel) {
+    return TextFormField(
+      controller: viewModel.emailController,
+      decoration: formInputDecoration('Email', Icons.email_outlined),
+      keyboardType: TextInputType.emailAddress,
+      validator: viewModel.validateEmail,
+      autofillHints: const [AutofillHints.email],
+      textInputAction: TextInputAction.next,
+    );
+  }
+
+  Widget _buildPasswordField(
+    RegisterPageScreenViewModel viewModel,
+    BuildContext context,
+  ) {
+    return TextFormField(
+      controller: viewModel.passwordController,
+      decoration: formInputDecoration('Password', Icons.lock_outline),
+      obscureText: true,
+      validator: viewModel.validatePassword,
+      autofillHints: const [AutofillHints.newPassword],
+      textInputAction: TextInputAction.done,
+      onFieldSubmitted: (_) => viewModel.submitForm(context),
+    );
+  }
+
+  Widget _buildResponseError(
+    RegisterPageScreenViewModel viewModel,
+    ThemeData theme,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Text(
+        viewModel.responseErrorMessage!,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.error,
+          fontWeight: FontWeight.bold,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildRegisterButton(
+    RegisterPageScreenViewModel viewModel,
+    BuildContext context,
+  ) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: customButtonStyle(context),
+        onPressed: viewModel.isLoading
+            ? null
+            : () async => viewModel.submitForm(context),
+        child: viewModel.isLoading
+            ? const SizedBox(
+                height: 22,
+                width: 22,
+                child: CircularProgressIndicator(strokeWidth: 2.6),
+              )
+            : const Text('Register'),
       ),
     );
   }

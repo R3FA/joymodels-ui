@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
+import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/enums/jwt_claim_key_api_enum.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_new_otp_code_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_verify_request_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/sso_repository.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 import 'package:joymodels_mobile/ui/home_page/widgets/home_page_screen.dart';
+import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 
 class VerifyPageScreenViewModel with ChangeNotifier {
   final ssoRepository = sl<SsoRepository>();
@@ -74,6 +76,19 @@ class VerifyPageScreenViewModel with ChangeNotifier {
 
       clearControllers();
       return true;
+    } on SessionExpiredException {
+      isVerifying = false;
+      errorMessage = SessionExpiredException().toString();
+      notifyListeners();
+      await Future.delayed(const Duration(seconds: 3));
+      if (context.mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const WelcomePageScreen()),
+          (route) => false,
+        );
+      }
+      clearControllers();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isVerifying = false;
@@ -82,7 +97,7 @@ class VerifyPageScreenViewModel with ChangeNotifier {
     }
   }
 
-  Future<bool> requestNewOtpCode() async {
+  Future<bool> requestNewOtpCode(BuildContext context) async {
     errorMessage = null;
     successMessage = null;
     isRequestingNewOtpCode = true;
@@ -103,6 +118,18 @@ class VerifyPageScreenViewModel with ChangeNotifier {
       successMessage = "New OTP Code has been sent!";
       notifyListeners();
       return true;
+    } on SessionExpiredException {
+      isRequestingNewOtpCode = false;
+      errorMessage = SessionExpiredException().toString();
+      notifyListeners();
+      await Future.delayed(const Duration(seconds: 3));
+      if (context.mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const WelcomePageScreen()),
+          (route) => false,
+        );
+      }
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isRequestingNewOtpCode = false;

@@ -19,7 +19,6 @@ class WelcomePageViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  // Login button validation navigation
   Future<void> onLoginPressed(BuildContext context) async {
     _setError(null);
     _setLoading(true);
@@ -35,7 +34,6 @@ class WelcomePageViewModel with ChangeNotifier {
     }
   }
 
-  // Register button validation navigation
   Future<void> onRegisterPressed(BuildContext context) async {
     _setError(null);
     _setLoading(true);

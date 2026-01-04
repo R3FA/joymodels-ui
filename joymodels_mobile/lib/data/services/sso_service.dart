@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
+import 'package:joymodels_mobile/data/model/sso/request_types/sso_access_token_change_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_new_otp_code_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_user_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_user_login_request_api_model.dart';
@@ -16,9 +17,7 @@ class SsoService {
 
     final streamedResponse = await multiPartRequest.send();
 
-    final response = await http.Response.fromStream(streamedResponse);
-
-    return response;
+    return await http.Response.fromStream(streamedResponse);
   }
 
   Future<http.Response> verify(SsoVerifyRequestApiModel request) async {
@@ -31,9 +30,7 @@ class SsoService {
 
     final streamedResponse = await multiPartRequest.send();
 
-    final response = await http.Response.fromStream(streamedResponse);
-
-    return response;
+    return await http.Response.fromStream(streamedResponse);
   }
 
   Future<http.Response> requestNewOtpCode(
@@ -48,9 +45,7 @@ class SsoService {
 
     final streamedResponse = await multiPartRequest.send();
 
-    final response = await http.Response.fromStream(streamedResponse);
-
-    return response;
+    return await http.Response.fromStream(streamedResponse);
   }
 
   Future<http.Response> login(SsoUserLoginRequestApiModel request) async {
@@ -60,8 +55,18 @@ class SsoService {
 
     final streamedResponse = await multiPartRequest.send();
 
-    final response = await http.Response.fromStream(streamedResponse);
+    return await http.Response.fromStream(streamedResponse);
+  }
 
-    return response;
+  Future<http.Response> requestAccessTokenChange(
+    SsoAccessTokenChangeRequestApiModel request,
+  ) async {
+    final url = Uri.parse('$ssoUrl/request-access-token-change');
+
+    final multipartRequest = await request.toMultipartRequest(url);
+
+    final streamedResponse = await multipartRequest.send();
+
+    return await http.Response.fromStream(streamedResponse);
   }
 }
