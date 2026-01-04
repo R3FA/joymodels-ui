@@ -7,36 +7,30 @@ import 'package:joymodels_mobile/data/model/category/request_types/category_requ
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/enums/jwt_claim_key_api_enum.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
+import 'package:joymodels_mobile/data/model/users/request_types/user_search_request_api_model.dart';
+import 'package:joymodels_mobile/data/model/users/response_types/users_response_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/category_repository.dart';
 import 'package:joymodels_mobile/data/repositories/users_repository.dart';
-
-class ArtistModel {
-  final String name;
-  final String imageUrl;
-  final int count;
-
-  ArtistModel({
-    required this.name,
-    required this.imageUrl,
-    required this.count,
-  });
-}
-
-class TopModel {
-  final String name;
-  final String imageUrl;
-  final String price;
-
-  TopModel({required this.name, required this.imageUrl, required this.price});
-}
 
 class HomePageScreenViewModel with ChangeNotifier {
   final usersRepository = sl<UsersRepository>();
   final categoryRepository = sl<CategoryRepository>();
 
-  late String loggedUsername = '';
-  late Uint8List loggedUserAvatarUrl = Uint8List(0);
+  bool isSearching = false;
+  bool isLoggedUserDataLoading = false;
+  bool isCategoriesLoading = false;
+  bool isTopArtistsLoading = false;
+  bool isTopArtistsPictureLoading = false;
+
+  final searchController = TextEditingController();
+
+  String loggedUsername = '';
+  Uint8List loggedUserAvatarUrl = Uint8List(0);
+
   PaginationResponseApiModel<CategoryResponseApiModel>? categories;
+
+  PaginationResponseApiModel<UsersResponseApiModel>? topArtists;
+  Map<String, Uint8List> topArtistsAvatars = {};
 
   int selectedNavBarItem = 0;
   String? selectedCategory;
@@ -44,13 +38,12 @@ class HomePageScreenViewModel with ChangeNotifier {
   String? errorMessage;
   VoidCallback? onSessionExpired;
 
-  bool isLoggedUserDataLoading = false;
-  bool isCategoriesLoading = false;
-
   Future<void> init() async {
     await getLoggedUserDataFromToken();
     await getLoggedUserProfilePicture();
     await getCategories();
+    await getTopArtists();
+    await getTopArtistsProfilePicture();
   }
 
   void onNavigationBarItemTapped(int index) {
@@ -58,15 +51,50 @@ class HomePageScreenViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  void onCategoryTap(CategoryResponseApiModel cat) {
-    if (selectedCategory == cat.uuid) {
+  void onSearchPressed() {
+    isSearching = true;
+    notifyListeners();
+  }
+
+  void onSearchCancelled() {
+    isSearching = false;
+    searchController.clear();
+    notifyListeners();
+  }
+
+  void onSearchSubmitted(String query) {
+    if (query.trim().isEmpty) return;
+
+    // TODO: Navigacija na search rezultate
+    // Navigator.of(context).push(
+    //   MaterialPageRoute(builder: (_) => SearchResultsScreen(query: query)),
+    // );
+  }
+
+  void onCategoryTap(BuildContext context, CategoryResponseApiModel category) {
+    if (selectedCategory == category.uuid) {
       selectedCategory = null;
       notifyListeners();
       return;
     }
 
-    selectedCategory = cat.uuid;
+    selectedCategory = category.uuid;
     notifyListeners();
+
+    // TODO: Implementirati kada bude spremno
+    // Navigator.of(context).push(
+    //   MaterialPageRoute(builder: (_) => ModelsSearchScreen(category: category)),
+    // );
+  }
+
+  void onViewAllCategoriesPressed(BuildContext context) {
+    selectedCategory = 'View All';
+    notifyListeners();
+
+    // TODO: Implementirati kada bude spremno
+    // Navigator.of(
+    //   context,
+    // ).push(MaterialPageRoute(builder: (_) => const CategoriesScreen()));
   }
 
   Future<void> getLoggedUserDataFromToken() async {
@@ -214,41 +242,93 @@ class HomePageScreenViewModel with ChangeNotifier {
     }
   }
 
-  List<ArtistModel> topArtists = [
-    ArtistModel(
-      name: "Sam Lake",
-      imageUrl: "https://i.imgur.com/9wN3OQp.png",
-      count: 437,
-    ),
-    ArtistModel(
-      name: "Dan Houser",
-      imageUrl: "https://i.imgur.com/gsRGk8q.png",
-      count: 631,
-    ),
-    ArtistModel(
-      name: "Kojima",
-      imageUrl: "https://i.imgur.com/B4Z6ipM.png",
-      count: 211,
-    ),
-  ];
+  Future<bool> getTopArtists() async {
+    errorMessage = null;
+    isTopArtistsLoading = true;
+    notifyListeners();
 
-  List<TopModel> topRatedModels = [
-    TopModel(
-      name: "Max Payne – 3D Model",
-      imageUrl: "https://i.imgur.com/PIIogMz.png",
-      price: "\$19,99",
-    ),
-    TopModel(
-      name: "Alan Wake – 3D Model",
-      imageUrl: "https://i.imgur.com/F4onsfb.png",
-      price: "",
-    ),
-  ];
+    try {
+      final artistSearch = UsersSearchRequestApiModel(
+        nickname: null,
+        pageNumber: 1,
+        pageSize: 5,
+      );
+
+      topArtists = await usersRepository.search(artistSearch);
+      isTopArtistsLoading = false;
+      notifyListeners();
+      return true;
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      isTopArtistsLoading = false;
+      notifyListeners();
+      onSessionExpired?.call();
+      return false;
+    } catch (e) {
+      errorMessage = e.toString();
+      isTopArtistsLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> getTopArtistsProfilePicture() async {
+    errorMessage = null;
+    isTopArtistsPictureLoading = true;
+    notifyListeners();
+
+    try {
+      for (int i = 0; i < (topArtists!.data.length); i++) {
+        final artist = topArtists!.data[i];
+        final avatar = await usersRepository.getUserAvatar(artist.uuid);
+        topArtistsAvatars[artist.uuid] = avatar.fileBytes;
+      }
+      isTopArtistsPictureLoading = false;
+      notifyListeners();
+      return true;
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      isTopArtistsPictureLoading = false;
+      notifyListeners();
+      await Future.delayed(const Duration(seconds: 3));
+      onSessionExpired?.call();
+      return false;
+    } catch (e) {
+      errorMessage = e.toString();
+      isTopArtistsPictureLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  void onArtistTap(BuildContext context, UsersResponseApiModel? artist) {
+    if (artist == null) return;
+
+    // TODO: Implementirati kada bude spremno
+    // Navigator.of(context).push(
+    //   MaterialPageRoute(
+    //     builder:  (_) => ArtistDetailScreen(artist: artist),
+    //   ),
+    // );
+  }
+
+  void onViewAllArtistsPressed(BuildContext context) {
+    // TODO: Implementirati kada bude spremno
+    // Navigator.of(
+    //   context,
+    // ).push(MaterialPageRoute(builder: (_) => const TopArtistScreen()));
+  }
+
+  void onViewAllModelsPressed(BuildContext context) {
+    // TODO: Implementirati kada bude spremno
+    // Navigator.of(context).push(
+    //   MaterialPageRoute(builder: (_) => const TopModelsScreen()),
+    // );
+  }
 
   @override
   void dispose() {
     onSessionExpired = null;
-    errorMessage = null;
     super.dispose();
   }
 }

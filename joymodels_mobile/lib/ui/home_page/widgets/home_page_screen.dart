@@ -45,12 +45,13 @@ class _HomePageScreenState extends State<HomePageScreen> {
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(14, 32, 14, 0),
+          physics: const ClampingScrollPhysics(),
           children: [
             if (viewModel.errorMessage != null)
               ErrorMessageText(message: viewModel.errorMessage!),
             _buildHeader(viewModel, theme),
             const SizedBox(height: 28),
-            _buildCategoriesGrid(viewModel, theme),
+            _buildCategoriesGrid(viewModel, theme, context),
             const SizedBox(height: 24),
             _buildTopArtists(viewModel, theme),
             const SizedBox(height: 24),
@@ -75,7 +76,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                     width: 64,
                     height: 64,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) =>
+                    errorBuilder: (_, __, ___) =>
                         const Icon(Icons.person, size: 42, color: Colors.white),
                   ),
                 )
@@ -83,37 +84,81 @@ class _HomePageScreenState extends State<HomePageScreen> {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text('Hi, ', style: theme.textTheme.titleLarge),
-                  Text(
-                    viewModel.loggedUsername,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: theme.colorScheme.secondary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              Text('Welcome back!', style: theme.textTheme.labelLarge),
-            ],
+          child: viewModel.isSearching
+              ? _buildSearchBar(viewModel, theme)
+              : _buildWelcomeText(viewModel, theme),
+        ),
+
+        if (viewModel.isSearching)
+          TextButton(
+            onPressed: viewModel.onSearchCancelled,
+            child: const Text('Cancel'),
+          )
+        else ...[
+          IconButton(
+            icon: const Icon(Icons.notifications_none),
+            onPressed: () {},
           ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.notifications_none),
-          onPressed: () {},
-        ),
-        IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: viewModel.onSearchPressed,
+          ),
+        ],
       ],
+    );
+  }
+
+  Widget _buildWelcomeText(HomePageScreenViewModel viewModel, ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text('Hi, ', style: theme.textTheme.titleLarge),
+            Flexible(
+              child: Text(
+                viewModel.loggedUsername,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: theme.colorScheme.secondary,
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        Text('Welcome back! ', style: theme.textTheme.labelLarge),
+      ],
+    );
+  }
+
+  Widget _buildSearchBar(HomePageScreenViewModel viewModel, ThemeData theme) {
+    return TextField(
+      controller: viewModel.searchController,
+      autofocus: true,
+      decoration: InputDecoration(
+        hintText: 'Search models, artists.. .',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        filled: true,
+        fillColor: theme.colorScheme.surfaceContainerHighest,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        prefixIcon: const Icon(Icons.search),
+      ),
+      textInputAction: TextInputAction.search,
+      onSubmitted: viewModel.onSearchSubmitted,
     );
   }
 
   Widget _buildCategoriesGrid(
     HomePageScreenViewModel viewModel,
     ThemeData theme,
+    BuildContext context,
   ) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -135,7 +180,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                   theme: theme,
                   categoryName: cat.categoryName,
                   isSelected: cat.uuid == viewModel.selectedCategory,
-                  onTap: () => viewModel.onCategoryTap(cat),
+                  onTap: () => viewModel.onCategoryTap(context, cat),
                 ),
               ),
           _buildCategoryItem(
@@ -143,7 +188,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
             theme: theme,
             categoryName: 'View All',
             isSelected: viewModel.selectedCategory == 'View All',
-            onTap: () => viewModel.selectedCategory = 'View All',
+            onTap: () => viewModel.onViewAllCategoriesPressed(context),
           ),
         ],
       ),
@@ -203,49 +248,80 @@ class _HomePageScreenState extends State<HomePageScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Top Artists', style: theme.textTheme.titleMedium),
+        _buildTopArtistsHeader(viewModel, theme),
         const SizedBox(height: 10),
-        SizedBox(
-          height: 105,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: viewModel.topArtists.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 10),
-            itemBuilder: (_, i) {
-              final artist = viewModel.topArtists[i];
-              return Container(
-                width: 95,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: theme.colorScheme.surfaceContainerHighest,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircleAvatar(
-                      backgroundImage: NetworkImage(artist.imageUrl),
-                      radius: 28,
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      artist.name,
-                      style: theme.textTheme.bodyMedium,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                    ),
-                    Text(
-                      '${artist.count} models',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.secondary,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+        _buildTopArtistsList(viewModel, theme),
+      ],
+    );
+  }
+
+  Widget _buildTopArtistsHeader(
+    HomePageScreenViewModel viewModel,
+    ThemeData theme,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text('Top Artists', style: theme.textTheme.titleMedium),
+        TextButton(
+          onPressed: () => viewModel.onViewAllArtistsPressed(context),
+          style: TextButton.styleFrom(padding: EdgeInsets.zero),
+          child: const Text('View All >'),
         ),
       ],
+    );
+  }
+
+  Widget _buildTopArtistsList(
+    HomePageScreenViewModel viewModel,
+    ThemeData theme,
+  ) {
+    return SizedBox(
+      height: 105,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: viewModel.topArtists?.data.length ?? 0,
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        itemBuilder: (_, i) {
+          final artist = viewModel.topArtists?.data[i];
+          final avatar = viewModel.topArtistsAvatars[artist?.uuid];
+          final hasAvatar = avatar != null && avatar.isNotEmpty;
+
+          return GestureDetector(
+            onTap: () => viewModel.onArtistTap(context, artist),
+            child: Container(
+              width: 95,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: theme.colorScheme.surfaceContainerHighest,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundImage: hasAvatar ? MemoryImage(avatar) : null,
+                    child: hasAvatar ? null : const Icon(Icons.person),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    artist?.nickName ?? '',
+                    style: theme.textTheme.bodyMedium,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                  Text(
+                    '${artist?.userLikedModelsCount ?? 0} models',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.secondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -256,87 +332,60 @@ class _HomePageScreenState extends State<HomePageScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Top Rated Models', style: theme.textTheme.titleMedium),
-            TextButton(
-              onPressed: () {},
-              style: TextButton.styleFrom(padding: EdgeInsets.zero),
-              child: const Text('View All >'),
-            ),
-          ],
-        ),
+        _buildTopRatedModelsHeader(viewModel, theme),
         const SizedBox(height: 10),
-        SizedBox(
-          height: 115,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: viewModel.topRatedModels.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 10),
-            itemBuilder: (_, i) {
-              final model = viewModel.topRatedModels[i];
-              return Container(
-                width: 150,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: theme.colorScheme.surfaceContainerHighest,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.network(
-                        model.imageUrl,
-                        width: 65,
-                        height: 90,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 12, right: 4),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              model.name,
-                              style: theme.textTheme.bodySmall,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                            ),
-                            if (model.price.isNotEmpty)
-                              Container(
-                                margin: const EdgeInsets.only(top: 4),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 2,
-                                  horizontal: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.primaryContainer,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  model.price,
-                                  style: theme.textTheme.labelMedium?.copyWith(
-                                    color: theme.colorScheme.primary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+        _buildTopRatedModelsList(viewModel, theme),
+      ],
+    );
+  }
+
+  Widget _buildTopRatedModelsHeader(
+    HomePageScreenViewModel viewModel,
+    ThemeData theme,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text('Top Rated Models', style: theme.textTheme.titleMedium),
+        TextButton(
+          onPressed: () => viewModel.onViewAllModelsPressed(context),
+          style: TextButton.styleFrom(padding: EdgeInsets.zero),
+          child: const Text('View All >'),
         ),
       ],
+    );
+  }
+
+  Widget _buildTopRatedModelsList(
+    HomePageScreenViewModel viewModel,
+    ThemeData theme,
+  ) {
+    return SizedBox(
+      height: 115,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: 5,
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        itemBuilder: (_, i) {
+          return Container(
+            width: 150,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: theme.colorScheme.surfaceContainerHighest,
+            ),
+            child: Center(
+              child: Text(
+                'In the making',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
