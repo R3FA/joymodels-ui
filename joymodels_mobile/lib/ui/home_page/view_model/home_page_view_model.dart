@@ -328,6 +328,7 @@ class HomePageScreenViewModel with ChangeNotifier {
 
   @override
   void dispose() {
+    searchController.dispose();
     onSessionExpired = null;
     super.dispose();
   }
