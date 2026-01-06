@@ -11,11 +11,13 @@ import 'package:joymodels_mobile/data/model/users/request_types/user_search_requ
 import 'package:joymodels_mobile/data/model/users/response_types/users_response_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/category_repository.dart';
 import 'package:joymodels_mobile/data/repositories/users_repository.dart';
+import 'package:joymodels_mobile/ui/model_search_page/widget/model_search_page_screen.dart';
 
 class HomePageScreenViewModel with ChangeNotifier {
   final usersRepository = sl<UsersRepository>();
   final categoryRepository = sl<CategoryRepository>();
 
+  bool isLoading = false;
   bool isSearching = false;
   bool isLoggedUserDataLoading = false;
   bool isCategoriesLoading = false;
@@ -33,17 +35,29 @@ class HomePageScreenViewModel with ChangeNotifier {
   Map<String, Uint8List> topArtistsAvatars = {};
 
   int selectedNavBarItem = 0;
-  String? selectedCategory;
 
+  String? selectedCategory;
   String? errorMessage;
+
   VoidCallback? onSessionExpired;
 
   Future<void> init() async {
-    await getLoggedUserDataFromToken();
-    await getLoggedUserProfilePicture();
-    await getCategories();
-    await getTopArtists();
-    await getTopArtistsProfilePicture();
+    isLoading = true;
+    notifyListeners();
+    try {
+      await getLoggedUserDataFromToken();
+      await getLoggedUserProfilePicture();
+      await getCategories();
+      await getTopArtists();
+      await getTopArtistsProfilePicture();
+
+      isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      errorMessage = e.toString();
+      isLoading = false;
+      notifyListeners();
+    }
   }
 
   void onNavigationBarItemTapped(int index) {
@@ -81,20 +95,26 @@ class HomePageScreenViewModel with ChangeNotifier {
     selectedCategory = category.uuid;
     notifyListeners();
 
-    // TODO: Implementirati kada bude spremno
-    // Navigator.of(context).push(
-    //   MaterialPageRoute(builder: (_) => ModelsSearchScreen(category: category)),
-    // );
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ModelsSearchScreen(categoryName: category.categoryName),
+      ),
+    );
+
+    selectedCategory = null;
+    notifyListeners();
   }
 
   void onViewAllCategoriesPressed(BuildContext context) {
     selectedCategory = 'View All';
     notifyListeners();
 
-    // TODO: Implementirati kada bude spremno
-    // Navigator.of(
-    //   context,
-    // ).push(MaterialPageRoute(builder: (_) => const CategoriesScreen()));
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ModelsSearchScreen(categoryName: null)),
+    );
+
+    selectedCategory = null;
+    notifyListeners();
   }
 
   Future<void> getLoggedUserDataFromToken() async {

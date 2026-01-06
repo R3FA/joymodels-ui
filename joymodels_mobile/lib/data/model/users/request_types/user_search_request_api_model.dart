@@ -9,10 +9,10 @@ class UsersSearchRequestApiModel extends PaginationRequestApiModel {
     required super.pageSize,
   });
 
+  @override
   Map<String, String> toQueryParameters() {
     return {
-      'pageNumber': pageNumber.toString(),
-      'pageSize': pageSize.toString(),
+      ...super.toQueryParameters(),
       if (nickname != null) 'nickname': nickname!,
     };
   }

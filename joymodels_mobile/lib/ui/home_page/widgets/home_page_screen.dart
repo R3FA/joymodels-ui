@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:joymodels_mobile/ui/core/ui/error_message_text.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -18,12 +17,11 @@ class _HomePageScreenState extends State<HomePageScreen> {
   @override
   void initState() {
     super.initState();
-
     _viewModel = context.read<HomePageScreenViewModel>();
-
     _viewModel.onSessionExpired = _handleSessionExpired;
-
-    _viewModel.init();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _viewModel.init();
+    });
   }
 
   void _handleSessionExpired() {
@@ -41,26 +39,78 @@ class _HomePageScreenState extends State<HomePageScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      bottomNavigationBar: const NavigationBarWidget(),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(14, 32, 14, 0),
-          physics: const ClampingScrollPhysics(),
-          children: [
-            if (viewModel.errorMessage != null)
-              ErrorMessageText(message: viewModel.errorMessage!),
-            _buildHeader(viewModel, theme),
-            const SizedBox(height: 28),
-            _buildCategoriesGrid(viewModel, theme, context),
-            const SizedBox(height: 24),
-            _buildTopArtists(viewModel, theme),
-            const SizedBox(height: 24),
-            _buildTopRatedModels(viewModel, theme),
-          ],
-        ),
+      bottomNavigationBar: viewModel.isLoading
+          ? null
+          : const NavigationBarWidget(),
+      body: SafeArea(child: _buildBody(viewModel, theme)),
+    );
+  }
+
+  // ==================== BODY ====================
+
+  Widget _buildBody(HomePageScreenViewModel viewModel, ThemeData theme) {
+    if (viewModel.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (viewModel.errorMessage != null) {
+      return _buildErrorState(viewModel, theme);
+    }
+
+    return _buildContent(viewModel, theme);
+  }
+
+  Widget _buildErrorState(HomePageScreenViewModel viewModel, ThemeData theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 80, color: theme.colorScheme.error),
+          const SizedBox(height: 16),
+          Text(
+            'Something went wrong',
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.error,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              viewModel.errorMessage!,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () => viewModel.init(),
+            child: const Text('Retry'),
+          ),
+        ],
       ),
     );
   }
+
+  Widget _buildContent(HomePageScreenViewModel viewModel, ThemeData theme) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(14, 32, 14, 0),
+      physics: const ClampingScrollPhysics(),
+      children: [
+        _buildHeader(viewModel, theme),
+        const SizedBox(height: 28),
+        _buildCategoriesGrid(viewModel, theme, context),
+        const SizedBox(height: 24),
+        _buildTopArtists(viewModel, theme),
+        const SizedBox(height: 24),
+        _buildTopRatedModels(viewModel, theme),
+      ],
+    );
+  }
+
+  // ==================== HEADER ====================
 
   Widget _buildHeader(HomePageScreenViewModel viewModel, ThemeData theme) {
     return Row(
@@ -88,7 +138,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
               ? _buildSearchBar(viewModel, theme)
               : _buildWelcomeText(viewModel, theme),
         ),
-
         if (viewModel.isSearching)
           TextButton(
             onPressed: viewModel.onSearchCancelled,
@@ -154,6 +203,8 @@ class _HomePageScreenState extends State<HomePageScreen> {
       onSubmitted: viewModel.onSearchSubmitted,
     );
   }
+
+  // ==================== CATEGORIES ====================
 
   Widget _buildCategoriesGrid(
     HomePageScreenViewModel viewModel,
@@ -244,6 +295,8 @@ class _HomePageScreenState extends State<HomePageScreen> {
     );
   }
 
+  // ==================== TOP ARTISTS ====================
+
   Widget _buildTopArtists(HomePageScreenViewModel viewModel, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -324,6 +377,8 @@ class _HomePageScreenState extends State<HomePageScreen> {
       ),
     );
   }
+
+  // ==================== TOP RATED MODELS ====================
 
   Widget _buildTopRatedModels(
     HomePageScreenViewModel viewModel,
