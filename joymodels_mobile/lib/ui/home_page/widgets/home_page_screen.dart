@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:joymodels_mobile/ui/core/ui/navigation_bar.dart';
+import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
 import '../view_model/home_page_view_model.dart';
@@ -41,7 +41,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
     return Scaffold(
       bottomNavigationBar: viewModel.isLoading
           ? null
-          : const NavigationBarWidget(),
+          : const NavigationBarScreen(),
       body: SafeArea(child: _buildBody(viewModel, theme)),
     );
   }

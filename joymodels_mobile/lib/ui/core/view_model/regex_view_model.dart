@@ -60,9 +60,9 @@ class RegexValidationViewModel {
     if (text == null || text.trim().isEmpty) {
       return 'Text cannot be empty string.';
     }
-    final regex = RegExp(r"^[A-Za-z0-9:.,\-\' ]+$");
+    final regex = RegExp(r"^[A-Za-z0-9:.,\-\'\& ]+$");
     if (!regex.hasMatch(text)) {
-      return 'Invalid value: Must contain only letters (any language), digits, and the following characters: (:.,-\').';
+      return 'Invalid value: Must contain only letters (any language), digits, and the following characters: (:.,-\'&).';
     }
     return null;
   }
@@ -77,6 +77,19 @@ class RegexValidationViewModel {
     if (!regex.hasMatch(url)) {
       return 'Invalid URL format. Please provide a valid YouTube link (youtube.com or youtu.be) starting with https://';
     }
+    return null;
+  }
+
+  static String? validatePrice(String? price) {
+    if (price == null || price.trim().isEmpty) {
+      return 'Price cannot be empty string.';
+    }
+    final regex = RegExp(r'^\d*\. ?\d{0,2}');
+
+    if (!regex.hasMatch(price)) {
+      return 'Invalid price format. Please provide a valid price with up to two decimal places.';
+    }
+
     return null;
   }
 }

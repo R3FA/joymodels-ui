@@ -34,8 +34,6 @@ class HomePageScreenViewModel with ChangeNotifier {
   PaginationResponseApiModel<UsersResponseApiModel>? topArtists;
   Map<String, Uint8List> topArtistsAvatars = {};
 
-  int selectedNavBarItem = 0;
-
   String? selectedCategory;
   String? errorMessage;
 
@@ -58,11 +56,6 @@ class HomePageScreenViewModel with ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
-  }
-
-  void onNavigationBarItemTapped(int index) {
-    selectedNavBarItem = index;
-    notifyListeners();
   }
 
   void onSearchPressed() {
