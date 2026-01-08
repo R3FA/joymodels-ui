@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
+import 'package:joymodels_mobile/data/model/models/request_types/model_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/request_types/model_search_request_api_model.dart';
 
 class ModelService {
@@ -19,5 +20,18 @@ class ModelService {
     );
 
     return response;
+  }
+
+  Future<http.Response> create(ModelCreateRequestApiModel request) async {
+    final url = Uri.parse("$modelsUrl/create");
+
+    final multiPartRequest = await request.toMultipartRequest(url);
+
+    final token = await TokenStorage.getAccessToken();
+    multiPartRequest.headers['Authorization'] = "Bearer $token";
+
+    final streamedResponse = await multiPartRequest.send();
+
+    return await http.Response.fromStream(streamedResponse);
   }
 }

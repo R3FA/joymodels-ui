@@ -9,15 +9,19 @@ import 'package:joymodels_mobile/data/model/category/request_types/category_requ
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_availability/request_types/model_availability_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_availability/response_types/model_availability_response_api_model.dart';
+import 'package:joymodels_mobile/data/model/models/request_types/model_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/category_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_availability_repository.dart';
+import 'package:joymodels_mobile/data/repositories/model_repository.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 import 'package:joymodels_mobile/ui/core/view_model/validation_view_model.dart';
+import 'package:joymodels_mobile/ui/home_page/widgets/home_page_screen.dart';
 
 class ModelCreatePageViewModel with ChangeNotifier {
   final categoryRepository = sl<CategoryRepository>();
   final modelAvailabilityRepository = sl<ModelAvailabilityRepository>();
+  final modelRepository = sl<ModelRepository>();
 
   VoidCallback? onSessionExpired;
 
@@ -94,21 +98,8 @@ class ModelCreatePageViewModel with ChangeNotifier {
       return false;
     }
 
-    for (final cat in selectedCategories) {
-      final categoryNameError = RegexValidationViewModel.validateText(
-        cat['name'] ?? '',
-      );
-      if (categoryNameError != null) {
-        errorMessage = 'Category: $categoryNameError';
-        return false;
-      }
-    }
-
-    final availabilityError = RegexValidationViewModel.validateText(
-      selectedAvailability?.availabilityName ?? '',
-    );
-    if (availabilityError != null) {
-      errorMessage = 'Availability: $availabilityError';
+    if (selectedAvailability == null) {
+      errorMessage = 'Availability is required';
       return false;
     }
 
@@ -407,10 +398,11 @@ class ModelCreatePageViewModel with ChangeNotifier {
 
   // ==================== FORM ACTIONS ====================
 
-  Future<void> onSubmit(BuildContext context) async {
+  Future<bool> onSubmit(BuildContext context) async {
+    print(selectedCategories);
     if (!isFormValid()) {
       notifyListeners();
-      return;
+      return false;
     }
 
     isSubmitting = true;
@@ -418,23 +410,77 @@ class ModelCreatePageViewModel with ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: Pozovi repository za upload modela
+      final request = ModelCreateRequestApiModel(
+        name: modelNameController.text,
+        description: modelDescriptionController.text,
+        pictures: List.generate(
+          selectedPhotos.length,
+          (i) =>
+              ModelFile(bytes: selectedPhotos[i], name: selectedPhotoNames[i]),
+        ),
+        price: double.parse(modelPriceController.text),
+        modelAvailabilityUuid: selectedAvailability!.uuid,
+        modelCategoryUuids: selectedCategories
+            .map((cat) => cat['uuid']!)
+            .toList(),
+        model: ModelFile(
+          bytes: selectedModelFile!,
+          name: selectedModelFileName!,
+        ),
+      );
+
+      await modelRepository.create(request);
 
       isSubmitting = false;
       notifyListeners();
 
-      // if (context.mounted) {
-      //   Navigator.of(context).pop(true);
-      // }
+      if (context.mounted) {
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const HomePageScreen()));
+      }
+
+      clearForm();
+
+      return true;
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      isSubmitting = false;
+      notifyListeners();
+      onSessionExpired?.call();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isSubmitting = false;
       notifyListeners();
+      return false;
     }
   }
 
   void clearError() {
     errorMessage = null;
+    notifyListeners();
+  }
+
+  void clearForm() {
+    modelNameController.clear();
+    modelDescriptionController.clear();
+    modelCategorySearchController.clear();
+    modelPriceController.clear();
+
+    selectedPhotos.clear();
+    selectedPhotoNames.clear();
+    selectedCategories.clear();
+    selectedAvailability = null;
+    selectedModelFile = null;
+    selectedModelFileName = null;
+
+    isLoading = false;
+    isCategoriesLoading = false;
+    isModelAvailabilitiesLoading = false;
+    isSubmitting = false;
+    errorMessage = null;
+
     notifyListeners();
   }
 
