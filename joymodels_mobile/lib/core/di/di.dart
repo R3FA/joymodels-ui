@@ -3,10 +3,12 @@ import 'package:http/http.dart' as http;
 import 'package:joymodels_mobile/data/core/repositories/auth_repository.dart';
 import 'package:joymodels_mobile/data/core/services/auth_service.dart';
 import 'package:joymodels_mobile/data/repositories/category_repository.dart';
+import 'package:joymodels_mobile/data/repositories/model_availability_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_repository.dart';
 import 'package:joymodels_mobile/data/repositories/sso_repository.dart';
 import 'package:joymodels_mobile/data/repositories/users_repository.dart';
 import 'package:joymodels_mobile/data/services/category_service.dart';
+import 'package:joymodels_mobile/data/services/model_availability_service.dart';
 import 'package:joymodels_mobile/data/services/model_service.dart';
 import 'package:joymodels_mobile/data/services/sso_service.dart';
 import 'package:joymodels_mobile/data/services/users_service.dart';
@@ -45,5 +47,14 @@ void dependencyInjectionSetup() {
   sl.registerLazySingleton(() => ModelService());
   sl.registerLazySingleton(
     () => ModelRepository(sl<ModelService>(), sl<AuthService>()),
+  );
+
+  // ModelAvailability
+  sl.registerLazySingleton(() => ModelAvailabilityService());
+  sl.registerLazySingleton(
+    () => ModelAvailabilityRepository(
+      sl<ModelAvailabilityService>(),
+      sl<AuthService>(),
+    ),
   );
 }

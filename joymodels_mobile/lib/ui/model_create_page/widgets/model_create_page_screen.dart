@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:joymodels_mobile/data/model/model_availability/response_types/model_availability_response_api_model.dart';
 import 'package:joymodels_mobile/ui/core/ui/form_input_decoration.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/model_create_page/view_model/model_create_page_view_model.dart';
@@ -42,7 +43,25 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
 
     return Scaffold(
       bottomNavigationBar: const NavigationBarScreen(),
-      appBar: AppBar(title: const Text('Add model'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('Add model'),
+        centerTitle: true,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: SizedBox(
+              height: 36,
+              child: ElevatedButton(
+                onPressed: () => viewModel.onSubmit(context),
+                child: const Text(
+                  'Create',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: _buildBody(viewModel, theme),
     );
   }
@@ -380,25 +399,20 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
         Text('Availability:', style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
         Row(
-          children: [
-            Expanded(
-              child: _buildAvailabilityChip(
-                viewModel: viewModel,
-                theme: theme,
-                availability: ModelAvailability.store,
-                label: 'Store',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildAvailabilityChip(
-                viewModel: viewModel,
-                theme: theme,
-                availability: ModelAvailability.communityChallenge,
-                label: 'Community\nChallenge',
-              ),
-            ),
-          ],
+          children:
+              viewModel.modelAvailabilities?.data.map((availability) {
+                return Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: _buildAvailabilityChip(
+                      viewModel: viewModel,
+                      theme: theme,
+                      availability: availability,
+                    ),
+                  ),
+                );
+              }).toList() ??
+              [],
         ),
       ],
     );
@@ -407,10 +421,10 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
   Widget _buildAvailabilityChip({
     required ModelCreatePageViewModel viewModel,
     required ThemeData theme,
-    required ModelAvailability availability,
-    required String label,
+    required ModelAvailabilityResponseApiModel availability,
   }) {
-    final isSelected = viewModel.selectedAvailability == availability;
+    final isSelected =
+        viewModel.selectedAvailability?.uuid == availability.uuid;
 
     return GestureDetector(
       onTap: () => viewModel.onAvailabilityChanged(availability),
@@ -430,7 +444,7 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
         ),
         alignment: Alignment.center,
         child: Text(
-          label,
+          availability.availabilityName,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: isSelected
                 ? theme.colorScheme.onPrimaryContainer
@@ -443,7 +457,7 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
     );
   }
 
-  // ==================== PRICE FIEL221D ====================
+  // ==================== PRICE FIELD ====================
 
   Widget _buildPriceField(ModelCreatePageViewModel viewModel, ThemeData theme) {
     return Column(

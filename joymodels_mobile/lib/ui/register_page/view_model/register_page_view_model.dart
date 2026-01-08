@@ -5,7 +5,7 @@ import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_user_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/sso_repository.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
-import 'package:joymodels_mobile/ui/core/view_model/user_profile_picture_view_model.dart';
+import 'package:joymodels_mobile/ui/core/view_model/validation_view_model.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 
 class RegisterPageScreenViewModel with ChangeNotifier {
@@ -45,7 +45,7 @@ class RegisterPageScreenViewModel with ChangeNotifier {
 
   Future<String?> validateUserPicture(File? file) async {
     return profilePictureErrorMessage =
-        await UserProfilePictureValidationViewModel.validateUserPicture(file);
+        await ValidationViewModel.validateUserPicture(file);
   }
 
   Future<void> pickUserProfilePicture() async {
