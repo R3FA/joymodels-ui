@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:joymodels_mobile/ui/home_page/view_model/home_page_view_model.dart';
+import 'package:joymodels_mobile/ui/core/ui/navigation_bar/view_model/navigation_bar_view_model.dart';
 import 'package:provider/provider.dart';
 
-class NavigationBarWidget extends StatelessWidget {
-  const NavigationBarWidget({super.key});
+class NavigationBarScreen extends StatelessWidget {
+  const NavigationBarScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = context.watch<HomePageScreenViewModel>();
+    final viewModel = context.watch<NavigationBarViewModel>();
 
     const double iconSize = 32;
     const double navBarHeight = 70;
@@ -15,7 +15,8 @@ class NavigationBarWidget extends StatelessWidget {
     return NavigationBar(
       height: navBarHeight,
       selectedIndex: viewModel.selectedNavBarItem,
-      onDestinationSelected: viewModel.onNavigationBarItemTapped,
+      onDestinationSelected: (index) =>
+          viewModel.onNavigationBarItemTapped(context, index),
       destinations: const [
         NavigationDestination(
           icon: Icon(Icons.home, size: iconSize),
@@ -34,8 +35,8 @@ class NavigationBarWidget extends StatelessWidget {
           label: 'Cart',
         ),
         NavigationDestination(
-          icon: Icon(Icons.person, size: iconSize),
-          label: 'Profile',
+          icon: Icon(Icons.settings, size: iconSize),
+          label: 'Settings',
         ),
       ],
     );

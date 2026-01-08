@@ -14,4 +14,11 @@ abstract class PaginationRequestApiModel {
     'pageSize': pageSize,
     if (orderBy != null) 'orderBy': orderBy,
   };
+
+  Map<String, String> toQueryParameters() {
+    return {
+      'pageNumber': pageNumber.toString(),
+      'pageSize': pageSize.toString(),
+    };
+  }
 }
