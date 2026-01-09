@@ -33,7 +33,7 @@ class ModelRepository {
   Future<ModelResponseApiModel> create(
     ModelCreateRequestApiModel request,
   ) async {
-    final response = await _service.create(request);
+    final response = await _authService.request(() => _service.create(request));
 
     if (response.statusCode == 200) {
       final jsonMap = jsonDecode(response.body);
