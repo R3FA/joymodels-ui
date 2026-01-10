@@ -38,7 +38,6 @@ class ModelSearchPageViewModel with ChangeNotifier {
     try {
       initializeCategoryName(categoryName: categoryName);
       await searchModels();
-      await loadModelsPicture();
       isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -80,39 +79,6 @@ class ModelSearchPageViewModel with ChangeNotifier {
     } catch (e) {
       errorMessage = e.toString();
       areModelsLoading = false;
-      notifyListeners();
-      return false;
-    }
-  }
-
-  Future<bool> loadModelsPicture() async {
-    errorMessage = null;
-    areModelPicturesLoading = true;
-    notifyListeners();
-
-    try {
-      for (ModelResponseApiModel model in models?.data ?? []) {
-        modelPictures.add(
-          await modelRepository.getModelPictures(
-            model.uuid,
-            model.modelPictures[0].pictureLocation,
-          ),
-        );
-      }
-
-      areModelPicturesLoading = false;
-      notifyListeners();
-
-      return true;
-    } on SessionExpiredException {
-      errorMessage = SessionExpiredException().toString();
-      areModelPicturesLoading = false;
-      notifyListeners();
-      onSessionExpired?.call();
-      return false;
-    } catch (e) {
-      errorMessage = e.toString();
-      areModelPicturesLoading = false;
       notifyListeners();
       return false;
     }

@@ -1,7 +1,6 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/model_page/view_model/model_page_view_model.dart';
@@ -101,24 +100,16 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: PageView.builder(
-              itemCount: vm.modelPictures.length,
+              itemCount: vm.loadedModel?.modelPictures.length ?? 0,
               controller: vm.galleryController,
               onPageChanged: vm.onGalleryPageChanged,
               itemBuilder: (context, i) {
-                if (vm.modelPictures[i]?.fileBytes.isEmpty ?? true) {
-                  return Container(
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    child: Icon(
-                      Icons.image,
-                      color: theme.colorScheme.onSurfaceVariant,
-                      size: 56,
-                    ),
-                  );
-                }
-                return Image.memory(
-                  vm.modelPictures[i]?.fileBytes ?? Uint8List(0),
+                return Image.network(
+                  "${ApiConstants.baseUrl}/models/get/${vm.loadedModel?.uuid}/images/${Uri.encodeComponent(vm.loadedModel?.modelPictures[i].pictureLocation ?? '')}",
                   fit: BoxFit.cover,
                   alignment: Alignment.center,
+                  errorBuilder: (_, _, _) =>
+                      const Icon(Icons.person, size: 42, color: Colors.white),
                 );
               },
             ),

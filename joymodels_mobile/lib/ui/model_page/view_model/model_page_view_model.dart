@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
-import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/core/response_types/picture_response_api_model.dart';
-import 'package:joymodels_mobile/data/model/model_picture/response_types/model_picture_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/model_repository.dart';
 
@@ -33,47 +31,12 @@ class ModelPageViewModel extends ChangeNotifier {
 
     try {
       this.loadedModel = loadedModel;
-      await loadModelsPicture();
       isLoading = false;
       notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
       isLoading = false;
       notifyListeners();
-    }
-  }
-
-  Future<bool> loadModelsPicture() async {
-    errorMessage = null;
-    areModelImagesLoading = true;
-    notifyListeners();
-
-    try {
-      for (ModelPictureResponseApiModel? picture
-          in loadedModel?.modelPictures ?? []) {
-        modelPictures.add(
-          await modelRepository.getModelPictures(
-            loadedModel!.uuid,
-            picture!.pictureLocation,
-          ),
-        );
-      }
-
-      areModelImagesLoading = false;
-      notifyListeners();
-
-      return true;
-    } on SessionExpiredException {
-      errorMessage = SessionExpiredException().toString();
-      areModelImagesLoading = false;
-      notifyListeners();
-      onSessionExpired?.call();
-      return false;
-    } catch (e) {
-      errorMessage = e.toString();
-      areModelImagesLoading = false;
-      notifyListeners();
-      return false;
     }
   }
 

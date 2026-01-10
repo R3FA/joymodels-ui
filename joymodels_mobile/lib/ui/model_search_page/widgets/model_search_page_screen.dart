@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/ui/model_search_page/view_model/model_search_page_view_model.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
@@ -235,7 +236,6 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
           viewModel: viewModel,
           theme: theme,
           model: model,
-          index: index,
         );
       },
     );
@@ -245,7 +245,6 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     required ModelSearchPageViewModel viewModel,
     required ThemeData theme,
     required ModelResponseApiModel model,
-    required int index,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -262,7 +261,7 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildModelImage(viewModel, theme, index),
+                _buildModelImage(viewModel, theme, model),
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildModelInfo(
@@ -286,27 +285,21 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
   Widget _buildModelImage(
     ModelSearchPageViewModel viewModel,
     ThemeData theme,
-    int index,
+    ModelResponseApiModel model,
   ) {
-    final picture = (index < viewModel.modelPictures.length)
-        ? viewModel.modelPictures[index]
-        : null;
-
     return CircleAvatar(
       radius: 32,
       backgroundColor: theme.colorScheme.primary,
-      child: picture != null && picture.fileBytes.isNotEmpty
-          ? ClipOval(
-              child: Image.memory(
-                picture.fileBytes,
-                width: 64,
-                height: 64,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) =>
-                    const Icon(Icons.person, size: 42, color: Colors.white),
-              ),
-            )
-          : const Icon(Icons.person, size: 42, color: Colors.white),
+      child: ClipOval(
+        child: Image.network(
+          "${ApiConstants.baseUrl}/models/get/${model.uuid}/images/${Uri.encodeComponent(model.modelPictures[0].pictureLocation)}",
+          width: 64,
+          height: 64,
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) =>
+              const Icon(Icons.person, size: 42, color: Colors.white),
+        ),
+      ),
     );
   }
 
