@@ -365,7 +365,7 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
                 Divider(
                   height: 1,
                   thickness: 1,
-                  color: theme.colorScheme.secondary.withOpacity(0.31),
+                  color: theme.colorScheme.secondary,
                 ),
                 const SizedBox(height: 6),
                 Row(
