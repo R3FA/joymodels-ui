@@ -7,6 +7,24 @@ import 'package:joymodels_mobile/data/model/models/request_types/model_search_re
 class ModelService {
   final String modelsUrl = "${ApiConstants.baseUrl}/models";
 
+  Future<http.Response> getModelPictures(
+    String modelUuid,
+    String modelPictureLocationPath,
+  ) async {
+    final url = Uri.parse(
+      "$modelsUrl/get/$modelUuid/images/${Uri.encodeComponent(modelPictureLocationPath)}",
+    );
+
+    final token = await TokenStorage.getAccessToken();
+
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    return response;
+  }
+
   Future<http.Response> search(ModelSearchRequestApiModel request) async {
     final url = Uri.parse(
       "$modelsUrl/search",

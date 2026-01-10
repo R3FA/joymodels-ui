@@ -11,7 +11,7 @@ import 'package:joymodels_mobile/data/model/users/request_types/user_search_requ
 import 'package:joymodels_mobile/data/model/users/response_types/users_response_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/category_repository.dart';
 import 'package:joymodels_mobile/data/repositories/users_repository.dart';
-import 'package:joymodels_mobile/ui/model_search_page/widget/model_search_page_screen.dart';
+import 'package:joymodels_mobile/ui/model_search_page/widgets/model_search_page_screen.dart';
 
 class HomePageScreenViewModel with ChangeNotifier {
   final usersRepository = sl<UsersRepository>();

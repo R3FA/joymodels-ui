@@ -36,8 +36,8 @@ class ModelCreateRequestApiModel {
     req.fields['Price'] = price.toString();
     req.fields['ModelAvailabilityUuid'] = modelAvailabilityUuid;
 
-    for (final categoryUuid in modelCategoryUuids) {
-      req.fields['ModelCategoryUuids'] = categoryUuid;
+    for (int i = 0; i < modelCategoryUuids.length; i++) {
+      req.fields['ModelCategoryUuids[$i]'] = modelCategoryUuids[i];
     }
 
     for (final pic in pictures) {

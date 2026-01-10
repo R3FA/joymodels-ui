@@ -149,7 +149,7 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
   }
 
   Widget _buildBody(ModelSearchPageViewModel viewModel, ThemeData theme) {
-    if (viewModel.areModelsLoading) {
+    if (viewModel.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -235,6 +235,7 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
           viewModel: viewModel,
           theme: theme,
           model: model,
+          index: index,
         );
       },
     );
@@ -244,6 +245,7 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     required ModelSearchPageViewModel viewModel,
     required ThemeData theme,
     required ModelResponseApiModel model,
+    required int index,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -260,7 +262,7 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildModelImage(theme),
+                _buildModelImage(viewModel, theme, index),
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildModelInfo(
@@ -281,15 +283,30 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     );
   }
 
-  Widget _buildModelImage(ThemeData theme) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        width: 80,
-        height: 80,
-        color: theme.colorScheme.surfaceContainerHigh,
-        child: const Icon(Icons.view_in_ar, size: 32),
-      ),
+  Widget _buildModelImage(
+    ModelSearchPageViewModel viewModel,
+    ThemeData theme,
+    int index,
+  ) {
+    final picture = (index < viewModel.modelPictures.length)
+        ? viewModel.modelPictures[index]
+        : null;
+
+    return CircleAvatar(
+      radius: 32,
+      backgroundColor: theme.colorScheme.primary,
+      child: picture != null && picture.fileBytes.isNotEmpty
+          ? ClipOval(
+              child: Image.memory(
+                picture.fileBytes,
+                width: 64,
+                height: 64,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) =>
+                    const Icon(Icons.person, size: 42, color: Colors.white),
+              ),
+            )
+          : const Icon(Icons.person, size: 42, color: Colors.white),
     );
   }
 

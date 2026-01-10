@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:joymodels_mobile/data/core/services/auth_service.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/users/request_types/user_search_request_api_model.dart';
-import 'package:joymodels_mobile/data/model/users/response_types/users_avatar_response_api_model.dart';
+import 'package:joymodels_mobile/data/model/core/response_types/picture_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/users/response_types/users_response_api_model.dart';
 import 'package:joymodels_mobile/data/services/users_service.dart';
 
@@ -27,7 +27,7 @@ class UsersRepository {
     }
   }
 
-  Future<UsersAvatarResponse> getUserAvatar(String userUuid) async {
+  Future<PictureResponse> getUserAvatar(String userUuid) async {
     final response = await _authService.request(
       () => _service.getUserAvatar(userUuid),
     );
@@ -36,10 +36,7 @@ class UsersRepository {
       final contentType =
           response.headers['content-type'] ?? 'application/octet-stream';
       final fileBytes = response.bodyBytes;
-      return UsersAvatarResponse(
-        fileBytes: fileBytes,
-        contentType: contentType,
-      );
+      return PictureResponse(fileBytes: fileBytes, contentType: contentType);
     } else {
       throw Exception(
         'Failed to fetch user avatar by its uuid: ${response.statusCode} - ${response.body}',

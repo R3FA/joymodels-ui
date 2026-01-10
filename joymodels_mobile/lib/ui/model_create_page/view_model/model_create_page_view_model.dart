@@ -399,7 +399,6 @@ class ModelCreatePageViewModel with ChangeNotifier {
   // ==================== FORM ACTIONS ====================
 
   Future<bool> onSubmit(BuildContext context) async {
-    print(selectedCategories);
     if (!isFormValid()) {
       notifyListeners();
       return false;
@@ -448,6 +447,7 @@ class ModelCreatePageViewModel with ChangeNotifier {
       isSubmitting = false;
       notifyListeners();
       onSessionExpired?.call();
+      clearForm();
       return false;
     } catch (e) {
       errorMessage = e.toString();
