@@ -115,7 +115,8 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
             ),
           ),
         ),
-        if (vm.modelPictures.length > 1 && vm.galleryIndex > 0)
+        if ((vm.loadedModel?.modelPictures.length ?? 0) > 1 &&
+            vm.galleryIndex > 0)
           Positioned(
             top: 0,
             bottom: 0,
@@ -136,8 +137,8 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
               ),
             ),
           ),
-        if (vm.modelPictures.length > 1 &&
-            vm.galleryIndex < vm.modelPictures.length - 1)
+        if ((vm.loadedModel?.modelPictures.length ?? 0) > 1 &&
+            vm.galleryIndex < (vm.loadedModel?.modelPictures.length ?? 0) - 1)
           Positioned(
             top: 0,
             bottom: 0,
@@ -168,7 +169,7 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
-              '${vm.galleryIndex + 1} / ${vm.modelPictures.length}',
+              '${vm.galleryIndex + 1} / ${(vm.loadedModel?.modelPictures.length ?? 0)}',
               style: theme.textTheme.bodySmall,
             ),
           ),

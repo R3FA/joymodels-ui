@@ -110,7 +110,8 @@ class ModelSearchPageViewModel with ChangeNotifier {
   }
 
   void onSearchSubmitted(String query) {
-    // TODO: Implementirati
+    initializeModelName(modelName: query);
+    searchModels();
   }
 
   void onFilterPressed(BuildContext context) {

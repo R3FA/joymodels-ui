@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
-import 'package:joymodels_mobile/data/model/core/response_types/picture_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/model_repository.dart';
 
@@ -13,7 +12,6 @@ class ModelPageViewModel extends ChangeNotifier {
   String? errorMessage;
 
   ModelResponseApiModel? loadedModel;
-  List<PictureResponse?> modelPictures = List.empty(growable: true);
 
   int galleryIndex = 0;
   late final PageController galleryController = PageController(initialPage: 0);
@@ -41,7 +39,7 @@ class ModelPageViewModel extends ChangeNotifier {
   }
 
   void nextGallery() {
-    if (galleryIndex < modelPictures.length - 1) {
+    if (galleryIndex < (loadedModel?.modelPictures.length ?? 0) - 1) {
       galleryIndex++;
       galleryController.jumpToPage(galleryIndex);
       notifyListeners();
@@ -89,7 +87,6 @@ class ModelPageViewModel extends ChangeNotifier {
     areModelImagesLoading = false;
     errorMessage = null;
     loadedModel = null;
-    modelPictures.clear();
     galleryIndex = 0;
     notifyListeners();
   }
