@@ -61,4 +61,24 @@ class UsersRepository {
       );
     }
   }
+
+  Future<PaginationResponseApiModel<UsersResponseApiModel>> searchTopArtists(
+    UsersSearchRequestApiModel request,
+  ) async {
+    final response = await _authService.request(
+      () => _service.searchTopArtists(request),
+    );
+
+    if (response.statusCode == 200) {
+      final jsonMap = jsonDecode(response.body);
+      return PaginationResponseApiModel<UsersResponseApiModel>.fromJson(
+        jsonMap,
+        (item) => UsersResponseApiModel.fromJson(item),
+      );
+    } else {
+      throw Exception(
+        'Failed to fetch top artists: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
 }

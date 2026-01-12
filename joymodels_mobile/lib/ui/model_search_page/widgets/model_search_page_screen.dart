@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
+import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/model_search_page/view_model/model_search_page_view_model.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -46,6 +47,7 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      bottomNavigationBar: NavigationBarScreen(),
       body: SafeArea(
         child: Column(
           children: [
@@ -291,10 +293,15 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     ThemeData theme,
     ModelResponseApiModel model,
   ) {
-    return CircleAvatar(
-      radius: 32,
-      backgroundColor: theme.colorScheme.primary,
-      child: ClipOval(
+    return Container(
+      width: 64,
+      height: 64,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
         child: Image.network(
           "${ApiConstants.baseUrl}/models/get/${model.uuid}/images/${Uri.encodeComponent(model.modelPictures[0].pictureLocation)}",
           width: 64,

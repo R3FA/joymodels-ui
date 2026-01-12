@@ -6,6 +6,7 @@ import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.
 import 'package:joymodels_mobile/data/model/category/request_types/category_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/enums/jwt_claim_key_api_enum.dart';
+import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/users/request_types/user_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/users/response_types/users_response_api_model.dart';
@@ -33,6 +34,10 @@ class HomePageScreenViewModel with ChangeNotifier {
 
   PaginationResponseApiModel<UsersResponseApiModel>? topArtists;
   Map<String, Uint8List> topArtistsAvatars = {};
+
+  // TODO: Implementirati kada bude spremno za recommendera
+  PaginationResponseApiModel<ModelResponseApiModel>? recommendedModels;
+  Map<String, Uint8List> recommendedModelsAvatars = {};
 
   String? selectedCategory;
   String? errorMessage;
@@ -264,7 +269,7 @@ class HomePageScreenViewModel with ChangeNotifier {
         pageSize: 5,
       );
 
-      topArtists = await usersRepository.search(artistSearch);
+      topArtists = await usersRepository.searchTopArtists(artistSearch);
       isTopArtistsLoading = false;
       notifyListeners();
       return true;

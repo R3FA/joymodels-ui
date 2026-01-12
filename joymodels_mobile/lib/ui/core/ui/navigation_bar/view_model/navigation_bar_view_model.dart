@@ -7,33 +7,6 @@ enum NavBarItem { home, community, add, cart, settings }
 class NavigationBarViewModel with ChangeNotifier {
   int selectedNavBarItem = 0;
 
-  void onNavigationBarItemTapped(BuildContext context, int index) {
-    if (selectedNavBarItem == index) return;
-
-    final navBarItem = NavBarItem.values[index];
-
-    switch (navBarItem) {
-      case NavBarItem.home:
-        _navigateToHome(context);
-        break;
-      case NavBarItem.community:
-        _navigateToCommunity(context);
-        break;
-      case NavBarItem.add:
-        _navigateToAddModel(context);
-        break;
-      case NavBarItem.cart:
-        _navigateToCart(context);
-        break;
-      case NavBarItem.settings:
-        _navigateToSettings(context);
-        break;
-    }
-
-    selectedNavBarItem = index;
-    notifyListeners();
-  }
-
   void _navigateToHome(BuildContext context) {
     Navigator.of(
       context,
@@ -56,5 +29,30 @@ class NavigationBarViewModel with ChangeNotifier {
 
   void _navigateToSettings(BuildContext context) {
     // TODO: Implementiraj
+  }
+
+  void onNavigationBarItemTapped(BuildContext context, int index) {
+    final navBarItem = NavBarItem.values[index];
+
+    switch (navBarItem) {
+      case NavBarItem.home:
+        _navigateToHome(context);
+        break;
+      case NavBarItem.community:
+        _navigateToCommunity(context);
+        break;
+      case NavBarItem.add:
+        _navigateToAddModel(context);
+        break;
+      case NavBarItem.cart:
+        _navigateToCart(context);
+        break;
+      case NavBarItem.settings:
+        _navigateToSettings(context);
+        break;
+    }
+
+    selectedNavBarItem = index;
+    notifyListeners();
   }
 }
