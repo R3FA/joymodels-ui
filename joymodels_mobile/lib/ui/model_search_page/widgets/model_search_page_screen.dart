@@ -7,8 +7,9 @@ import 'package:provider/provider.dart';
 
 class ModelsSearchScreen extends StatefulWidget {
   final String? categoryName;
+  final String? modelName;
 
-  const ModelsSearchScreen({super.key, this.categoryName});
+  const ModelsSearchScreen({super.key, this.categoryName, this.modelName});
 
   @override
   State<ModelsSearchScreen> createState() => _ModelsSearchScreenState();
@@ -23,7 +24,10 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     _viewModel = context.read<ModelSearchPageViewModel>();
     _viewModel.onSessionExpired = _handleSessionExpired;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _viewModel.init(categoryName: widget.categoryName);
+      _viewModel.init(
+        categoryName: widget.categoryName,
+        modelName: widget.modelName,
+      );
     });
   }
 

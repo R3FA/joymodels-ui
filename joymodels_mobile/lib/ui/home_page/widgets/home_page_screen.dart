@@ -200,7 +200,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
         prefixIcon: const Icon(Icons.search),
       ),
       textInputAction: TextInputAction.search,
-      onSubmitted: viewModel.onSearchSubmitted,
+      onSubmitted: (query) => viewModel.onSearchSubmitted(context, query),
     );
   }
 

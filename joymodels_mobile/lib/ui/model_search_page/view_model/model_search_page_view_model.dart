@@ -32,11 +32,12 @@ class ModelSearchPageViewModel with ChangeNotifier {
 
   VoidCallback? onSessionExpired;
 
-  Future<void> init({String? categoryName}) async {
+  Future<void> init({String? categoryName, String? modelName}) async {
     isLoading = true;
     notifyListeners();
     try {
       initializeCategoryName(categoryName: categoryName);
+      initializeModelName(modelName: modelName);
       await searchModels();
       isLoading = false;
       notifyListeners();
@@ -49,6 +50,10 @@ class ModelSearchPageViewModel with ChangeNotifier {
 
   void initializeCategoryName({String? categoryName}) {
     this.categoryName = categoryName;
+  }
+
+  void initializeModelName({String? modelName}) {
+    this.modelName = modelName;
   }
 
   Future<bool> searchModels({int pageNumber = 1}) async {

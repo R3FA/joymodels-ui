@@ -69,13 +69,10 @@ class HomePageScreenViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  void onSearchSubmitted(String query) {
-    if (query.trim().isEmpty) return;
-
-    // TODO: Navigacija na search rezultate
-    // Navigator.of(context).push(
-    //   MaterialPageRoute(builder: (_) => SearchResultsScreen(query: query)),
-    // );
+  void onSearchSubmitted(BuildContext context, String query) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ModelsSearchScreen(modelName: query)),
+    );
   }
 
   void onCategoryTap(BuildContext context, CategoryResponseApiModel category) {
