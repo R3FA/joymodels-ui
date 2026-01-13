@@ -92,7 +92,7 @@ class HomePageScreenViewModel with ChangeNotifier {
 
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => ModelsSearchScreen(categoryName: category.categoryName),
+        builder: (_) => ModelsSearchScreen(selectedCategory: category),
       ),
     );
 
@@ -105,7 +105,9 @@ class HomePageScreenViewModel with ChangeNotifier {
     notifyListeners();
 
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => ModelsSearchScreen(categoryName: null)),
+      MaterialPageRoute(
+        builder: (_) => ModelsSearchScreen(selectedCategory: null),
+      ),
     );
 
     selectedCategory = null;

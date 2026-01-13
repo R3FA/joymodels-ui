@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/data/core/config/api_constants.dart';
+import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
+import 'package:joymodels_mobile/data/model/models/request_types/model_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/model_search_page/view_model/model_search_page_view_model.dart';
@@ -7,10 +9,10 @@ import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dar
 import 'package:provider/provider.dart';
 
 class ModelsSearchScreen extends StatefulWidget {
-  final String? categoryName;
+  final CategoryResponseApiModel? selectedCategory;
   final String? modelName;
 
-  const ModelsSearchScreen({super.key, this.categoryName, this.modelName});
+  const ModelsSearchScreen({super.key, this.selectedCategory, this.modelName});
 
   @override
   State<ModelsSearchScreen> createState() => _ModelsSearchScreenState();
@@ -26,7 +28,7 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     _viewModel.onSessionExpired = _handleSessionExpired;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _viewModel.init(
-        categoryName: widget.categoryName,
+        selectedCategory: widget.selectedCategory,
         modelName: widget.modelName,
       );
     });
@@ -52,7 +54,6 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
         child: Column(
           children: [
             _buildHeader(viewModel, theme),
-            _buildSortTabs(viewModel, theme),
             const SizedBox(height: 8),
             Expanded(child: _buildBody(viewModel, theme)),
             if (_shouldShowPagination(viewModel))
@@ -90,67 +91,16 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
                 ),
               ),
               textInputAction: TextInputAction.search,
-              onSubmitted: viewModel.onSearchSubmitted,
+              onSubmitted: (_) => viewModel.onFilterSubmit(),
             ),
           ),
           const SizedBox(width: 8),
           IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () => viewModel.onFilterPressed(context),
+            icon: const Icon(Icons.sort),
+            onPressed: () =>
+                viewModel.onFilterPressed(context, widget.selectedCategory),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSortTabs(ModelSearchPageViewModel viewModel, ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          _buildSortTab(
-            viewModel: viewModel,
-            theme: theme,
-            label: 'Best matches',
-            sortType: ModelSortType.bestMatches,
-          ),
-          const SizedBox(width: 24),
-          _buildSortTab(
-            viewModel: viewModel,
-            theme: theme,
-            label: 'Top Sales',
-            sortType: ModelSortType.topSales,
-          ),
-          const SizedBox(width: 24),
-          _buildSortTab(
-            viewModel: viewModel,
-            theme: theme,
-            label: 'Price',
-            sortType: ModelSortType.price,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSortTab({
-    required ModelSearchPageViewModel viewModel,
-    required ThemeData theme,
-    required String label,
-    required ModelSortType sortType,
-  }) {
-    final isSelected = viewModel.selectedSortType == sortType;
-
-    return GestureDetector(
-      onTap: () => viewModel.onSortTypeChanged(sortType),
-      child: Text(
-        label,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: isSelected
-              ? theme.colorScheme.primary
-              : theme.colorScheme.onSurfaceVariant,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        ),
       ),
     );
   }
@@ -194,7 +144,9 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () => viewModel.searchModels(),
+            onPressed: () => viewModel.searchModels(
+              ModelSearchRequestApiModel(pageNumber: 1, pageSize: 10),
+            ),
             child: const Text('Retry'),
           ),
         ],
