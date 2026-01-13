@@ -19,6 +19,7 @@ abstract class PaginationRequestApiModel {
     return {
       'pageNumber': pageNumber.toString(),
       'pageSize': pageSize.toString(),
+      if (orderBy != null) 'orderBy': orderBy!,
     };
   }
 }

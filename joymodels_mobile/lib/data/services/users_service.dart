@@ -46,4 +46,21 @@ class UsersService {
 
     return response;
   }
+
+  Future<http.Response> searchTopArtists(
+    UsersSearchRequestApiModel request,
+  ) async {
+    final url = Uri.parse(
+      "$usersUrl/search-top-artists",
+    ).replace(queryParameters: request.toQueryParameters());
+
+    final token = await TokenStorage.getAccessToken();
+
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    return response;
+  }
 }

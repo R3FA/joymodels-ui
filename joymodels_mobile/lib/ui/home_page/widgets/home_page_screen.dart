@@ -105,7 +105,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
         const SizedBox(height: 24),
         _buildTopArtists(viewModel, theme),
         const SizedBox(height: 24),
-        _buildTopRatedModels(viewModel, theme),
+        _buildRecommendedModels(viewModel, theme),
       ],
     );
   }
@@ -200,7 +200,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
         prefixIcon: const Icon(Icons.search),
       ),
       textInputAction: TextInputAction.search,
-      onSubmitted: viewModel.onSearchSubmitted,
+      onSubmitted: (query) => viewModel.onSearchSubmitted(context, query),
     );
   }
 
@@ -298,10 +298,11 @@ class _HomePageScreenState extends State<HomePageScreen> {
   // ==================== TOP ARTISTS ====================
 
   Widget _buildTopArtists(HomePageScreenViewModel viewModel, ThemeData theme) {
+    final hasArtists = (viewModel.topArtists?.data.isNotEmpty ?? false);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildTopArtistsHeader(viewModel, theme),
+        _buildTopArtistsHeader(viewModel, theme, hasArtists),
         const SizedBox(height: 10),
         _buildTopArtistsList(viewModel, theme),
       ],
@@ -311,16 +312,18 @@ class _HomePageScreenState extends State<HomePageScreen> {
   Widget _buildTopArtistsHeader(
     HomePageScreenViewModel viewModel,
     ThemeData theme,
+    bool hasArtists,
   ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text('Top Artists', style: theme.textTheme.titleMedium),
-        TextButton(
-          onPressed: () => viewModel.onViewAllArtistsPressed(context),
-          style: TextButton.styleFrom(padding: EdgeInsets.zero),
-          child: const Text('View All >'),
-        ),
+        if (hasArtists)
+          TextButton(
+            onPressed: () => viewModel.onViewAllArtistsPressed(context),
+            style: TextButton.styleFrom(padding: EdgeInsets.zero),
+            child: const Text('View All >'),
+          ),
       ],
     );
   }
@@ -329,6 +332,37 @@ class _HomePageScreenState extends State<HomePageScreen> {
     HomePageScreenViewModel viewModel,
     ThemeData theme,
   ) {
+    final hasArtists = (viewModel.topArtists?.data.isNotEmpty ?? false);
+
+    if (!hasArtists) {
+      return Container(
+        height: 105,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.people_alt_outlined,
+              size: 38,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              "No top artists yet",
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return SizedBox(
       height: 105,
       child: ListView.separated(
@@ -364,7 +398,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                     textAlign: TextAlign.center,
                   ),
                   Text(
-                    '${artist?.userLikedModelsCount ?? 0} models',
+                    '${artist?.userModelsCount ?? 0} models',
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.secondary,
                     ),
@@ -378,48 +412,81 @@ class _HomePageScreenState extends State<HomePageScreen> {
     );
   }
 
-  // ==================== TOP RATED MODELS ====================
+  // ==================== RECOMMENDED MODELS ====================
 
-  Widget _buildTopRatedModels(
+  Widget _buildRecommendedModels(
     HomePageScreenViewModel viewModel,
     ThemeData theme,
   ) {
+    final hasModels = (viewModel.recommendedModels?.data.isNotEmpty ?? false);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildTopRatedModelsHeader(viewModel, theme),
+        _buildRecommendedModelsHeader(viewModel, theme, hasModels),
         const SizedBox(height: 10),
-        _buildTopRatedModelsList(viewModel, theme),
+        _buildRecommendedModelsList(viewModel, theme, hasModels),
       ],
     );
   }
 
-  Widget _buildTopRatedModelsHeader(
+  Widget _buildRecommendedModelsHeader(
     HomePageScreenViewModel viewModel,
     ThemeData theme,
+    bool hasModels,
   ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text('Top Rated Models', style: theme.textTheme.titleMedium),
-        TextButton(
-          onPressed: () => viewModel.onViewAllModelsPressed(context),
-          style: TextButton.styleFrom(padding: EdgeInsets.zero),
-          child: const Text('View All >'),
-        ),
+        Text('Recommended Models', style: theme.textTheme.titleMedium),
+        if (hasModels)
+          TextButton(
+            onPressed: () => viewModel.onViewAllModelsPressed(context),
+            style: TextButton.styleFrom(padding: EdgeInsets.zero),
+            child: const Text('View All >'),
+          ),
       ],
     );
   }
 
-  Widget _buildTopRatedModelsList(
+  Widget _buildRecommendedModelsList(
     HomePageScreenViewModel viewModel,
     ThemeData theme,
+    bool hasModels,
   ) {
+    if (!hasModels) {
+      return Container(
+        height: 115,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.view_in_ar,
+              size: 42,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              "No recommended models yet",
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return SizedBox(
       height: 115,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: 5,
+        itemCount: viewModel.recommendedModels?.data.length ?? 0,
         separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (_, i) {
           return Container(
@@ -430,7 +497,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
             ),
             child: Center(
               child: Text(
-                'In the making',
+                'Placeholder for model name',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                   fontStyle: FontStyle.italic,

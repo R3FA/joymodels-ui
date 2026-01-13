@@ -11,6 +11,7 @@ class UsersResponseApiModel {
   final int userFollowerCount;
   final int userFollowingCount;
   final int userLikedModelsCount;
+  final int userModelsCount;
   final UserRoleResponseApiModel userRole;
 
   UsersResponseApiModel({
@@ -24,6 +25,7 @@ class UsersResponseApiModel {
     required this.userFollowerCount,
     required this.userFollowingCount,
     required this.userLikedModelsCount,
+    required this.userModelsCount,
     required this.userRole,
   });
 
@@ -39,6 +41,7 @@ class UsersResponseApiModel {
       userFollowerCount: json['userFollowerCount'] as int,
       userFollowingCount: json['userFollowingCount'] as int,
       userLikedModelsCount: json['userLikedModelsCount'] as int,
+      userModelsCount: json['userModelsCount'] as int,
       userRole: UserRoleResponseApiModel.fromJson(json['userRole']),
     );
   }

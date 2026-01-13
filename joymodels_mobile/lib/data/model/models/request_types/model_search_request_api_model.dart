@@ -11,6 +11,7 @@ class ModelSearchRequestApiModel extends PaginationRequestApiModel {
     this.arePrivateUserModelsSearched = false,
     required super.pageNumber,
     required super.pageSize,
+    super.orderBy,
   });
 
   @override

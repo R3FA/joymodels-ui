@@ -16,7 +16,7 @@ import 'package:joymodels_mobile/data/repositories/model_availability_repository
 import 'package:joymodels_mobile/data/repositories/model_repository.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 import 'package:joymodels_mobile/ui/core/view_model/validation_view_model.dart';
-import 'package:joymodels_mobile/ui/home_page/widgets/home_page_screen.dart';
+import 'package:joymodels_mobile/ui/model_page/widgets/model_page_screen.dart';
 
 class ModelCreatePageViewModel with ChangeNotifier {
   final categoryRepository = sl<CategoryRepository>();
@@ -399,7 +399,6 @@ class ModelCreatePageViewModel with ChangeNotifier {
   // ==================== FORM ACTIONS ====================
 
   Future<bool> onSubmit(BuildContext context) async {
-    print(selectedCategories);
     if (!isFormValid()) {
       notifyListeners();
       return false;
@@ -429,15 +428,17 @@ class ModelCreatePageViewModel with ChangeNotifier {
         ),
       );
 
-      await modelRepository.create(request);
+      final createdModel = await modelRepository.create(request);
 
       isSubmitting = false;
       notifyListeners();
 
       if (context.mounted) {
-        Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (_) => const HomePageScreen()));
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ModelPageScreen(loadedModel: createdModel),
+          ),
+        );
       }
 
       clearForm();
@@ -448,6 +449,7 @@ class ModelCreatePageViewModel with ChangeNotifier {
       isSubmitting = false;
       notifyListeners();
       onSessionExpired?.call();
+      clearForm();
       return false;
     } catch (e) {
       errorMessage = e.toString();

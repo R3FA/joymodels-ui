@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:joymodels_mobile/data/core/config/api_constants.dart';
+import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
+import 'package:joymodels_mobile/data/model/models/request_types/model_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
+import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/model_search_page/view_model/model_search_page_view_model.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
 
 class ModelsSearchScreen extends StatefulWidget {
-  final String? categoryName;
+  final CategoryResponseApiModel? selectedCategory;
+  final String? modelName;
 
-  const ModelsSearchScreen({super.key, this.categoryName});
+  const ModelsSearchScreen({super.key, this.selectedCategory, this.modelName});
 
   @override
   State<ModelsSearchScreen> createState() => _ModelsSearchScreenState();
@@ -22,7 +27,10 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     _viewModel = context.read<ModelSearchPageViewModel>();
     _viewModel.onSessionExpired = _handleSessionExpired;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _viewModel.init(categoryName: widget.categoryName);
+      _viewModel.init(
+        selectedCategory: widget.selectedCategory,
+        modelName: widget.modelName,
+      );
     });
   }
 
@@ -41,11 +49,11 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      bottomNavigationBar: NavigationBarScreen(),
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(viewModel, theme),
-            _buildSortTabs(viewModel, theme),
             const SizedBox(height: 8),
             Expanded(child: _buildBody(viewModel, theme)),
             if (_shouldShowPagination(viewModel))
@@ -83,73 +91,22 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
                 ),
               ),
               textInputAction: TextInputAction.search,
-              onSubmitted: viewModel.onSearchSubmitted,
+              onSubmitted: (_) => viewModel.onFilterSubmit(),
             ),
           ),
           const SizedBox(width: 8),
           IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () => viewModel.onFilterPressed(context),
+            icon: const Icon(Icons.sort),
+            onPressed: () =>
+                viewModel.onFilterPressed(context, widget.selectedCategory),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSortTabs(ModelSearchPageViewModel viewModel, ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          _buildSortTab(
-            viewModel: viewModel,
-            theme: theme,
-            label: 'Best matches',
-            sortType: ModelSortType.bestMatches,
-          ),
-          const SizedBox(width: 24),
-          _buildSortTab(
-            viewModel: viewModel,
-            theme: theme,
-            label: 'Top Sales',
-            sortType: ModelSortType.topSales,
-          ),
-          const SizedBox(width: 24),
-          _buildSortTab(
-            viewModel: viewModel,
-            theme: theme,
-            label: 'Price',
-            sortType: ModelSortType.price,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSortTab({
-    required ModelSearchPageViewModel viewModel,
-    required ThemeData theme,
-    required String label,
-    required ModelSortType sortType,
-  }) {
-    final isSelected = viewModel.selectedSortType == sortType;
-
-    return GestureDetector(
-      onTap: () => viewModel.onSortTypeChanged(sortType),
-      child: Text(
-        label,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: isSelected
-              ? theme.colorScheme.primary
-              : theme.colorScheme.onSurfaceVariant,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        ),
       ),
     );
   }
 
   Widget _buildBody(ModelSearchPageViewModel viewModel, ThemeData theme) {
-    if (viewModel.areModelsLoading) {
+    if (viewModel.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -187,7 +144,9 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () => viewModel.searchModels(),
+            onPressed: () => viewModel.searchModels(
+              ModelSearchRequestApiModel(pageNumber: 1, pageSize: 10),
+            ),
             child: const Text('Retry'),
           ),
         ],
@@ -260,7 +219,7 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildModelImage(theme),
+                _buildModelImage(viewModel, theme, model),
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildModelInfo(
@@ -281,14 +240,28 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     );
   }
 
-  Widget _buildModelImage(ThemeData theme) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        width: 80,
-        height: 80,
-        color: theme.colorScheme.surfaceContainerHigh,
-        child: const Icon(Icons.view_in_ar, size: 32),
+  Widget _buildModelImage(
+    ModelSearchPageViewModel viewModel,
+    ThemeData theme,
+    ModelResponseApiModel model,
+  ) {
+    return Container(
+      width: 64,
+      height: 64,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Image.network(
+          "${ApiConstants.baseUrl}/models/get/${model.uuid}/images/${Uri.encodeComponent(model.modelPictures[0].pictureLocation)}",
+          width: 64,
+          height: 64,
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) =>
+              const Icon(Icons.person, size: 42, color: Colors.white),
+        ),
       ),
     );
   }

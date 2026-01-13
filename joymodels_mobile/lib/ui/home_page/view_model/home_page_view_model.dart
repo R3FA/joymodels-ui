@@ -6,12 +6,13 @@ import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.
 import 'package:joymodels_mobile/data/model/category/request_types/category_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/enums/jwt_claim_key_api_enum.dart';
+import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/users/request_types/user_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/users/response_types/users_response_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/category_repository.dart';
 import 'package:joymodels_mobile/data/repositories/users_repository.dart';
-import 'package:joymodels_mobile/ui/model_search_page/widget/model_search_page_screen.dart';
+import 'package:joymodels_mobile/ui/model_search_page/widgets/model_search_page_screen.dart';
 
 class HomePageScreenViewModel with ChangeNotifier {
   final usersRepository = sl<UsersRepository>();
@@ -33,6 +34,10 @@ class HomePageScreenViewModel with ChangeNotifier {
 
   PaginationResponseApiModel<UsersResponseApiModel>? topArtists;
   Map<String, Uint8List> topArtistsAvatars = {};
+
+  // TODO: Implementirati kada bude spremno za recommendera
+  PaginationResponseApiModel<ModelResponseApiModel>? recommendedModels;
+  Map<String, Uint8List> recommendedModelsAvatars = {};
 
   String? selectedCategory;
   String? errorMessage;
@@ -69,13 +74,10 @@ class HomePageScreenViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  void onSearchSubmitted(String query) {
-    if (query.trim().isEmpty) return;
-
-    // TODO: Navigacija na search rezultate
-    // Navigator.of(context).push(
-    //   MaterialPageRoute(builder: (_) => SearchResultsScreen(query: query)),
-    // );
+  void onSearchSubmitted(BuildContext context, String query) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ModelsSearchScreen(modelName: query)),
+    );
   }
 
   void onCategoryTap(BuildContext context, CategoryResponseApiModel category) {
@@ -90,7 +92,7 @@ class HomePageScreenViewModel with ChangeNotifier {
 
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => ModelsSearchScreen(categoryName: category.categoryName),
+        builder: (_) => ModelsSearchScreen(selectedCategory: category),
       ),
     );
 
@@ -103,7 +105,9 @@ class HomePageScreenViewModel with ChangeNotifier {
     notifyListeners();
 
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => ModelsSearchScreen(categoryName: null)),
+      MaterialPageRoute(
+        builder: (_) => ModelsSearchScreen(selectedCategory: null),
+      ),
     );
 
     selectedCategory = null;
@@ -267,7 +271,7 @@ class HomePageScreenViewModel with ChangeNotifier {
         pageSize: 5,
       );
 
-      topArtists = await usersRepository.search(artistSearch);
+      topArtists = await usersRepository.searchTopArtists(artistSearch);
       isTopArtistsLoading = false;
       notifyListeners();
       return true;
