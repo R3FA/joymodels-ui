@@ -471,7 +471,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              "No recommended models yet.",
+              "No recommended models yet",
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
