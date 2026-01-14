@@ -437,7 +437,11 @@ class _HomePageScreenState extends State<HomePageScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text('Recommended Models', style: theme.textTheme.titleMedium),
+        Text(
+          // TODO: Implement functionality for recommended models
+          'Recommended Models (in works)',
+          style: theme.textTheme.titleMedium,
+        ),
         if (hasModels)
           TextButton(
             onPressed: () => viewModel.onViewAllModelsPressed(context),

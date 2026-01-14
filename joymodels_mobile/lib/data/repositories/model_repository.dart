@@ -65,4 +65,18 @@ class ModelRepository {
       );
     }
   }
+
+  Future<void> delete(String modelUuid) async {
+    final response = await _authService.request(
+      () => _service.delete(modelUuid),
+    );
+
+    if (response.statusCode == 204) {
+      return;
+    } else {
+      throw Exception(
+        'Failed to delete model by its uuid: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
 }

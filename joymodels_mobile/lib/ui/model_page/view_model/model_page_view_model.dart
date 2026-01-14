@@ -5,6 +5,7 @@ import 'package:joymodels_mobile/data/model/model_reviews/response_types/model_c
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/model_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_reviews_repository.dart';
+import 'package:joymodels_mobile/ui/home_page/widgets/home_page_screen.dart';
 
 class ModelPageViewModel extends ChangeNotifier {
   final modelRepository = sl<ModelRepository>();
@@ -13,6 +14,8 @@ class ModelPageViewModel extends ChangeNotifier {
   bool isLoading = false;
   bool areModelImagesLoading = false;
   bool areReviewsLoading = false;
+  bool isModelLiked = false;
+  bool isModelBeingDeleted = false;
 
   String? errorMessage;
 
@@ -85,6 +88,50 @@ class ModelPageViewModel extends ChangeNotifier {
     }
   }
 
+  void onLikeModel() {
+    isModelLiked = !isModelLiked;
+    // TODO: Dodaj logiku za API poziv ili lokalnu bazu po potrebi
+    notifyListeners();
+  }
+
+  void onReportModel() {
+    // TODO: Dodaj logiku za prijavu modela (prikaz modala, API call ...)
+  }
+
+  void onEditModel() {
+    // TODO: Dodaj logiku za izmjenu modela (navigacija na edit screen itd.)
+  }
+
+  Future<bool> onDeleteModel(BuildContext context) async {
+    errorMessage = null;
+    isModelBeingDeleted = true;
+    notifyListeners();
+
+    try {
+      await modelRepository.delete(loadedModel!.uuid);
+      isModelBeingDeleted = false;
+      if (context.mounted) {
+        Navigator.of(
+          context,
+          rootNavigator: true,
+        ).pushReplacement(MaterialPageRoute(builder: (_) => HomePageScreen()));
+      }
+      notifyListeners();
+      return true;
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      isModelBeingDeleted = false;
+      notifyListeners();
+      onSessionExpired?.call();
+      return false;
+    } catch (e) {
+      errorMessage = e.toString();
+      isModelBeingDeleted = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   void nextGallery() {
     if (galleryIndex < (loadedModel?.modelPictures.length ?? 0) - 1) {
       galleryIndex++;
@@ -104,10 +151,6 @@ class ModelPageViewModel extends ChangeNotifier {
   void onGalleryPageChanged(int index) {
     galleryIndex = index;
     notifyListeners();
-  }
-
-  void onCategory() {
-    // TODO: Implement category action
   }
 
   // Reviews

@@ -52,4 +52,17 @@ class ModelService {
 
     return await http.Response.fromStream(streamedResponse);
   }
+
+  Future<http.Response> delete(String modelUuid) async {
+    final url = Uri.parse("$modelsUrl/delete/$modelUuid");
+
+    final token = await TokenStorage.getAccessToken();
+
+    final response = await http.delete(
+      url,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    return response;
+  }
 }

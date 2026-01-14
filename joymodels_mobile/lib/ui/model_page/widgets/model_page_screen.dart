@@ -42,6 +42,13 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
     final viewModel = context.watch<ModelPageViewModel>();
     final theme = Theme.of(context);
 
+    if (viewModel.isModelBeingDeleted) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+        bottomNavigationBar: NavigationBarScreen(),
+      );
+    }
+
     if (viewModel.isLoading || viewModel.loadedModel == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -51,16 +58,56 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back),
-              color: theme.colorScheme.secondary,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
-        ),
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) {
+              switch (value) {
+                case 'edit':
+                  if (!context.mounted) return;
+                  viewModel.onEditModel();
+                  break;
+                case 'delete':
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (BuildContext dialogContext) {
+                      return AlertDialog(
+                        title: const Text('Confirm delete'),
+                        content: const Text(
+                          'Are you sure you want to delete this model?',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(dialogContext).pop(),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              Navigator.of(dialogContext).pop();
+                              await viewModel.onDeleteModel(context);
+                            },
+                            child: const Text(
+                              'Delete',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
+              const PopupMenuItem<String>(
+                value: 'delete',
+                child: Text('Delete'),
+              ),
+            ],
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -180,13 +227,28 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
 
   Widget _buildModelTitleRow(ModelPageViewModel vm, ThemeData theme) {
     return Padding(
-      padding: const EdgeInsets.only(left: 2),
-      child: Text(
-        vm.loadedModel?.name ?? '',
-        style: theme.textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.w700,
-          color: theme.colorScheme.primary,
-        ),
+      padding: const EdgeInsets.only(left: 2, right: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Text(
+              vm.loadedModel?.name ?? '',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+          ),
+          IconButton(
+            icon: Icon(
+              vm.isModelLiked ? Icons.favorite : Icons.favorite_border,
+              color: vm.isModelLiked ? Colors.red : theme.iconTheme.color,
+            ),
+            tooltip: vm.isModelLiked ? 'Unlike' : 'Like',
+            onPressed: vm.onLikeModel,
+          ),
+        ],
       ),
     );
   }
@@ -330,7 +392,7 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
                                       '',
                                   context,
                                 ),
-                                fontWeight: FontWeight.bold, // opcionalno
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                             TextSpan(
