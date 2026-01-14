@@ -186,7 +186,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
       controller: viewModel.searchController,
       autofocus: true,
       decoration: InputDecoration(
-        hintText: 'Search models, artists.. .',
+        hintText: 'Search models',
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
