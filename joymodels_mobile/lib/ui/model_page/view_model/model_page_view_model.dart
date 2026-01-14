@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
+import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
+import 'package:joymodels_mobile/data/model/model_reviews/response_types/model_calculated_reviews_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/model_repository.dart';
+import 'package:joymodels_mobile/data/repositories/model_reviews_repository.dart';
 
 class ModelPageViewModel extends ChangeNotifier {
   final modelRepository = sl<ModelRepository>();
+  final modelReviewsRepository = sl<ModelReviewsRepository>();
 
   bool isLoading = false;
   bool areModelImagesLoading = false;
+  bool areReviewsLoading = false;
 
   String? errorMessage;
 
   ModelResponseApiModel? loadedModel;
+  ModelCalculatedReviewsResponseApiModel? calculatedReviews;
 
   int galleryIndex = 0;
   late final PageController galleryController = PageController(initialPage: 0);
@@ -29,12 +35,40 @@ class ModelPageViewModel extends ChangeNotifier {
 
     try {
       this.loadedModel = loadedModel;
+      await getModelReviews(loadedModel!);
       isLoading = false;
       notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
       isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<bool> getModelReviews(ModelResponseApiModel model) async {
+    errorMessage = null;
+    areReviewsLoading = true;
+    notifyListeners();
+
+    try {
+      calculatedReviews = await modelReviewsRepository.calculateReviews(
+        model.uuid,
+      );
+      areReviewsLoading = false;
+      notifyListeners();
+
+      return true;
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      areReviewsLoading = false;
+      notifyListeners();
+      onSessionExpired?.call();
+      return false;
+    } catch (e) {
+      errorMessage = e.toString();
+      areReviewsLoading = false;
+      notifyListeners();
+      return false;
     }
   }
 

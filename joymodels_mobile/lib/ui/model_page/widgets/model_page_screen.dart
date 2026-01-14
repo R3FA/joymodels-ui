@@ -318,16 +318,27 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
                     Expanded(
                       child: Text.rich(
                         TextSpan(
-                          style: theme.textTheme.bodySmall,
+                          style: theme.textTheme.bodyMedium,
                           children: [
-                            const TextSpan(text: "Mostly positive "),
                             TextSpan(
-                              text: "(78% of 818,053)",
+                              text:
+                                  vm.calculatedReviews?.modelReviewResponse ??
+                                  '',
+                            ),
+                            TextSpan(
+                              text:
+                                  "(${vm.calculatedReviews?.reviewPercentage ?? ''})",
                               style: TextStyle(
                                 color: theme.colorScheme.secondary,
                               ),
                             ),
-                            const TextSpan(text: " ALL TIME"),
+                            TextSpan(
+                              children: [
+                                if (vm.calculatedReviews?.reviewPercentage !=
+                                    'No reviews yet.')
+                                  const TextSpan(text: " ALL TIME"),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -351,35 +362,6 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
                         ),
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: theme.colorScheme.secondary,
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text.rich(
-                        TextSpan(
-                          style: theme.textTheme.bodySmall,
-                          children: [
-                            const TextSpan(text: "Mixed "),
-                            TextSpan(
-                              text: "(55% of 12,545)",
-                              style: TextStyle(
-                                color: theme.colorScheme.secondary,
-                              ),
-                            ),
-                            const TextSpan(text: " RECENT"),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 72),
                   ],
                 ),
               ],
