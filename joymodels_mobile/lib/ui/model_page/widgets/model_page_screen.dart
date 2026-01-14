@@ -324,6 +324,14 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
                               text:
                                   vm.calculatedReviews?.modelReviewResponse ??
                                   '',
+                              style: TextStyle(
+                                color: vm.getReviewColor(
+                                  vm.calculatedReviews?.modelReviewResponse ??
+                                      '',
+                                  context,
+                                ),
+                                fontWeight: FontWeight.bold, // opcionalno
+                              ),
                             ),
                             TextSpan(
                               text:

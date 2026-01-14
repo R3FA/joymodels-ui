@@ -72,6 +72,19 @@ class ModelPageViewModel extends ChangeNotifier {
     }
   }
 
+  Color getReviewColor(String reviewType, BuildContext context) {
+    switch (reviewType) {
+      case 'Positive':
+        return Colors.blue;
+      case 'Negative':
+        return Colors.red;
+      case 'Mixed':
+        return Colors.brown;
+      default:
+        return Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black;
+    }
+  }
+
   void nextGallery() {
     if (galleryIndex < (loadedModel?.modelPictures.length ?? 0) - 1) {
       galleryIndex++;
