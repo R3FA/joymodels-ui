@@ -40,6 +40,19 @@ class ModelService {
     return response;
   }
 
+  Future<http.Response> isModelLiked(String modelUuid) async {
+    final url = Uri.parse("$modelsUrl/is-model-liked/$modelUuid");
+
+    final token = await TokenStorage.getAccessToken();
+
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    return response;
+  }
+
   Future<http.Response> create(ModelCreateRequestApiModel request) async {
     final url = Uri.parse("$modelsUrl/create");
 
@@ -51,6 +64,32 @@ class ModelService {
     final streamedResponse = await multiPartRequest.send();
 
     return await http.Response.fromStream(streamedResponse);
+  }
+
+  Future<http.Response> modelLike(String modelUuid) async {
+    final url = Uri.parse("$modelsUrl/model-like/$modelUuid");
+
+    final token = await TokenStorage.getAccessToken();
+
+    final response = await http.post(
+      url,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    return response;
+  }
+
+  Future<http.Response> modelUnlike(String modelUuid) async {
+    final url = Uri.parse("$modelsUrl/model-unlike/$modelUuid");
+
+    final token = await TokenStorage.getAccessToken();
+
+    final response = await http.delete(
+      url,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    return response;
   }
 
   Future<http.Response> delete(String modelUuid) async {

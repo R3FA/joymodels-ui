@@ -39,12 +39,33 @@ class ModelPageViewModel extends ChangeNotifier {
     try {
       this.loadedModel = loadedModel;
       await getModelReviews(loadedModel!);
+      await isModelLikedByUser(loadedModel);
       isLoading = false;
       notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
       isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<bool> isModelLikedByUser(ModelResponseApiModel model) async {
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      isModelLiked = await modelRepository.isModelLiked(model.uuid);
+      notifyListeners();
+      return true;
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      notifyListeners();
+      onSessionExpired?.call();
+      return false;
+    } catch (e) {
+      errorMessage = e.toString();
+      notifyListeners();
+      return false;
     }
   }
 
@@ -88,10 +109,42 @@ class ModelPageViewModel extends ChangeNotifier {
     }
   }
 
-  void onLikeModel() {
+  Future<bool> onLikeModel() async {
     isModelLiked = !isModelLiked;
-    // TODO: Dodaj logiku za API poziv ili lokalnu bazu po potrebi
+    errorMessage = null;
     notifyListeners();
+
+    if (isModelLiked) {
+      try {
+        await modelRepository.modelLike(loadedModel!.uuid);
+        notifyListeners();
+        return true;
+      } on SessionExpiredException {
+        errorMessage = SessionExpiredException().toString();
+        notifyListeners();
+        onSessionExpired?.call();
+        return false;
+      } catch (e) {
+        errorMessage = e.toString();
+        notifyListeners();
+        return false;
+      }
+    } else {
+      try {
+        await modelRepository.modelUnlike(loadedModel!.uuid);
+        notifyListeners();
+        return true;
+      } on SessionExpiredException {
+        errorMessage = SessionExpiredException().toString();
+        notifyListeners();
+        onSessionExpired?.call();
+        return false;
+      } catch (e) {
+        errorMessage = e.toString();
+        notifyListeners();
+        return false;
+      }
+    }
   }
 
   void onReportModel() {

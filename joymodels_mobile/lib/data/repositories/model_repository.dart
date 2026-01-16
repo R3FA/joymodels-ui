@@ -51,6 +51,27 @@ class ModelRepository {
     }
   }
 
+  Future<bool> isModelLiked(String modelUuid) async {
+    final response = await _authService.request(
+      () => _service.isModelLiked(modelUuid),
+    );
+
+    if (response.statusCode == 200) {
+      final body = response.body.trim().toLowerCase();
+      if (body == 'true') {
+        return true;
+      } else if (body == 'false') {
+        return false;
+      } else {
+        throw Exception('Unexpected response body: ${response.body}');
+      }
+    } else {
+      throw Exception(
+        'Failed to check if model is liked by its uuid: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
   Future<ModelResponseApiModel> create(
     ModelCreateRequestApiModel request,
   ) async {
@@ -62,6 +83,34 @@ class ModelRepository {
     } else {
       throw Exception(
         'Failed to create model: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  Future<void> modelLike(String modelUuid) async {
+    final response = await _authService.request(
+      () => _service.modelLike(modelUuid),
+    );
+
+    if (response.statusCode == 204) {
+      return;
+    } else {
+      throw Exception(
+        'Failed to like model by its uuid: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  Future<void> modelUnlike(String modelUuid) async {
+    final response = await _authService.request(
+      () => _service.modelUnlike(modelUuid),
+    );
+
+    if (response.statusCode == 204) {
+      return;
+    } else {
+      throw Exception(
+        'Failed to unlike model by its uuid: ${response.statusCode} - ${response.body}',
       );
     }
   }
