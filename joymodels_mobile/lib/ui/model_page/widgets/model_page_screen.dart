@@ -65,7 +65,7 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
               switch (value) {
                 case 'edit':
                   if (!context.mounted) return;
-                  viewModel.onEditModel();
+                  viewModel.onEditModel(context);
                   break;
                 case 'delete':
                   showDialog(

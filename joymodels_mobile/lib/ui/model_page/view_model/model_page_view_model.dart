@@ -6,6 +6,9 @@ import 'package:joymodels_mobile/data/model/models/response_types/model_response
 import 'package:joymodels_mobile/data/repositories/model_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_reviews_repository.dart';
 import 'package:joymodels_mobile/ui/home_page/widgets/home_page_screen.dart';
+import 'package:joymodels_mobile/ui/model_edit_page/view_model/model_edit_page_view_model.dart';
+import 'package:joymodels_mobile/ui/model_edit_page/widgets/model_edit_page_screen.dart';
+import 'package:provider/provider.dart';
 
 class ModelPageViewModel extends ChangeNotifier {
   final modelRepository = sl<ModelRepository>();
@@ -147,12 +150,16 @@ class ModelPageViewModel extends ChangeNotifier {
     }
   }
 
-  void onReportModel() {
-    // TODO: Dodaj logiku za prijavu modela (prikaz modala, API call ...)
-  }
-
-  void onEditModel() {
-    // TODO: Dodaj logiku za izmjenu modela (navigacija na edit screen itd.)
+  void onEditModel(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => ModelEditPageViewModel(),
+          child: ModelEditPageScreen(model: loadedModel!),
+        ),
+      ),
+    );
   }
 
   Future<bool> onDeleteModel(BuildContext context) async {
