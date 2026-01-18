@@ -115,7 +115,6 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
     );
   }
 
-  // ==================== ERROR MESSAGE ====================
 
   Widget _buildErrorMessage(ModelEditPageViewModel viewModel, ThemeData theme) {
     return Container(
@@ -147,7 +146,6 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
     );
   }
 
-  // ==================== NAME FIELD ====================
 
   Widget _buildNameField(ModelEditPageViewModel viewModel, ThemeData theme) {
     return Column(
@@ -166,7 +164,6 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
     );
   }
 
-  // ==================== DESCRIPTION FIELD ====================
 
   Widget _buildDescriptionField(
     ModelEditPageViewModel viewModel,
@@ -189,7 +186,6 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
     );
   }
 
-  // ==================== PHOTOS SECTION ====================
   Widget _buildPhotosSection(
     ModelEditPageViewModel viewModel,
     ThemeData theme,
@@ -320,7 +316,6 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
     );
   }
 
-  // ==================== CATEGORY SECTION ====================
 
   Widget _buildCategorySection(
     ModelEditPageViewModel viewModel,
@@ -424,7 +419,6 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
     );
   }
 
-  // ==================== AVAILABILITY SECTION ====================
 
   Widget _buildAvailabilitySection(
     ModelEditPageViewModel viewModel,
@@ -494,7 +488,6 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
     );
   }
 
-  // ==================== PRICE FIELD ====================
 
   Widget _buildPriceField(ModelEditPageViewModel viewModel, ThemeData theme) {
     return Column(
@@ -510,7 +503,6 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
     );
   }
 
-  // ==================== LOADING OVERLAY ====================
 
   Widget _buildLoadingOverlay(ThemeData theme) {
     return Container(

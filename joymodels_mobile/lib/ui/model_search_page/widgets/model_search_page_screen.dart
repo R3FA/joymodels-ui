@@ -3,6 +3,7 @@ import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/request_types/model_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
+import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
@@ -121,7 +122,12 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     }
 
     if (viewModel.errorMessage != null) {
-      return _buildErrorState(viewModel, theme);
+      return ErrorDisplay(
+        message: viewModel.errorMessage!,
+        onRetry: () => viewModel.searchModels(
+          ModelSearchRequestApiModel(pageNumber: 1, pageSize: 10),
+        ),
+      );
     }
 
     if (viewModel.models == null || viewModel.models!.data.isEmpty) {
@@ -131,38 +137,6 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     return _buildModelsList(viewModel, theme);
   }
 
-  Widget _buildErrorState(ModelSearchPageViewModel viewModel, ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, size: 80, color: theme.colorScheme.error),
-          const SizedBox(height: 16),
-          Text(
-            'Something went wrong',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.error,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            viewModel.errorMessage!,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () => viewModel.searchModels(
-              ModelSearchRequestApiModel(pageNumber: 1, pageSize: 10),
-            ),
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildEmptyState(ThemeData theme) {
     return Center(

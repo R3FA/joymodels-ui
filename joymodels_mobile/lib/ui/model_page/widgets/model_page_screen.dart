@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
+import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/model_page/view_model/model_page_view_model.dart';
@@ -54,6 +55,16 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
         bottomNavigationBar: NavigationBarScreen(),
+      );
+    }
+
+    if (viewModel.errorMessage != null) {
+      return Scaffold(
+        body: ErrorDisplay(
+          message: viewModel.errorMessage!,
+          onRetry: () => viewModel.init(loadedModel: widget.loadedModel),
+        ),
+        bottomNavigationBar: const NavigationBarScreen(),
       );
     }
 

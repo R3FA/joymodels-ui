@@ -3,12 +3,12 @@ import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/category/request_types/category_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
-import 'package:joymodels_mobile/data/model/core/response_types/picture_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/request_types/model_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/category_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_repository.dart';
+import 'package:joymodels_mobile/ui/core/mixins/pagination_mixin.dart';
 import 'package:joymodels_mobile/ui/model_page/widgets/model_page_screen.dart';
 import 'package:joymodels_mobile/ui/model_search_page/widgets/model_search_modal_sort_type_screen.dart';
 
@@ -32,31 +32,45 @@ extension ModelSortTypeQueryParam on ModelSortType {
   }
 }
 
-class ModelSearchPageViewModel with ChangeNotifier {
+class ModelSearchPageViewModel with ChangeNotifier, PaginationMixin<ModelResponseApiModel> {
   final modelRepository = sl<ModelRepository>();
   final categoryRepository = sl<CategoryRepository>();
 
   final searchController = TextEditingController();
 
-  ModelResponseApiModel? selectedModel;
   ModelSortType? selectedFilterSort;
   String? selectedFilterCategory;
 
-  String? categoryName;
-  String? modelName;
   String? errorMessage;
 
   bool isLoading = false;
   bool isCategoriesLoading = false;
   bool areModelsLoading = false;
-  bool areModelPicturesLoading = false;
 
   PaginationResponseApiModel<ModelResponseApiModel>? models;
-  List<PictureResponse?> modelPictures = List.empty(growable: true);
 
   PaginationResponseApiModel<CategoryResponseApiModel>? categories;
 
   VoidCallback? onSessionExpired;
+
+  @override
+  PaginationResponseApiModel<ModelResponseApiModel>? get paginationData => models;
+
+  @override
+  bool get isLoadingPage => areModelsLoading;
+
+  @override
+  Future<void> loadPage(int pageNumber) async {
+    await searchModels(
+      ModelSearchRequestApiModel(
+        modelName: searchController.text,
+        categoryName: selectedFilterCategory,
+        orderBy: selectedFilterSort?.queryParam,
+        pageNumber: pageNumber,
+        pageSize: 10,
+      ),
+    );
+  }
 
   Future<void> init({
     CategoryResponseApiModel? selectedCategory,
@@ -193,9 +207,6 @@ class ModelSearchPageViewModel with ChangeNotifier {
   }
 
   void onModelTap(BuildContext context, ModelResponseApiModel model) {
-    selectedModel = model;
-    notifyListeners();
-
     if (context.mounted) {
       Navigator.of(context).push(
         MaterialPageRoute(
@@ -207,33 +218,6 @@ class ModelSearchPageViewModel with ChangeNotifier {
 
   void onBackPressed(BuildContext context) {
     Navigator.of(context).pop();
-  }
-
-  void onPageChanged(int page) {
-    if (page == models?.pageNumber) return;
-
-    searchModels(ModelSearchRequestApiModel(pageNumber: page, pageSize: 10));
-  }
-
-  int get currentPage => models?.pageNumber ?? 1;
-  int get totalPages => models?.totalPages ?? 1;
-  bool get hasPreviousPage => models?.hasPreviousPage ?? false;
-  bool get hasNextPage => models?.hasNextPage ?? false;
-
-  Future<void> onNextPage() async {
-    if (hasNextPage && !areModelsLoading) {
-      await searchModels(
-        ModelSearchRequestApiModel(pageNumber: currentPage + 1, pageSize: 10),
-      );
-    }
-  }
-
-  Future<void> onPreviousPage() async {
-    if (hasPreviousPage && !areModelsLoading) {
-      await searchModels(
-        ModelSearchRequestApiModel(pageNumber: currentPage - 1, pageSize: 10),
-      );
-    }
   }
 
   @override

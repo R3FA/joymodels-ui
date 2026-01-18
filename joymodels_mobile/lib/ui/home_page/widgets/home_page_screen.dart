@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -46,53 +47,21 @@ class _HomePageScreenState extends State<HomePageScreen> {
     );
   }
 
-  // ==================== BODY ====================
-
   Widget _buildBody(HomePageScreenViewModel viewModel, ThemeData theme) {
     if (viewModel.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (viewModel.errorMessage != null) {
-      return _buildErrorState(viewModel, theme);
+      return ErrorDisplay(
+        message: viewModel.errorMessage!,
+        onRetry: () => viewModel.init(),
+      );
     }
 
     return _buildContent(viewModel, theme);
   }
 
-  Widget _buildErrorState(HomePageScreenViewModel viewModel, ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, size: 80, color: theme.colorScheme.error),
-          const SizedBox(height: 16),
-          Text(
-            'Something went wrong',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.error,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              viewModel.errorMessage!,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () => viewModel.init(),
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildContent(HomePageScreenViewModel viewModel, ThemeData theme) {
     return ListView(
@@ -110,7 +79,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
     );
   }
 
-  // ==================== HEADER ====================
 
   Widget _buildHeader(HomePageScreenViewModel viewModel, ThemeData theme) {
     return Row(
@@ -204,7 +172,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
     );
   }
 
-  // ==================== CATEGORIES ====================
 
   Widget _buildCategoriesGrid(
     HomePageScreenViewModel viewModel,
@@ -295,7 +262,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
     );
   }
 
-  // ==================== TOP ARTISTS ====================
 
   Widget _buildTopArtists(HomePageScreenViewModel viewModel, ThemeData theme) {
     final hasArtists = (viewModel.topArtists?.data.isNotEmpty ?? false);
@@ -412,7 +378,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
     );
   }
 
-  // ==================== RECOMMENDED MODELS ====================
 
   Widget _buildRecommendedModels(
     HomePageScreenViewModel viewModel,
@@ -437,8 +402,8 @@ class _HomePageScreenState extends State<HomePageScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        // TODO: Implement functionality for recommended models
         Text(
-          // TODO: Implement functionality for recommended models
           'Recommended Models (in works)',
           style: theme.textTheme.titleMedium,
         ),

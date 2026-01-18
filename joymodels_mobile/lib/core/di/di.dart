@@ -18,40 +18,32 @@ import 'package:joymodels_mobile/data/services/users_service.dart';
 final sl = GetIt.instance;
 
 void dependencyInjectionSetup() {
-  // Http
   sl.registerLazySingleton(() => http.Client());
 
-  // SsoService
   sl.registerLazySingleton(() => SsoService());
 
-  // Auth
   sl.registerLazySingleton(() => AuthRepository(sl<SsoService>()));
   sl.registerLazySingleton(() => AuthService(sl<AuthRepository>()));
 
-  // SsoRepository
   sl.registerLazySingleton(
     () => SsoRepository(sl<SsoService>(), sl<AuthService>()),
   );
 
-  // Users
   sl.registerLazySingleton(() => UsersService());
   sl.registerLazySingleton(
     () => UsersRepository(sl<UsersService>(), sl<AuthService>()),
   );
 
-  // Category
   sl.registerLazySingleton(() => CategoryService());
   sl.registerLazySingleton(
     () => CategoryRepository(sl<CategoryService>(), sl<AuthService>()),
   );
 
-  // Model
   sl.registerLazySingleton(() => ModelService());
   sl.registerLazySingleton(
     () => ModelRepository(sl<ModelService>(), sl<AuthService>()),
   );
 
-  // ModelAvailability
   sl.registerLazySingleton(() => ModelAvailabilityService());
   sl.registerLazySingleton(
     () => ModelAvailabilityRepository(
@@ -60,7 +52,6 @@ void dependencyInjectionSetup() {
     ),
   );
 
-  // ModelReviews
   sl.registerLazySingleton(() => ModelReviewsService());
   sl.registerLazySingleton(
     () => ModelReviewsRepository(sl<ModelReviewsService>(), sl<AuthService>()),

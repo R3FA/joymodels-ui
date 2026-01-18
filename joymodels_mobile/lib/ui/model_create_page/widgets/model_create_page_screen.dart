@@ -105,7 +105,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
     );
   }
 
-  // ==================== ERROR MESSAGE ====================
 
   Widget _buildErrorMessage(
     ModelCreatePageViewModel viewModel,
@@ -140,7 +139,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
     );
   }
 
-  // ==================== NAME FIELD ====================
 
   Widget _buildNameField(ModelCreatePageViewModel viewModel, ThemeData theme) {
     return Column(
@@ -159,7 +157,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
     );
   }
 
-  // ==================== DESCRIPTION FIELD ====================
 
   Widget _buildDescriptionField(
     ModelCreatePageViewModel viewModel,
@@ -182,7 +179,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
     );
   }
 
-  // ==================== PHOTOS SECTION ====================
 
   Widget _buildPhotosSection(
     ModelCreatePageViewModel viewModel,
@@ -279,7 +275,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
     );
   }
 
-  // ==================== CATEGORY SECTION ====================
 
   Widget _buildCategorySection(
     ModelCreatePageViewModel viewModel,
@@ -387,7 +382,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
     );
   }
 
-  // ==================== AVAILABILITY SECTION ====================
 
   Widget _buildAvailabilitySection(
     ModelCreatePageViewModel viewModel,
@@ -457,7 +451,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
     );
   }
 
-  // ==================== PRICE FIELD ====================
 
   Widget _buildPriceField(ModelCreatePageViewModel viewModel, ThemeData theme) {
     return Column(
@@ -473,7 +466,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
     );
   }
 
-  // ==================== ADD MODEL FILE BUTTON ====================
 
   Widget _buildAddModelFileButton(
     ModelCreatePageViewModel viewModel,
@@ -548,7 +540,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
     );
   }
 
-  // ==================== LOADING OVERLAY ====================
 
   Widget _buildLoadingOverlay(ThemeData theme) {
     return Container(

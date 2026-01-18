@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/model/enums/model_review_enum.dart';
 import 'package:joymodels_mobile/data/model/model_reviews/response_types/model_review_response_api_model.dart';
+import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
 import 'package:joymodels_mobile/ui/model_reviews_page/view_model/model_reviews_page_view_model.dart';
@@ -100,27 +101,9 @@ class _ModelReviewsPageScreenState extends State<ModelReviewsPageScreen> {
     }
 
     if (viewModel.errorMessage != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                viewModel.errorMessage!,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => viewModel.loadReviews(),
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
+      return ErrorDisplay(
+        message: viewModel.errorMessage!,
+        onRetry: () => viewModel.loadReviews(),
       );
     }
 

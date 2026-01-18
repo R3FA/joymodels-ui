@@ -50,7 +50,6 @@ class ModelEditPageViewModel extends ChangeNotifier {
   PaginationResponseApiModel<ModelAvailabilityResponseApiModel>?
   modelAvailabilities;
 
-  // For PATCH Request
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
   final priceController = TextEditingController();
@@ -75,7 +74,6 @@ class ModelEditPageViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ---- PHOTOS ----
   Future<void> onAddPhotoPressed() async {
     if (!canAddMorePhotos) {
       errorMessage = 'Maximum $maxPhotos photos allowed';
@@ -185,7 +183,6 @@ class ModelEditPageViewModel extends ChangeNotifier {
 
   bool showRemoveButtonForServerPicture(String pictureLocation) => true;
 
-  // ---- CATEGORIES ----
   void selectedModelCategoriesInit() {
     modelsCategories.clear();
     for (final modelCat in originalModel.modelCategories) {
@@ -266,16 +263,6 @@ class ModelEditPageViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<CategoryResponseApiModel> filteredCategories(String search) {
-    if (search.trim().isEmpty) return List.from(categories);
-    return categories
-        .where(
-          (cat) =>
-              cat.categoryName.toLowerCase().contains(search.toLowerCase()),
-        )
-        .toList();
-  }
-
   List<CategoryResponseApiModel> combinedCategories(String search) {
     final combinedSet = {for (var c in categories) c.uuid: c};
 
@@ -301,7 +288,6 @@ class ModelEditPageViewModel extends ChangeNotifier {
     return sorted;
   }
 
-  // ---- AVAILABILITY ----
   Future<bool> getModelAvailabilities({String? availabilityName}) async {
     errorMessage = null;
     isModelAvailabilitiesLoading = true;
@@ -338,7 +324,6 @@ class ModelEditPageViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ---- PATCH/SUBMIT ----
   bool isFormValid() {
     if (nameController.text != originalModel.name) {
       final nameError = RegexValidationViewModel.validateText(

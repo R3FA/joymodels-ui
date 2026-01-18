@@ -17,7 +17,6 @@ class ModelPageViewModel extends ChangeNotifier {
   final modelReviewsRepository = sl<ModelReviewsRepository>();
 
   bool isLoading = false;
-  bool areModelImagesLoading = false;
   bool areReviewsLoading = false;
   bool isModelLiked = false;
   bool isModelBeingDeleted = false;
@@ -31,10 +30,6 @@ class ModelPageViewModel extends ChangeNotifier {
   late final PageController galleryController = PageController(initialPage: 0);
 
   VoidCallback? onSessionExpired;
-
-  ModelPageViewModel() {
-    galleryController.addListener(() {});
-  }
 
   Future<void> init({required ModelResponseApiModel? loadedModel}) async {
     clear();
@@ -224,7 +219,6 @@ class ModelPageViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Reviews
   void onViewAllReviews(BuildContext context) {
     if (loadedModel == null) return;
 
@@ -239,23 +233,17 @@ class ModelPageViewModel extends ChangeNotifier {
     );
   }
 
-  // Buy
   void onAddToCart() {
     // TODO: Implement add to cart action
   }
 
-  // FAQ
   String get faqUserAvatar => "https://randomuser.me/api/portraits/men/75.jpg";
   String get faqUsername => "Heisenberg";
   String get faqQuestion => "Is this model compatible with blender?";
   void onViewAllFAQ() {}
 
-  // Misc
-  void onSearchPressed() {}
-
   void clear() {
     isLoading = false;
-    areModelImagesLoading = false;
     errorMessage = null;
     loadedModel = null;
     galleryIndex = 0;
@@ -265,6 +253,7 @@ class ModelPageViewModel extends ChangeNotifier {
   @override
   void dispose() {
     galleryController.dispose();
+    onSessionExpired = null;
     super.dispose();
   }
 }

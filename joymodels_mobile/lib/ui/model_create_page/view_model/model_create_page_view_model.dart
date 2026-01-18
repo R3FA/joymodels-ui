@@ -119,7 +119,6 @@ class ModelCreatePageViewModel with ChangeNotifier {
     return true;
   }
 
-  // ==================== PHOTOS ====================
 
   Future<void> onAddPhotoPressed() async {
     if (!canAddMorePhotos) {
@@ -216,7 +215,6 @@ class ModelCreatePageViewModel with ChangeNotifier {
     }
   }
 
-  // ==================== CATEGORIES ====================
 
   Future<bool> getCategories({String? categoryName}) async {
     errorMessage = null;
@@ -300,7 +298,6 @@ class ModelCreatePageViewModel with ChangeNotifier {
     return [...selectedCategoriesOnTop, ...otherCategories];
   }
 
-  // ==================== AVAILABILITY ====================
 
   Future<bool> getModelAvailabilities({String? availabilityName}) async {
     errorMessage = null;
@@ -343,7 +340,6 @@ class ModelCreatePageViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  // ==================== MODEL FILE ====================
 
   Future<void> onAddModelFilePressed() async {
     try {
@@ -396,7 +392,6 @@ class ModelCreatePageViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  // ==================== FORM ACTIONS ====================
 
   Future<bool> onSubmit(BuildContext context) async {
     if (!isFormValid()) {

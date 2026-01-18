@@ -6,8 +6,9 @@ import 'package:joymodels_mobile/data/model/model_reviews/request_types/model_re
 import 'package:joymodels_mobile/data/model/model_reviews/response_types/model_review_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/model_reviews_repository.dart';
+import 'package:joymodels_mobile/ui/core/mixins/pagination_mixin.dart';
 
-class ModelReviewsPageViewModel extends ChangeNotifier {
+class ModelReviewsPageViewModel extends ChangeNotifier with PaginationMixin<ModelReviewResponseApiModel> {
   final modelReviewsRepository = sl<ModelReviewsRepository>();
 
   bool isLoading = false;
@@ -21,10 +22,17 @@ class ModelReviewsPageViewModel extends ChangeNotifier {
   List<ModelReviewResponseApiModel> get reviews =>
       reviewsPagination?.data ?? [];
 
-  int get currentPage => reviewsPagination?.pageNumber ?? 1;
-  int get totalPages => reviewsPagination?.totalPages ?? 1;
-  bool get hasPreviousPage => reviewsPagination?.hasPreviousPage ?? false;
-  bool get hasNextPage => reviewsPagination?.hasNextPage ?? false;
+  @override
+  PaginationResponseApiModel<ModelReviewResponseApiModel>? get paginationData =>
+      reviewsPagination;
+
+  @override
+  bool get isLoadingPage => isLoading;
+
+  @override
+  Future<void> loadPage(int pageNumber) async {
+    await loadReviews(pageNumber: pageNumber);
+  }
 
   Future<void> init(String modelUuid) async {
     this.modelUuid = modelUuid;
@@ -41,7 +49,7 @@ class ModelReviewsPageViewModel extends ChangeNotifier {
         modelUuid: modelUuid,
         modelReviewType: selectedReviewType,
         pageNumber: pageNumber ?? currentPage,
-        pageSize: 1,
+        pageSize: 10,
       );
 
       reviewsPagination = await modelReviewsRepository.search(request);
@@ -70,17 +78,6 @@ class ModelReviewsPageViewModel extends ChangeNotifier {
     await loadReviews(pageNumber: 1);
   }
 
-  Future<void> onNextPage() async {
-    if (hasNextPage && !isLoading) {
-      await loadReviews(pageNumber: currentPage + 1);
-    }
-  }
-
-  Future<void> onPreviousPage() async {
-    if (hasPreviousPage && !isLoading) {
-      await loadReviews(pageNumber: currentPage - 1);
-    }
-  }
 
   Color getReviewTypeColor(BuildContext context, String reviewTypeName) {
     switch (reviewTypeName.toLowerCase()) {
@@ -91,11 +88,6 @@ class ModelReviewsPageViewModel extends ChangeNotifier {
       default:
         return Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black;
     }
-  }
-
-  void clearError() {
-    errorMessage = null;
-    notifyListeners();
   }
 
   @override
