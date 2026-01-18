@@ -32,7 +32,8 @@ extension ModelSortTypeQueryParam on ModelSortType {
   }
 }
 
-class ModelSearchPageViewModel with ChangeNotifier, PaginationMixin<ModelResponseApiModel> {
+class ModelSearchPageViewModel
+    with ChangeNotifier, PaginationMixin<ModelResponseApiModel> {
   final modelRepository = sl<ModelRepository>();
   final categoryRepository = sl<CategoryRepository>();
 
@@ -54,7 +55,8 @@ class ModelSearchPageViewModel with ChangeNotifier, PaginationMixin<ModelRespons
   VoidCallback? onSessionExpired;
 
   @override
-  PaginationResponseApiModel<ModelResponseApiModel>? get paginationData => models;
+  PaginationResponseApiModel<ModelResponseApiModel>? get paginationData =>
+      models;
 
   @override
   bool get isLoadingPage => areModelsLoading;

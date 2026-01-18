@@ -62,7 +62,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
     return _buildContent(viewModel, theme);
   }
 
-
   Widget _buildContent(HomePageScreenViewModel viewModel, ThemeData theme) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(14, 32, 14, 0),
@@ -78,7 +77,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
       ],
     );
   }
-
 
   Widget _buildHeader(HomePageScreenViewModel viewModel, ThemeData theme) {
     return Row(
@@ -172,7 +170,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
     );
   }
 
-
   Widget _buildCategoriesGrid(
     HomePageScreenViewModel viewModel,
     ThemeData theme,
@@ -261,7 +258,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
       ),
     );
   }
-
 
   Widget _buildTopArtists(HomePageScreenViewModel viewModel, ThemeData theme) {
     final hasArtists = (viewModel.topArtists?.data.isNotEmpty ?? false);
@@ -377,7 +373,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
       ),
     );
   }
-
 
   Widget _buildRecommendedModels(
     HomePageScreenViewModel viewModel,

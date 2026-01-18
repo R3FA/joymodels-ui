@@ -24,11 +24,7 @@ class ErrorDisplay extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 80,
-              color: theme.colorScheme.error,
-            ),
+            Icon(icon, size: 80, color: theme.colorScheme.error),
             const SizedBox(height: 16),
             Text(
               'Something went wrong',
@@ -47,10 +43,7 @@ class ErrorDisplay extends StatelessWidget {
             ),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: onRetry,
-                child: Text(retryButtonText!),
-              ),
+              ElevatedButton(onPressed: onRetry, child: Text(retryButtonText!)),
             ],
           ],
         ),

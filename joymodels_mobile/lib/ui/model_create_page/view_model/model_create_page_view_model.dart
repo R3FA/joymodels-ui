@@ -119,7 +119,6 @@ class ModelCreatePageViewModel with ChangeNotifier {
     return true;
   }
 
-
   Future<void> onAddPhotoPressed() async {
     if (!canAddMorePhotos) {
       errorMessage = 'Maximum $maxPhotos photos allowed';
@@ -215,7 +214,6 @@ class ModelCreatePageViewModel with ChangeNotifier {
     }
   }
 
-
   Future<bool> getCategories({String? categoryName}) async {
     errorMessage = null;
     isCategoriesLoading = true;
@@ -298,7 +296,6 @@ class ModelCreatePageViewModel with ChangeNotifier {
     return [...selectedCategoriesOnTop, ...otherCategories];
   }
 
-
   Future<bool> getModelAvailabilities({String? availabilityName}) async {
     errorMessage = null;
     isModelAvailabilitiesLoading = true;
@@ -339,7 +336,6 @@ class ModelCreatePageViewModel with ChangeNotifier {
 
     notifyListeners();
   }
-
 
   Future<void> onAddModelFilePressed() async {
     try {
@@ -391,7 +387,6 @@ class ModelCreatePageViewModel with ChangeNotifier {
     errorMessage = null;
     notifyListeners();
   }
-
 
   Future<bool> onSubmit(BuildContext context) async {
     if (!isFormValid()) {

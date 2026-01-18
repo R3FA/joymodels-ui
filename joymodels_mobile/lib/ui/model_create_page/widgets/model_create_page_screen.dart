@@ -105,7 +105,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
     );
   }
 
-
   Widget _buildErrorMessage(
     ModelCreatePageViewModel viewModel,
     ThemeData theme,
@@ -139,7 +138,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
     );
   }
 
-
   Widget _buildNameField(ModelCreatePageViewModel viewModel, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,7 +154,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
       ],
     );
   }
-
 
   Widget _buildDescriptionField(
     ModelCreatePageViewModel viewModel,
@@ -178,7 +175,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
       ],
     );
   }
-
 
   Widget _buildPhotosSection(
     ModelCreatePageViewModel viewModel,
@@ -274,7 +270,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
       ),
     );
   }
-
 
   Widget _buildCategorySection(
     ModelCreatePageViewModel viewModel,
@@ -382,7 +377,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
     );
   }
 
-
   Widget _buildAvailabilitySection(
     ModelCreatePageViewModel viewModel,
     ThemeData theme,
@@ -451,7 +445,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
     );
   }
 
-
   Widget _buildPriceField(ModelCreatePageViewModel viewModel, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -465,7 +458,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
       ],
     );
   }
-
 
   Widget _buildAddModelFileButton(
     ModelCreatePageViewModel viewModel,
@@ -539,7 +531,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
       ),
     );
   }
-
 
   Widget _buildLoadingOverlay(ThemeData theme) {
     return Container(
