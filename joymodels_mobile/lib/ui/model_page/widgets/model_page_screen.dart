@@ -408,7 +408,7 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
                             ),
                             TextSpan(
                               text:
-                                  "(${vm.calculatedReviews?.reviewPercentage ?? ''})",
+                                  " (${vm.calculatedReviews?.reviewPercentage ?? ''})",
                               style: TextStyle(
                                 color: theme.colorScheme.secondary,
                               ),
@@ -503,10 +503,16 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
             ),
             const SizedBox(width: 6),
             ElevatedButton(
-              onPressed: vm.onAddToCart,
+              onPressed: vm.isAddingToCart
+                  ? null
+                  : () => vm.onToggleCart(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: theme.colorScheme.onPrimary,
+                backgroundColor: vm.isInCart
+                    ? theme.colorScheme.errorContainer
+                    : theme.colorScheme.primary,
+                foregroundColor: vm.isInCart
+                    ? theme.colorScheme.error
+                    : theme.colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 14,
                   vertical: 8,
@@ -516,7 +522,27 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
                 ),
                 textStyle: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              child: const Text("Add to Cart"),
+              child: vm.isAddingToCart
+                  ? SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          vm.isInCart ? theme.colorScheme.error : Colors.white,
+                        ),
+                      ),
+                    )
+                  : vm.isInCart
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.close, size: 18),
+                        const SizedBox(width: 6),
+                        Text("Remove from Cart"),
+                      ],
+                    )
+                  : Text("Add to Cart"),
             ),
           ],
         ),

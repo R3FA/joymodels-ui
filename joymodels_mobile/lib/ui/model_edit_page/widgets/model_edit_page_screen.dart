@@ -115,7 +115,6 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
     );
   }
 
-
   Widget _buildErrorMessage(ModelEditPageViewModel viewModel, ThemeData theme) {
     return Container(
       width: double.infinity,
@@ -146,7 +145,6 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
     );
   }
 
-
   Widget _buildNameField(ModelEditPageViewModel viewModel, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,7 +161,6 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
       ],
     );
   }
-
 
   Widget _buildDescriptionField(
     ModelEditPageViewModel viewModel,
@@ -316,7 +313,6 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
     );
   }
 
-
   Widget _buildCategorySection(
     ModelEditPageViewModel viewModel,
     ThemeData theme,
@@ -419,7 +415,6 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
     );
   }
 
-
   Widget _buildAvailabilitySection(
     ModelEditPageViewModel viewModel,
     ThemeData theme,
@@ -488,7 +483,6 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
     );
   }
 
-
   Widget _buildPriceField(ModelEditPageViewModel viewModel, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -502,7 +496,6 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
       ],
     );
   }
-
 
   Widget _buildLoadingOverlay(ThemeData theme) {
     return Container(

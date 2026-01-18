@@ -8,7 +8,8 @@ import 'package:joymodels_mobile/data/model/pagination/response_types/pagination
 import 'package:joymodels_mobile/data/repositories/model_reviews_repository.dart';
 import 'package:joymodels_mobile/ui/core/mixins/pagination_mixin.dart';
 
-class ModelReviewsPageViewModel extends ChangeNotifier with PaginationMixin<ModelReviewResponseApiModel> {
+class ModelReviewsPageViewModel extends ChangeNotifier
+    with PaginationMixin<ModelReviewResponseApiModel> {
   final modelReviewsRepository = sl<ModelReviewsRepository>();
 
   bool isLoading = false;
@@ -77,7 +78,6 @@ class ModelReviewsPageViewModel extends ChangeNotifier with PaginationMixin<Mode
     selectedReviewType = reviewType;
     await loadReviews(pageNumber: 1);
   }
-
 
   Color getReviewTypeColor(BuildContext context, String reviewTypeName) {
     switch (reviewTypeName.toLowerCase()) {

@@ -137,7 +137,6 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     return _buildModelsList(viewModel, theme);
   }
 
-
   Widget _buildEmptyState(ThemeData theme) {
     return Center(
       child: Column(
