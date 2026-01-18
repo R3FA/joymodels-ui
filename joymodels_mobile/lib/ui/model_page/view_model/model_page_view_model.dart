@@ -150,8 +150,8 @@ class ModelPageViewModel extends ChangeNotifier {
     }
   }
 
-  void onEditModel(BuildContext context) {
-    Navigator.push(
+  Future<void> onEditModel(BuildContext context) async {
+    final result = await Navigator.push<ModelResponseApiModel>(
       context,
       MaterialPageRoute(
         builder: (_) => ChangeNotifierProvider(
@@ -160,6 +160,15 @@ class ModelPageViewModel extends ChangeNotifier {
         ),
       ),
     );
+
+    if (result != null) {
+      loadedModel = result;
+      galleryIndex = 0;
+      if (galleryController.hasClients) {
+        galleryController.jumpToPage(0);
+      }
+      notifyListeners();
+    }
   }
 
   Future<bool> onDeleteModel(BuildContext context) async {

@@ -60,10 +60,7 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
                       onPressed: viewModel.isSaving
                           ? null
                           : () async {
-                              final success = await viewModel.onSubmit(context);
-                              if (success && context.mounted) {
-                                Navigator.of(context).pop(true);
-                              }
+                              await viewModel.onSubmit(context);
                             },
                       child: const Text(
                         'Save',
@@ -263,13 +260,13 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
                     ],
                   ),
                 ),
-            ...viewModel.modelPicturesToInsert.asMap().entries.map(
-              (entry) => Stack(
+            ...viewModel.modelPicturesToInsert.map(
+              (photo) => Stack(
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.memory(
-                      entry.value.bytes,
+                      photo.bytes,
                       width: 80,
                       height: 80,
                       fit: BoxFit.cover,
@@ -279,7 +276,7 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
                     top: 4,
                     right: 4,
                     child: GestureDetector(
-                      onTap: () => viewModel.onRemovePhoto(entry.key),
+                      onTap: () => viewModel.onRemovePhoto(photo),
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(

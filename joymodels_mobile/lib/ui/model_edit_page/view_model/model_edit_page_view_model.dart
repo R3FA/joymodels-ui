@@ -16,7 +16,6 @@ import 'package:joymodels_mobile/data/repositories/model_availability_repository
 import 'package:joymodels_mobile/data/repositories/model_repository.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 import 'package:joymodels_mobile/ui/core/view_model/validation_view_model.dart';
-import 'package:joymodels_mobile/ui/model_page/widgets/model_page_screen.dart';
 
 class ModelEditPageViewModel extends ChangeNotifier {
   final ImagePicker _imagePicker = ImagePicker();
@@ -162,12 +161,10 @@ class ModelEditPageViewModel extends ChangeNotifier {
     }
   }
 
-  void onRemovePhoto(int index) {
-    if (index >= 0 && index < modelPicturesToInsert.length) {
-      modelPicturesToInsert.removeAt(index);
-      errorMessage = null;
-      notifyListeners();
-    }
+  void onRemovePhoto(ModelFile photo) {
+    modelPicturesToInsert.remove(photo);
+    errorMessage = null;
+    notifyListeners();
   }
 
   void markPictureForDelete(String pictureLocation) {
@@ -351,8 +348,6 @@ class ModelEditPageViewModel extends ChangeNotifier {
         errorMessage = 'Name: $nameError';
         return false;
       }
-    } else {
-      nameController.clear();
     }
 
     if (descriptionController.text != originalModel.description) {
@@ -363,8 +358,6 @@ class ModelEditPageViewModel extends ChangeNotifier {
         errorMessage = 'Description: $descError';
         return false;
       }
-    } else {
-      descriptionController.clear();
     }
 
     final priceError = RegexValidationViewModel.validatePrice(
@@ -375,11 +368,7 @@ class ModelEditPageViewModel extends ChangeNotifier {
       return false;
     }
 
-    final numCategories =
-        modelCategoriesToInsert.length +
-        modelsCategories.length -
-        modelCategoriesToDelete.length;
-    if (numCategories < 1) {
+    if (modelsCategories.isEmpty) {
       errorMessage = 'At least one category is required';
       return false;
     }
@@ -415,8 +404,12 @@ class ModelEditPageViewModel extends ChangeNotifier {
     try {
       final patchRequest = ModelPatchRequestApiModel(
         uuid: originalModel.uuid,
-        name: nameController.text,
-        description: descriptionController.text,
+        name: nameController.text != originalModel.name
+            ? nameController.text
+            : null,
+        description: descriptionController.text != originalModel.description
+            ? descriptionController.text
+            : null,
         price: double.tryParse(priceController.text),
         modelAvailabilityUuid: selectedAvailability?.uuid,
         modelCategoriesToDelete: List<String>.from(modelCategoriesToDelete),
@@ -433,16 +426,13 @@ class ModelEditPageViewModel extends ChangeNotifier {
 
       final patchedModel = await modelRepository.patch(patchRequest);
 
-      if (context.mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => ModelPageScreen(loadedModel: patchedModel),
-          ),
-        );
-      }
-
       isSaving = false;
       notifyListeners();
+
+      if (context.mounted) {
+        Navigator.of(context).pop(patchedModel);
+      }
+
       return true;
     } on SessionExpiredException {
       errorMessage = SessionExpiredException().toString();
