@@ -4,6 +4,7 @@ import 'package:joymodels_mobile/data/model/category/response_types/category_res
 import 'package:joymodels_mobile/data/model/model_availability/response_types/model_availability_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/ui/core/ui/form_input_decoration.dart';
+import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/model_edit_page/view_model/model_edit_page_view_model.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
@@ -224,13 +225,14 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          "${ApiConstants.baseUrl}/models/get/${viewModel.originalModel.uuid}/images/${Uri.encodeComponent(picture.pictureLocation)}",
+                        child: SizedBox(
                           width: 80,
                           height: 80,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) =>
-                              const Icon(Icons.broken_image, size: 40),
+                          child: ModelImage(
+                            imageUrl:
+                                "${ApiConstants.baseUrl}/models/get/${viewModel.originalModel.uuid}/images/${Uri.encodeComponent(picture.pictureLocation)}",
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                       if (viewModel.showRemoveButtonForServerPicture(

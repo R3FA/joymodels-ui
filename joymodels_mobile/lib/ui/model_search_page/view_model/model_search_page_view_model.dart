@@ -215,6 +215,27 @@ class ModelSearchPageViewModel with ChangeNotifier {
     searchModels(ModelSearchRequestApiModel(pageNumber: page, pageSize: 10));
   }
 
+  int get currentPage => models?.pageNumber ?? 1;
+  int get totalPages => models?.totalPages ?? 1;
+  bool get hasPreviousPage => models?.hasPreviousPage ?? false;
+  bool get hasNextPage => models?.hasNextPage ?? false;
+
+  Future<void> onNextPage() async {
+    if (hasNextPage && !areModelsLoading) {
+      await searchModels(
+        ModelSearchRequestApiModel(pageNumber: currentPage + 1, pageSize: 10),
+      );
+    }
+  }
+
+  Future<void> onPreviousPage() async {
+    if (hasPreviousPage && !areModelsLoading) {
+      await searchModels(
+        ModelSearchRequestApiModel(pageNumber: currentPage - 1, pageSize: 10),
+      );
+    }
+  }
+
   @override
   void dispose() {
     searchController.dispose();
