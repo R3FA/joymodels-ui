@@ -322,25 +322,14 @@ class HomePageScreenViewModel with ChangeNotifier {
     if (artist == null) return;
 
     // TODO: Implementirati kada bude spremno
-    // Navigator.of(context).push(
-    //   MaterialPageRoute(
-    //     builder:  (_) => ArtistDetailScreen(artist: artist),
-    //   ),
-    // );
   }
 
   void onViewAllArtistsPressed(BuildContext context) {
     // TODO: Implementirati kada bude spremno
-    // Navigator.of(
-    //   context,
-    // ).push(MaterialPageRoute(builder: (_) => const TopArtistScreen()));
   }
 
   void onViewAllModelsPressed(BuildContext context) {
     // TODO: Implementirati kada bude spremno
-    // Navigator.of(context).push(
-    //   MaterialPageRoute(builder: (_) => const TopModelsScreen()),
-    // );
   }
 
   @override

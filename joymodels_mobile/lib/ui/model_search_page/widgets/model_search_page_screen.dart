@@ -3,7 +3,10 @@ import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/request_types/model_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
+import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
+import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
+import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
 import 'package:joymodels_mobile/ui/model_search_page/view_model/model_search_page_view_model.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -57,7 +60,15 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
             const SizedBox(height: 8),
             Expanded(child: _buildBody(viewModel, theme)),
             if (_shouldShowPagination(viewModel))
-              _buildPagination(viewModel, theme),
+              PaginationControls(
+                currentPage: viewModel.currentPage,
+                totalPages: viewModel.totalPages,
+                hasPreviousPage: viewModel.hasPreviousPage,
+                hasNextPage: viewModel.hasNextPage,
+                onPreviousPage: viewModel.onPreviousPage,
+                onNextPage: viewModel.onNextPage,
+                isLoading: viewModel.areModelsLoading,
+              ),
           ],
         ),
       ),
@@ -111,7 +122,12 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     }
 
     if (viewModel.errorMessage != null) {
-      return _buildErrorState(viewModel, theme);
+      return ErrorDisplay(
+        message: viewModel.errorMessage!,
+        onRetry: () => viewModel.searchModels(
+          ModelSearchRequestApiModel(pageNumber: 1, pageSize: 10),
+        ),
+      );
     }
 
     if (viewModel.models == null || viewModel.models!.data.isEmpty) {
@@ -121,38 +137,6 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     return _buildModelsList(viewModel, theme);
   }
 
-  Widget _buildErrorState(ModelSearchPageViewModel viewModel, ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, size: 80, color: theme.colorScheme.error),
-          const SizedBox(height: 16),
-          Text(
-            'Something went wrong',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.error,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            viewModel.errorMessage!,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () => viewModel.searchModels(
-              ModelSearchRequestApiModel(pageNumber: 1, pageSize: 10),
-            ),
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildEmptyState(ThemeData theme) {
     return Center(
@@ -254,13 +238,10 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Image.network(
-          "${ApiConstants.baseUrl}/models/get/${model.uuid}/images/${Uri.encodeComponent(model.modelPictures[0].pictureLocation)}",
-          width: 64,
-          height: 64,
+        child: ModelImage(
+          imageUrl:
+              "${ApiConstants.baseUrl}/models/get/${model.uuid}/images/${Uri.encodeComponent(model.modelPictures[0].pictureLocation)}",
           fit: BoxFit.cover,
-          errorBuilder: (_, _, _) =>
-              const Icon(Icons.person, size: 42, color: Colors.white),
         ),
       ),
     );
@@ -349,151 +330,5 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
         viewModel.errorMessage == null &&
         viewModel.models != null &&
         viewModel.models!.totalPages > 1;
-  }
-
-  Widget _buildPagination(ModelSearchPageViewModel viewModel, ThemeData theme) {
-    final currentPage = viewModel.models!.pageNumber;
-    final totalPages = viewModel.models!.totalPages;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border(
-          top: BorderSide(color: theme.colorScheme.outlineVariant),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildPaginationArrow(
-            viewModel: viewModel,
-            theme: theme,
-            icon: Icons.chevron_left,
-            onPressed: currentPage > 1
-                ? () => viewModel.onPageChanged(currentPage - 1)
-                : null,
-          ),
-          const SizedBox(width: 8),
-          ..._buildPageNumbers(viewModel, theme, currentPage, totalPages),
-          const SizedBox(width: 8),
-          _buildPaginationArrow(
-            viewModel: viewModel,
-            theme: theme,
-            icon: Icons.chevron_right,
-            onPressed: currentPage < totalPages
-                ? () => viewModel.onPageChanged(currentPage + 1)
-                : null,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPaginationArrow({
-    required ModelSearchPageViewModel viewModel,
-    required ThemeData theme,
-    required IconData icon,
-    VoidCallback? onPressed,
-  }) {
-    return IconButton(
-      onPressed: onPressed,
-      icon: Icon(icon),
-      style: IconButton.styleFrom(
-        backgroundColor: theme.colorScheme.surfaceContainerHighest,
-        disabledBackgroundColor: theme.colorScheme.surfaceContainerHighest,
-      ),
-    );
-  }
-
-  List<Widget> _buildPageNumbers(
-    ModelSearchPageViewModel viewModel,
-    ThemeData theme,
-    int currentPage,
-    int totalPages,
-  ) {
-    List<Widget> pages = [];
-    List<int> pageNumbers = _getVisiblePageNumbers(currentPage, totalPages);
-
-    int? previousPage;
-    for (final page in pageNumbers) {
-      if (previousPage != null && page - previousPage > 1) {
-        pages.add(_buildEllipsis(theme));
-      }
-
-      pages.add(_buildPageButton(viewModel, theme, page, currentPage));
-      previousPage = page;
-    }
-
-    return pages;
-  }
-
-  List<int> _getVisiblePageNumbers(int currentPage, int totalPages) {
-    if (totalPages <= 7) {
-      return List.generate(totalPages, (i) => i + 1);
-    }
-
-    Set<int> pages = {};
-
-    pages.add(1);
-
-    for (int i = currentPage - 1; i <= currentPage + 1; i++) {
-      if (i > 1 && i < totalPages) {
-        pages.add(i);
-      }
-    }
-
-    pages.add(totalPages);
-
-    return pages.toList()..sort();
-  }
-
-  Widget _buildEllipsis(ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Text(
-        '.. .',
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPageButton(
-    ModelSearchPageViewModel viewModel,
-    ThemeData theme,
-    int page,
-    int currentPage,
-  ) {
-    final isSelected = page == currentPage;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: InkWell(
-        onTap: isSelected ? null : () => viewModel.onPageChanged(page),
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: isSelected
-                ? theme.colorScheme.primary
-                : theme.colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            '$page',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: isSelected
-                  ? theme.colorScheme.onPrimary
-                  : theme.colorScheme.onSurface,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
