@@ -8,6 +8,8 @@ import 'package:joymodels_mobile/data/repositories/model_reviews_repository.dart
 import 'package:joymodels_mobile/ui/home_page/widgets/home_page_screen.dart';
 import 'package:joymodels_mobile/ui/model_edit_page/view_model/model_edit_page_view_model.dart';
 import 'package:joymodels_mobile/ui/model_edit_page/widgets/model_edit_page_screen.dart';
+import 'package:joymodels_mobile/ui/model_reviews_page/view_model/model_reviews_page_view_model.dart';
+import 'package:joymodels_mobile/ui/model_reviews_page/widgets/model_reviews_page_screen.dart';
 import 'package:provider/provider.dart';
 
 class ModelPageViewModel extends ChangeNotifier {
@@ -223,8 +225,18 @@ class ModelPageViewModel extends ChangeNotifier {
   }
 
   // Reviews
-  void onViewAllReviews() {
-    // TODO: Implement view all reviews action
+  void onViewAllReviews(BuildContext context) {
+    if (loadedModel == null) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => ModelReviewsPageViewModel(),
+          child: ModelReviewsPageScreen(modelUuid: loadedModel!.uuid),
+        ),
+      ),
+    );
   }
 
   // Buy

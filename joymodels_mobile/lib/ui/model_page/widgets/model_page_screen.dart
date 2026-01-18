@@ -413,25 +413,29 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: 32,
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: vm.onViewAllReviews,
-                          style: TextButton.styleFrom(
-                            foregroundColor: theme.colorScheme.secondary,
-                            padding: const EdgeInsets.symmetric(horizontal: 6),
-                            minimumSize: const Size(0, 0),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text(
-                            "View All",
-                            style: TextStyle(fontSize: 13),
+                    if (vm.calculatedReviews?.reviewPercentage !=
+                        'No reviews yet.')
+                      SizedBox(
+                        height: 32,
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () => vm.onViewAllReviews(context),
+                            style: TextButton.styleFrom(
+                              foregroundColor: theme.colorScheme.secondary,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                              ),
+                              minimumSize: const Size(0, 0),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: const Text(
+                              "View All",
+                              style: TextStyle(fontSize: 13),
+                            ),
                           ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ],
