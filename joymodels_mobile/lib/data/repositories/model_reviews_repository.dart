@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:joymodels_mobile/data/core/services/auth_service.dart';
+import 'package:joymodels_mobile/data/model/model_reviews/request_types/model_review_create_request_api_model.dart';
+import 'package:joymodels_mobile/data/model/model_reviews/request_types/model_review_patch_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_reviews/request_types/model_review_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_reviews/response_types/model_calculated_reviews_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_reviews/response_types/model_review_response_api_model.dart';
@@ -45,6 +47,52 @@ class ModelReviewsRepository {
     } else {
       throw Exception(
         'Failed to search model reviews: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  Future<ModelReviewResponseApiModel> create(
+    ModelReviewCreateRequestApiModel request,
+  ) async {
+    final response = await _authService.request(
+      () => _service.create(request.toFormData()),
+    );
+
+    if (response.statusCode == 200) {
+      final jsonMap = jsonDecode(response.body);
+      return ModelReviewResponseApiModel.fromJson(jsonMap);
+    } else {
+      throw Exception(
+        'Failed to create model review: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  Future<ModelReviewResponseApiModel> patch(
+    ModelReviewPatchRequestApiModel request,
+  ) async {
+    final response = await _authService.request(
+      () => _service.patch(request.toFormData()),
+    );
+
+    if (response.statusCode == 200) {
+      final jsonMap = jsonDecode(response.body);
+      return ModelReviewResponseApiModel.fromJson(jsonMap);
+    } else {
+      throw Exception(
+        'Failed to patch model review: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  Future<void> delete(String modelReviewUuid) async {
+    final response = await _authService.request(
+      () => _service.delete(modelReviewUuid),
+    );
+
+    if (response.statusCode != 204) {
+      throw Exception(
+        'Failed to delete model review: ${response.statusCode} - ${response.body}',
       );
     }
   }

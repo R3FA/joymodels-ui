@@ -151,6 +151,8 @@ class _ModelReviewsPageScreenState extends State<ModelReviewsPageScreen> {
     ModelReviewsPageViewModel viewModel,
     ThemeData theme,
   ) {
+    final isOwnReview = viewModel.isOwnReview(review);
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
@@ -216,6 +218,63 @@ class _ModelReviewsPageScreenState extends State<ModelReviewsPageScreen> {
                     ),
                   ),
                 ),
+                const SizedBox(width: 4),
+                PopupMenuButton<String>(
+                  icon: Icon(
+                    Icons.more_vert,
+                    color: theme.colorScheme.onSurfaceVariant,
+                    size: 20,
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onSelected: (value) {
+                    switch (value) {
+                      case 'edit':
+                        _showEditReviewDialog(review, viewModel, theme);
+                        break;
+                      case 'delete':
+                        _showDeleteConfirmDialog(review, viewModel, theme);
+                        break;
+                      case 'report':
+                        _showReportDialog(review, theme);
+                        break;
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    if (isOwnReview) ...[
+                      const PopupMenuItem<String>(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit, size: 18),
+                            SizedBox(width: 8),
+                            Text('Edit'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete, size: 18, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text('Delete', style: TextStyle(color: Colors.red)),
+                          ],
+                        ),
+                      ),
+                    ],
+                    const PopupMenuItem<String>(
+                      value: 'report',
+                      child: Row(
+                        children: [
+                          Icon(Icons.flag, size: 18),
+                          SizedBox(width: 8),
+                          Text('Report'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
             if (review.modelReviewText.isNotEmpty) ...[
@@ -226,5 +285,257 @@ class _ModelReviewsPageScreenState extends State<ModelReviewsPageScreen> {
         ),
       ),
     );
+  }
+
+  void _showDeleteConfirmDialog(
+    ModelReviewResponseApiModel review,
+    ModelReviewsPageViewModel viewModel,
+    ThemeData theme,
+  ) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Delete Review'),
+          content: const Text(
+            'Are you sure you want to delete this review? This action cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(dialogContext).pop();
+                await viewModel.deleteReview(context, review);
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showEditReviewDialog(
+    ModelReviewResponseApiModel review,
+    ModelReviewsPageViewModel viewModel,
+    ThemeData theme,
+  ) async {
+    await viewModel.loadReviewTypes();
+
+    if (!mounted) return;
+
+    final reviewTextController = TextEditingController(
+      text: review.modelReviewText,
+    );
+    final formKey = GlobalKey<FormState>();
+    String? selectedReviewTypeUuid = review.modelReviewTypeResponse.uuid;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Row(
+                children: [
+                  Icon(Icons.edit, color: theme.colorScheme.primary),
+                  const SizedBox(width: 12),
+                  const Text('Edit Review'),
+                ],
+              ),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Review Type',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (viewModel.isLoadingReviewTypes)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      else
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: viewModel.reviewTypes.map((reviewType) {
+                            final isSelected =
+                                selectedReviewTypeUuid == reviewType.uuid;
+                            return ChoiceChip(
+                              label: Text(reviewType.modelReviewTypeName),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                setDialogState(() {
+                                  selectedReviewTypeUuid = selected
+                                      ? reviewType.uuid
+                                      : null;
+                                });
+                              },
+                              selectedColor: _getReviewTypeColor(
+                                reviewType.modelReviewTypeName,
+                                theme,
+                              ).withValues(alpha: 0.3),
+                              labelStyle: TextStyle(
+                                color: isSelected
+                                    ? _getReviewTypeColor(
+                                        reviewType.modelReviewTypeName,
+                                        theme,
+                                      )
+                                    : theme.colorScheme.onSurface,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: reviewTextController,
+                        maxLines: 4,
+                        maxLength: 5000,
+                        decoration: InputDecoration(
+                          hintText: 'Write your review here...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: theme.colorScheme.surfaceContainerHighest,
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your review';
+                          }
+                          if (value.trim().length < 10) {
+                            return 'Review must be at least 10 characters';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ListenableBuilder(
+                  listenable: viewModel,
+                  builder: (context, _) {
+                    return ElevatedButton(
+                      onPressed:
+                          viewModel.isEditing || selectedReviewTypeUuid == null
+                          ? null
+                          : () async {
+                              if (formKey.currentState!.validate()) {
+                                final success = await viewModel.editReview(
+                                  this.context,
+                                  review.uuid,
+                                  selectedReviewTypeUuid,
+                                  reviewTextController.text.trim(),
+                                );
+                                if (success && dialogContext.mounted) {
+                                  Navigator.of(dialogContext).pop();
+                                }
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primary,
+                        foregroundColor: theme.colorScheme.onPrimary,
+                      ),
+                      child: viewModel.isEditing
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : const Text('Save'),
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showReportDialog(ModelReviewResponseApiModel review, ThemeData theme) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.flag, color: theme.colorScheme.error),
+              const SizedBox(width: 12),
+              const Text('Report Review'),
+            ],
+          ),
+          content: const Text(
+            'Report functionality will be implemented soon. This review will be flagged for moderator review.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Report feature coming soon'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.error,
+                foregroundColor: theme.colorScheme.onError,
+              ),
+              child: const Text('Report'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Color _getReviewTypeColor(String reviewType, ThemeData theme) {
+    switch (reviewType.toLowerCase()) {
+      case 'positive':
+        return Colors.green;
+      case 'negative':
+        return Colors.red;
+      case 'mixed':
+        return Colors.orange;
+      default:
+        return theme.colorScheme.primary;
+    }
   }
 }

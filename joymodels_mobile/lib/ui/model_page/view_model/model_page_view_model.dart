@@ -4,11 +4,15 @@ import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.
 import 'package:joymodels_mobile/data/model/model_faq_section/request_types/model_faq_section_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/request_types/model_faq_section_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/response_types/model_faq_section_response_api_model.dart';
+import 'package:joymodels_mobile/data/model/model_review_type/request_types/model_review_type_search_request_api_model.dart';
+import 'package:joymodels_mobile/data/model/model_review_type/response_types/model_review_type_response_api_model.dart';
+import 'package:joymodels_mobile/data/model/model_reviews/request_types/model_review_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_reviews/response_types/model_calculated_reviews_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/shopping_cart/request_types/shopping_cart_item_add_request_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/model_faq_section_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_repository.dart';
+import 'package:joymodels_mobile/data/repositories/model_review_type_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_reviews_repository.dart';
 import 'package:joymodels_mobile/data/repositories/shopping_cart_repository.dart';
 import 'package:joymodels_mobile/ui/home_page/widgets/home_page_screen.dart';
@@ -25,6 +29,7 @@ import 'package:provider/provider.dart';
 class ModelPageViewModel extends ChangeNotifier {
   final modelRepository = sl<ModelRepository>();
   final modelReviewsRepository = sl<ModelReviewsRepository>();
+  final modelReviewTypeRepository = sl<ModelReviewTypeRepository>();
   final shoppingCartRepository = sl<ShoppingCartRepository>();
   final modelFaqSectionRepository = sl<ModelFaqSectionRepository>();
 
@@ -35,6 +40,10 @@ class ModelPageViewModel extends ChangeNotifier {
   bool isAddingToCart = false;
   bool isInCart = false;
   bool isCreatingFAQ = false;
+  bool isCreatingReview = false;
+  bool isLoadingReviewTypes = false;
+
+  List<ModelReviewTypeResponseApiModel> reviewTypes = [];
 
   String? errorMessage;
   String? cartItemUuid;
@@ -519,6 +528,93 @@ class ModelPageViewModel extends ChangeNotifier {
     }
   }
 
+  bool get hasReviews =>
+      calculatedReviews?.reviewPercentage != 'No reviews yet.';
+
+  Future<bool> loadReviewTypes() async {
+    if (reviewTypes.isNotEmpty) return true;
+
+    isLoadingReviewTypes = true;
+    notifyListeners();
+
+    try {
+      final request = ModelReviewTypeSearchRequestApiModel(
+        pageNumber: 1,
+        pageSize: 50,
+      );
+      final result = await modelReviewTypeRepository.search(request);
+      reviewTypes = result.data;
+      isLoadingReviewTypes = false;
+      notifyListeners();
+      return true;
+    } on SessionExpiredException {
+      isLoadingReviewTypes = false;
+      notifyListeners();
+      onSessionExpired?.call();
+      return false;
+    } catch (e) {
+      isLoadingReviewTypes = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> submitReview(
+    BuildContext context,
+    String reviewTypeUuid,
+    String reviewText,
+  ) async {
+    if (loadedModel == null) return false;
+
+    errorMessage = null;
+    isCreatingReview = true;
+    notifyListeners();
+
+    try {
+      final request = ModelReviewCreateRequestApiModel(
+        modelUuid: loadedModel!.uuid,
+        modelReviewTypeUuid: reviewTypeUuid,
+        modelReviewText: reviewText,
+      );
+      await modelReviewsRepository.create(request);
+      await getModelReviews(loadedModel!);
+      isCreatingReview = false;
+      notifyListeners();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Review submitted successfully'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      return true;
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      isCreatingReview = false;
+      notifyListeners();
+      onSessionExpired?.call();
+      return false;
+    } catch (e) {
+      errorMessage = e.toString();
+      isCreatingReview = false;
+      notifyListeners();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to submit review: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+      return false;
+    }
+  }
+
   void clear() {
     isLoading = false;
     errorMessage = null;
@@ -527,6 +623,7 @@ class ModelPageViewModel extends ChangeNotifier {
     isInCart = false;
     cartItemUuid = null;
     faqList = [];
+    reviewTypes = [];
     notifyListeners();
   }
 

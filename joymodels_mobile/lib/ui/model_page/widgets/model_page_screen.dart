@@ -367,95 +367,306 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "REVIEWS",
-            style: theme.textTheme.labelMedium?.copyWith(
-              letterSpacing: 1.05,
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.secondary,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "REVIEWS",
+                style: theme.textTheme.labelMedium?.copyWith(
+                  letterSpacing: 1.05,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.secondary,
+                ),
+              ),
+              if (vm.hasReviews)
+                TextButton(
+                  onPressed: () => vm.onViewAllReviews(context),
+                  style: TextButton.styleFrom(
+                    foregroundColor: theme.colorScheme.secondary,
+                    minimumSize: Size.zero,
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                  ),
+                  child: const Text("View All", style: TextStyle(fontSize: 13)),
+                ),
+            ],
+          ),
+          const SizedBox(height: 7),
+          vm.hasReviews
+              ? _buildReviewsSummary(vm, theme)
+              : _buildEmptyReviews(vm, theme),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewsSummary(ModelPageViewModel vm, ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        border: Border.all(color: theme.colorScheme.secondary),
+        borderRadius: BorderRadius.circular(7),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Text.rich(
+              TextSpan(
+                style: theme.textTheme.bodyMedium,
+                children: [
+                  TextSpan(
+                    text: vm.calculatedReviews?.modelReviewResponse ?? '',
+                    style: TextStyle(
+                      color: vm.getReviewColor(
+                        vm.calculatedReviews?.modelReviewResponse ?? '',
+                        context,
+                      ),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextSpan(
+                    text: " (${vm.calculatedReviews?.reviewPercentage ?? ''})",
+                    style: TextStyle(color: theme.colorScheme.secondary),
+                  ),
+                  const TextSpan(text: " ALL TIME"),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-            margin: const EdgeInsets.only(bottom: 8),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              border: Border.all(color: theme.colorScheme.secondary),
-              borderRadius: BorderRadius.circular(7),
+          IconButton(
+            onPressed: () => _showAddReviewDialog(vm, theme),
+            icon: const Icon(Icons.add_circle_outline),
+            tooltip: 'Add Review',
+            color: theme.colorScheme.secondary,
+            constraints: const BoxConstraints(),
+            padding: const EdgeInsets.all(4),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyReviews(ModelPageViewModel vm, ThemeData theme) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.3),
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+      child: Row(
+        children: [
+          Icon(
+            Icons.rate_review_outlined,
+            size: 22,
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              "No reviews yet",
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
-            child: Column(
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Text.rich(
-                        TextSpan(
-                          style: theme.textTheme.bodyMedium,
-                          children: [
-                            TextSpan(
-                              text:
-                                  vm.calculatedReviews?.modelReviewResponse ??
-                                  '',
-                              style: TextStyle(
-                                color: vm.getReviewColor(
-                                  vm.calculatedReviews?.modelReviewResponse ??
-                                      '',
-                                  context,
-                                ),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextSpan(
-                              text:
-                                  " (${vm.calculatedReviews?.reviewPercentage ?? ''})",
-                              style: TextStyle(
-                                color: theme.colorScheme.secondary,
-                              ),
-                            ),
-                            TextSpan(
-                              children: [
-                                if (vm.calculatedReviews?.reviewPercentage !=
-                                    'No reviews yet.')
-                                  const TextSpan(text: " ALL TIME"),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    if (vm.calculatedReviews?.reviewPercentage !=
-                        'No reviews yet.')
-                      SizedBox(
-                        height: 32,
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () => vm.onViewAllReviews(context),
-                            style: TextButton.styleFrom(
-                              foregroundColor: theme.colorScheme.secondary,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                              ),
-                              minimumSize: const Size(0, 0),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: const Text(
-                              "View All",
-                              style: TextStyle(fontSize: 13),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ],
+          ),
+          TextButton.icon(
+            onPressed: () => _showAddReviewDialog(vm, theme),
+            icon: const Icon(Icons.add, size: 16),
+            label: const Text("Add Review"),
+            style: TextButton.styleFrom(
+              foregroundColor: theme.colorScheme.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             ),
           ),
         ],
       ),
     );
+  }
+
+  void _showAddReviewDialog(ModelPageViewModel vm, ThemeData theme) async {
+    await vm.loadReviewTypes();
+
+    if (!mounted) return;
+
+    final reviewTextController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    String? selectedReviewTypeUuid;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.rate_review_outlined,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  const Text('Add Review'),
+                ],
+              ),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Review "${vm.loadedModel?.name}"',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Review Type',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (vm.isLoadingReviewTypes)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      else
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: vm.reviewTypes.map((reviewType) {
+                            final isSelected =
+                                selectedReviewTypeUuid == reviewType.uuid;
+                            return ChoiceChip(
+                              label: Text(reviewType.modelReviewTypeName),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                setDialogState(() {
+                                  selectedReviewTypeUuid = selected
+                                      ? reviewType.uuid
+                                      : null;
+                                });
+                              },
+                              selectedColor: _getReviewTypeColor(
+                                reviewType.modelReviewTypeName,
+                                theme,
+                              ).withValues(alpha: 0.3),
+                              labelStyle: TextStyle(
+                                color: isSelected
+                                    ? _getReviewTypeColor(
+                                        reviewType.modelReviewTypeName,
+                                        theme,
+                                      )
+                                    : theme.colorScheme.onSurface,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: reviewTextController,
+                        maxLines: 4,
+                        maxLength: 5000,
+                        decoration: InputDecoration(
+                          hintText: 'Write your review here...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: theme.colorScheme.surfaceContainerHighest,
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your review';
+                          }
+                          if (value.trim().length < 10) {
+                            return 'Review must be at least 10 characters';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ListenableBuilder(
+                  listenable: vm,
+                  builder: (context, _) {
+                    return ElevatedButton(
+                      onPressed:
+                          vm.isCreatingReview || selectedReviewTypeUuid == null
+                          ? null
+                          : () async {
+                              if (formKey.currentState!.validate()) {
+                                final success = await vm.submitReview(
+                                  this.context,
+                                  selectedReviewTypeUuid!,
+                                  reviewTextController.text.trim(),
+                                );
+                                if (success && dialogContext.mounted) {
+                                  Navigator.of(dialogContext).pop();
+                                }
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primary,
+                        foregroundColor: theme.colorScheme.onPrimary,
+                      ),
+                      child: vm.isCreatingReview
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : const Text('Submit'),
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Color _getReviewTypeColor(String reviewType, ThemeData theme) {
+    switch (reviewType.toLowerCase()) {
+      case 'positive':
+        return Colors.green;
+      case 'negative':
+        return Colors.red;
+      case 'mixed':
+        return Colors.orange;
+      default:
+        return theme.colorScheme.primary;
+    }
   }
 
   Widget _buildBuySection(ModelPageViewModel vm, ThemeData theme) {
@@ -592,47 +803,35 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
       width: double.infinity,
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.3),
         ),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-      child: Column(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+      child: Row(
         children: [
           Icon(
             Icons.question_answer_outlined,
-            size: 48,
-            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+            size: 22,
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
           ),
-          const SizedBox(height: 12),
-          Text(
-            "No FAQ yet",
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            "Be the first to ask a question about this model",
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: () => _showAskQuestionDialog(vm, theme),
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text("Ask a Question"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.primary,
-              foregroundColor: theme.colorScheme.onPrimary,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              "No FAQ yet",
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
               ),
+            ),
+          ),
+          TextButton.icon(
+            onPressed: () => _showAskQuestionDialog(vm, theme),
+            icon: const Icon(Icons.add, size: 16),
+            label: const Text("Ask Question"),
+            style: TextButton.styleFrom(
+              foregroundColor: theme.colorScheme.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             ),
           ),
         ],
@@ -743,6 +942,15 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
                   ),
                 ),
                 const Spacer(),
+                IconButton(
+                  onPressed: () => _showAskQuestionDialog(vm, theme),
+                  icon: const Icon(Icons.add_circle_outline),
+                  tooltip: 'Ask Question',
+                  color: theme.colorScheme.secondary,
+                  constraints: const BoxConstraints(),
+                  padding: const EdgeInsets.all(4),
+                ),
+                const SizedBox(width: 4),
                 Icon(
                   Icons.chevron_right,
                   size: 18,
