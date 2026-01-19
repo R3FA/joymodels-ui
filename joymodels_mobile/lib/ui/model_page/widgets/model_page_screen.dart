@@ -720,49 +720,43 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
                 color: theme.colorScheme.secondary,
               ),
             ),
-            const SizedBox(width: 6),
-            ElevatedButton(
-              onPressed: vm.isAddingToCart
-                  ? null
-                  : () => vm.onToggleCart(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: vm.isInCart
-                    ? theme.colorScheme.errorContainer
-                    : theme.colorScheme.primary,
-                foregroundColor: vm.isInCart
-                    ? theme.colorScheme.error
-                    : theme.colorScheme.onPrimary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(7),
-                ),
-                textStyle: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              child: vm.isAddingToCart
-                  ? SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          vm.isInCart ? theme.colorScheme.error : Colors.white,
+            if (!vm.isModelOwner) ...[
+              const SizedBox(width: 6),
+              IconButton(
+                onPressed: vm.isAddingToCart
+                    ? null
+                    : () => vm.onToggleCart(context),
+                icon: vm.isAddingToCart
+                    ? SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            vm.isInCart
+                                ? theme.colorScheme.error
+                                : theme.colorScheme.primary,
+                          ),
                         ),
+                      )
+                    : Icon(
+                        vm.isInCart
+                            ? Icons.remove_shopping_cart
+                            : Icons.add_shopping_cart,
                       ),
-                    )
-                  : vm.isInCart
-                  ? Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.close, size: 18),
-                        const SizedBox(width: 6),
-                        Text("Remove from Cart"),
-                      ],
-                    )
-                  : Text("Add to Cart"),
-            ),
+                tooltip: vm.isInCart ? 'Remove from Cart' : 'Add to Cart',
+                color: vm.isInCart
+                    ? theme.colorScheme.error
+                    : theme.colorScheme.primary,
+                style: IconButton.styleFrom(
+                  backgroundColor: vm.isInCart
+                      ? theme.colorScheme.errorContainer.withValues(alpha: 0.5)
+                      : theme.colorScheme.primaryContainer.withValues(
+                          alpha: 0.5,
+                        ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
