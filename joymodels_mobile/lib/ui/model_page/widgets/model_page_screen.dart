@@ -5,6 +5,7 @@ import 'package:joymodels_mobile/data/model/models/response_types/model_response
 import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
+import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
 import 'package:joymodels_mobile/ui/model_page/view_model/model_page_view_model.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -71,54 +72,56 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            onSelected: (value) {
-              switch (value) {
-                case 'edit':
-                  if (!context.mounted) return;
-                  viewModel.onEditModel(context);
-                  break;
-                case 'delete':
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (BuildContext dialogContext) {
-                      return AlertDialog(
-                        title: const Text('Confirm delete'),
-                        content: const Text(
-                          'Are you sure you want to delete this model?',
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(dialogContext).pop(),
-                            child: const Text('Cancel'),
+          if (viewModel.isModelOwner)
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert),
+              onSelected: (value) {
+                switch (value) {
+                  case 'edit':
+                    if (!context.mounted) return;
+                    viewModel.onEditModel(context);
+                    break;
+                  case 'delete':
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext dialogContext) {
+                        return AlertDialog(
+                          title: const Text('Confirm delete'),
+                          content: const Text(
+                            'Are you sure you want to delete this model?',
                           ),
-                          TextButton(
-                            onPressed: () async {
-                              Navigator.of(dialogContext).pop();
-                              await viewModel.onDeleteModel(context);
-                            },
-                            child: const Text(
-                              'Delete',
-                              style: TextStyle(color: Colors.red),
+                          actions: [
+                            TextButton(
+                              onPressed: () =>
+                                  Navigator.of(dialogContext).pop(),
+                              child: const Text('Cancel'),
                             ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
-              const PopupMenuItem<String>(
-                value: 'delete',
-                child: Text('Delete'),
-              ),
-            ],
-          ),
+                            TextButton(
+                              onPressed: () async {
+                                Navigator.of(dialogContext).pop();
+                                await viewModel.onDeleteModel(context);
+                              },
+                              child: const Text(
+                                'Delete',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                    break;
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
+                const PopupMenuItem<String>(
+                  value: 'delete',
+                  child: Text('Delete'),
+                ),
+              ],
+            ),
         ],
       ),
       body: SingleChildScrollView(
@@ -366,95 +369,311 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "REVIEWS",
-            style: theme.textTheme.labelMedium?.copyWith(
-              letterSpacing: 1.05,
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.secondary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-            margin: const EdgeInsets.only(bottom: 8),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              border: Border.all(color: theme.colorScheme.secondary),
-              borderRadius: BorderRadius.circular(7),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Text.rich(
-                        TextSpan(
-                          style: theme.textTheme.bodyMedium,
-                          children: [
-                            TextSpan(
-                              text:
-                                  vm.calculatedReviews?.modelReviewResponse ??
-                                  '',
-                              style: TextStyle(
-                                color: vm.getReviewColor(
-                                  vm.calculatedReviews?.modelReviewResponse ??
-                                      '',
-                                  context,
-                                ),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextSpan(
-                              text:
-                                  " (${vm.calculatedReviews?.reviewPercentage ?? ''})",
-                              style: TextStyle(
-                                color: theme.colorScheme.secondary,
-                              ),
-                            ),
-                            TextSpan(
-                              children: [
-                                if (vm.calculatedReviews?.reviewPercentage !=
-                                    'No reviews yet.')
-                                  const TextSpan(text: " ALL TIME"),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    if (vm.calculatedReviews?.reviewPercentage !=
-                        'No reviews yet.')
-                      SizedBox(
-                        height: 32,
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () => vm.onViewAllReviews(context),
-                            style: TextButton.styleFrom(
-                              foregroundColor: theme.colorScheme.secondary,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                              ),
-                              minimumSize: const Size(0, 0),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: const Text(
-                              "View All",
-                              style: TextStyle(fontSize: 13),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "REVIEWS",
+                style: theme.textTheme.labelMedium?.copyWith(
+                  letterSpacing: 1.05,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.secondary,
                 ),
-              ],
-            ),
+              ),
+              if (vm.hasReviews)
+                TextButton(
+                  onPressed: () => vm.onViewAllReviews(context),
+                  style: TextButton.styleFrom(
+                    foregroundColor: theme.colorScheme.secondary,
+                    minimumSize: Size.zero,
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                  ),
+                  child: const Text("View All", style: TextStyle(fontSize: 13)),
+                ),
+            ],
           ),
+          const SizedBox(height: 7),
+          vm.hasReviews
+              ? _buildReviewsSummary(vm, theme)
+              : _buildEmptyReviews(vm, theme),
         ],
       ),
     );
+  }
+
+  Widget _buildReviewsSummary(ModelPageViewModel vm, ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        border: Border.all(color: theme.colorScheme.secondary),
+        borderRadius: BorderRadius.circular(7),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Text.rich(
+              TextSpan(
+                style: theme.textTheme.bodyMedium,
+                children: [
+                  TextSpan(
+                    text: vm.calculatedReviews?.modelReviewResponse ?? '',
+                    style: TextStyle(
+                      color: vm.getReviewColor(
+                        vm.calculatedReviews?.modelReviewResponse ?? '',
+                        context,
+                      ),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextSpan(
+                    text: " (${vm.calculatedReviews?.reviewPercentage ?? ''})",
+                    style: TextStyle(color: theme.colorScheme.secondary),
+                  ),
+                  const TextSpan(text: " ALL TIME"),
+                ],
+              ),
+            ),
+          ),
+          if (!vm.hasUserReviewed && !vm.isModelOwner)
+            IconButton(
+              onPressed: () => _showAddReviewDialog(vm, theme),
+              icon: const Icon(Icons.add_circle_outline),
+              tooltip: 'Add Review',
+              color: theme.colorScheme.secondary,
+              constraints: const BoxConstraints(),
+              padding: const EdgeInsets.all(4),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyReviews(ModelPageViewModel vm, ThemeData theme) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.3),
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+      child: Row(
+        children: [
+          Icon(
+            Icons.rate_review_outlined,
+            size: 22,
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              "No reviews yet",
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          if (!vm.hasUserReviewed && !vm.isModelOwner)
+            TextButton.icon(
+              onPressed: () => _showAddReviewDialog(vm, theme),
+              icon: const Icon(Icons.add, size: 16),
+              label: const Text("Add Review"),
+              style: TextButton.styleFrom(
+                foregroundColor: theme.colorScheme.primary,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddReviewDialog(ModelPageViewModel vm, ThemeData theme) async {
+    await vm.loadReviewTypes();
+
+    if (!mounted) return;
+
+    final reviewTextController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    String? selectedReviewTypeUuid;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.rate_review_outlined,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  const Text('Add Review'),
+                ],
+              ),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Review "${vm.loadedModel?.name}"',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Review Type',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (vm.isLoadingReviewTypes)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      else
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: vm.reviewTypes.map((reviewType) {
+                            final isSelected =
+                                selectedReviewTypeUuid == reviewType.uuid;
+                            return ChoiceChip(
+                              label: Text(reviewType.modelReviewTypeName),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                setDialogState(() {
+                                  selectedReviewTypeUuid = selected
+                                      ? reviewType.uuid
+                                      : null;
+                                });
+                              },
+                              selectedColor: _getReviewTypeColor(
+                                reviewType.modelReviewTypeName,
+                                theme,
+                              ).withValues(alpha: 0.3),
+                              labelStyle: TextStyle(
+                                color: isSelected
+                                    ? _getReviewTypeColor(
+                                        reviewType.modelReviewTypeName,
+                                        theme,
+                                      )
+                                    : theme.colorScheme.onSurface,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: reviewTextController,
+                        maxLines: 4,
+                        maxLength: 5000,
+                        decoration: InputDecoration(
+                          hintText: 'Write your review here...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: theme.colorScheme.surfaceContainerHighest,
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your review';
+                          }
+                          if (value.trim().length < 10) {
+                            return 'Review must be at least 10 characters';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ListenableBuilder(
+                  listenable: vm,
+                  builder: (context, _) {
+                    return ElevatedButton(
+                      onPressed:
+                          vm.isCreatingReview || selectedReviewTypeUuid == null
+                          ? null
+                          : () async {
+                              if (formKey.currentState!.validate()) {
+                                final success = await vm.submitReview(
+                                  this.context,
+                                  selectedReviewTypeUuid!,
+                                  reviewTextController.text.trim(),
+                                );
+                                if (success && dialogContext.mounted) {
+                                  Navigator.of(dialogContext).pop();
+                                }
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primary,
+                        foregroundColor: theme.colorScheme.onPrimary,
+                      ),
+                      child: vm.isCreatingReview
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : const Text('Submit'),
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Color _getReviewTypeColor(String reviewType, ThemeData theme) {
+    switch (reviewType.toLowerCase()) {
+      case 'positive':
+        return Colors.green;
+      case 'negative':
+        return Colors.red;
+      case 'mixed':
+        return Colors.orange;
+      default:
+        return theme.colorScheme.primary;
+    }
   }
 
   Widget _buildBuySection(ModelPageViewModel vm, ThemeData theme) {
@@ -501,49 +720,43 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
                 color: theme.colorScheme.secondary,
               ),
             ),
-            const SizedBox(width: 6),
-            ElevatedButton(
-              onPressed: vm.isAddingToCart
-                  ? null
-                  : () => vm.onToggleCart(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: vm.isInCart
-                    ? theme.colorScheme.errorContainer
-                    : theme.colorScheme.primary,
-                foregroundColor: vm.isInCart
-                    ? theme.colorScheme.error
-                    : theme.colorScheme.onPrimary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(7),
-                ),
-                textStyle: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              child: vm.isAddingToCart
-                  ? SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          vm.isInCart ? theme.colorScheme.error : Colors.white,
+            if (!vm.isModelOwner) ...[
+              const SizedBox(width: 6),
+              IconButton(
+                onPressed: vm.isAddingToCart
+                    ? null
+                    : () => vm.onToggleCart(context),
+                icon: vm.isAddingToCart
+                    ? SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            vm.isInCart
+                                ? theme.colorScheme.error
+                                : theme.colorScheme.primary,
+                          ),
                         ),
+                      )
+                    : Icon(
+                        vm.isInCart
+                            ? Icons.remove_shopping_cart
+                            : Icons.add_shopping_cart,
                       ),
-                    )
-                  : vm.isInCart
-                  ? Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.close, size: 18),
-                        const SizedBox(width: 6),
-                        Text("Remove from Cart"),
-                      ],
-                    )
-                  : Text("Add to Cart"),
-            ),
+                tooltip: vm.isInCart ? 'Remove from Cart' : 'Add to Cart',
+                color: vm.isInCart
+                    ? theme.colorScheme.error
+                    : theme.colorScheme.primary,
+                style: IconButton.styleFrom(
+                  backgroundColor: vm.isInCart
+                      ? theme.colorScheme.errorContainer.withValues(alpha: 0.5)
+                      : theme.colorScheme.primaryContainer.withValues(
+                          alpha: 0.5,
+                        ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -556,48 +769,20 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "FAQ",
-            style: theme.textTheme.labelMedium?.copyWith(
-              letterSpacing: 1.08,
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.secondary,
-            ),
-          ),
-          const SizedBox(height: 7),
-          Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: theme.colorScheme.secondary),
-            ),
-            padding: const EdgeInsets.all(10),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: theme.colorScheme.surface,
-                  foregroundImage: NetworkImage(vm.faqUserAvatar),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "FAQ",
+                style: theme.textTheme.labelMedium?.copyWith(
+                  letterSpacing: 1.08,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.secondary,
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(vm.faqUsername, style: theme.textTheme.labelLarge),
-                      const SizedBox(height: 2),
-                      Text(
-                        vm.faqQuestion,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              ),
+              if (vm.hasFAQ)
                 TextButton(
-                  onPressed: vm.onViewAllFAQ,
+                  onPressed: () => vm.onViewAllFAQ(context),
                   style: TextButton.styleFrom(
                     foregroundColor: theme.colorScheme.secondary,
                     minimumSize: Size.zero,
@@ -605,11 +790,288 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
                   ),
                   child: const Text("View All", style: TextStyle(fontSize: 13)),
                 ),
-              ],
+            ],
+          ),
+          const SizedBox(height: 7),
+          vm.hasFAQ ? _buildFAQList(vm, theme) : _buildEmptyFAQ(vm, theme),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyFAQ(ModelPageViewModel vm, ThemeData theme) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.3),
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+      child: Row(
+        children: [
+          Icon(
+            Icons.question_answer_outlined,
+            size: 22,
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              "No FAQ yet",
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          TextButton.icon(
+            onPressed: () => _showAskQuestionDialog(vm, theme),
+            icon: const Icon(Icons.add, size: 16),
+            label: const Text("Ask Question"),
+            style: TextButton.styleFrom(
+              foregroundColor: theme.colorScheme.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFAQList(ModelPageViewModel vm, ThemeData theme) {
+    final faq = vm.faqList.first;
+    final hasReplies = faq.replies != null && faq.replies!.isNotEmpty;
+    final replyCount = faq.replies?.length ?? 0;
+
+    return InkWell(
+      onTap: () => vm.onOpenFAQDetail(context, faq),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: theme.colorScheme.secondary),
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                UserAvatar(
+                  imageUrl:
+                      "${ApiConstants.baseUrl}/users/get/${faq.user.uuid}/avatar",
+                  radius: 18,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        faq.user.nickName,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        faq.messageText,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (hasReplies) ...[
+              const SizedBox(height: 10),
+              Container(
+                margin: const EdgeInsets.only(left: 46),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.reply,
+                      size: 16,
+                      color: theme.colorScheme.secondary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        faq.replies!.first.messageText,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Icon(
+                  Icons.comment_outlined,
+                  size: 14,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '$replyCount ${replyCount == 1 ? 'answer' : 'answers'}',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: () => _showAskQuestionDialog(vm, theme),
+                  icon: const Icon(Icons.add_circle_outline),
+                  tooltip: 'Ask Question',
+                  color: theme.colorScheme.secondary,
+                  constraints: const BoxConstraints(),
+                  padding: const EdgeInsets.all(4),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.chevron_right,
+                  size: 18,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAskQuestionDialog(ModelPageViewModel vm, ThemeData theme) {
+    final questionController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.question_answer_outlined,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  const Text('Ask a Question'),
+                ],
+              ),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Ask about "${vm.loadedModel?.name}"',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: questionController,
+                        maxLines: 4,
+                        maxLength: 5000,
+                        decoration: InputDecoration(
+                          hintText: 'Type your question here...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: theme.colorScheme.surfaceContainerHighest,
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your question';
+                          }
+                          if (value.trim().length < 10) {
+                            return 'Question must be at least 10 characters';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ListenableBuilder(
+                  listenable: vm,
+                  builder: (context, _) {
+                    return ElevatedButton(
+                      onPressed: vm.isCreatingFAQ
+                          ? null
+                          : () async {
+                              if (formKey.currentState!.validate()) {
+                                final success = await vm.submitFAQQuestion(
+                                  this.context,
+                                  questionController.text.trim(),
+                                );
+                                if (success && dialogContext.mounted) {
+                                  Navigator.of(dialogContext).pop();
+                                }
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primary,
+                        foregroundColor: theme.colorScheme.onPrimary,
+                      ),
+                      child: vm.isCreatingFAQ
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : const Text('Submit'),
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

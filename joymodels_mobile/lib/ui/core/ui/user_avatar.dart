@@ -20,12 +20,22 @@ class UserAvatar extends StatelessWidget {
               imageUrl,
               headers: {'Authorization': 'Bearer ${snapshot.data}'},
             ),
+            onBackgroundImageError: (_, _) {},
+            child: Icon(
+              Icons.person,
+              size: radius,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           );
         }
         return CircleAvatar(
           radius: radius,
           backgroundColor: Theme.of(context).colorScheme.surface,
-          child: const Icon(Icons.person),
+          child: Icon(
+            Icons.person,
+            size: radius,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         );
       },
     );

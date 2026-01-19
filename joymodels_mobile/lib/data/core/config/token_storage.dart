@@ -77,4 +77,16 @@ class TokenStorage {
     final accessTokenPayloadMap = TokenStorage.decodeAccessToken(accessToken);
     return accessTokenPayloadMap[claimKey.key] as String?;
   }
+
+  static Future<String?> getCurrentUserUuid() async {
+    return await getClaimFromToken(JwtClaimKeyApiEnum.nameIdentifier);
+  }
+
+  static Future<String?> getCurrentUserName() async {
+    return await getClaimFromToken(JwtClaimKeyApiEnum.userName);
+  }
+
+  static Future<String?> getCurrentUserRole() async {
+    return await getClaimFromToken(JwtClaimKeyApiEnum.role);
+  }
 }
