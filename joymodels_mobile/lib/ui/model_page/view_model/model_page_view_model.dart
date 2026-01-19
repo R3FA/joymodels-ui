@@ -455,7 +455,7 @@ class ModelPageViewModel extends ChangeNotifier {
     BuildContext context,
     ModelFaqSectionResponseApiModel faq,
   ) async {
-    final result = await Navigator.push<ModelFaqSectionResponseApiModel>(
+    final result = await Navigator.push<ModelFaqSectionResponseApiModel?>(
       context,
       MaterialPageRoute(
         builder: (_) => ChangeNotifierProvider(
@@ -471,6 +471,9 @@ class ModelPageViewModel extends ChangeNotifier {
         faqList[index] = result;
         notifyListeners();
       }
+    } else {
+      faqList.removeWhere((f) => f.uuid == faq.uuid);
+      notifyListeners();
     }
   }
 

@@ -262,17 +262,17 @@ class _ModelReviewsPageScreenState extends State<ModelReviewsPageScreen> {
                           ],
                         ),
                       ),
-                    ],
-                    const PopupMenuItem<String>(
-                      value: 'report',
-                      child: Row(
-                        children: [
-                          Icon(Icons.flag, size: 18),
-                          SizedBox(width: 8),
-                          Text('Report'),
-                        ],
+                    ] else
+                      const PopupMenuItem<String>(
+                        value: 'report',
+                        child: Row(
+                          children: [
+                            Icon(Icons.flag, size: 18),
+                            SizedBox(width: 8),
+                            Text('Report'),
+                          ],
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ],

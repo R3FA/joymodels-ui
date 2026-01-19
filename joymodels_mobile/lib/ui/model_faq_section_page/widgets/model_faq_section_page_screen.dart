@@ -49,7 +49,7 @@ class _ModelFaqSectionPageScreenState extends State<ModelFaqSectionPageScreen> {
   }
 
   Future<void> _openFAQDetail(ModelFaqSectionResponseApiModel faq) async {
-    final result = await Navigator.push<ModelFaqSectionResponseApiModel>(
+    final result = await Navigator.push<ModelFaqSectionResponseApiModel?>(
       context,
       MaterialPageRoute(
         builder: (_) => ChangeNotifierProvider(
@@ -59,8 +59,12 @@ class _ModelFaqSectionPageScreenState extends State<ModelFaqSectionPageScreen> {
       ),
     );
 
-    if (result != null && mounted) {
+    if (!mounted) return;
+
+    if (result != null) {
       _viewModel.updateFaqInList(result);
+    } else {
+      _viewModel.removeFaqFromList(faq.uuid);
     }
   }
 

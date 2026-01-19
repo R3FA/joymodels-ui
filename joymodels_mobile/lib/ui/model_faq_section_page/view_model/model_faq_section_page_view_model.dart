@@ -83,6 +83,13 @@ class ModelFaqSectionPageViewModel extends ChangeNotifier
     }
   }
 
+  void removeFaqFromList(String faqUuid) {
+    if (faqPagination == null) return;
+
+    faqPagination!.data.removeWhere((f) => f.uuid == faqUuid);
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     onSessionExpired = null;
