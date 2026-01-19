@@ -4,12 +4,14 @@ import 'package:joymodels_mobile/data/core/repositories/auth_repository.dart';
 import 'package:joymodels_mobile/data/core/services/auth_service.dart';
 import 'package:joymodels_mobile/data/repositories/category_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_availability_repository.dart';
+import 'package:joymodels_mobile/data/repositories/model_faq_section_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_reviews_repository.dart';
 import 'package:joymodels_mobile/data/repositories/shopping_cart_repository.dart';
 import 'package:joymodels_mobile/data/repositories/sso_repository.dart';
 import 'package:joymodels_mobile/data/repositories/users_repository.dart';
 import 'package:joymodels_mobile/data/services/category_service.dart';
+import 'package:joymodels_mobile/data/services/model_faq_section_service.dart';
 import 'package:joymodels_mobile/data/services/shopping_cart_service.dart';
 import 'package:joymodels_mobile/data/services/model_availability_service.dart';
 import 'package:joymodels_mobile/data/services/model_reviews_service.dart';
@@ -62,5 +64,13 @@ void dependencyInjectionSetup() {
   sl.registerLazySingleton(() => ShoppingCartService());
   sl.registerLazySingleton(
     () => ShoppingCartRepository(sl<ShoppingCartService>(), sl<AuthService>()),
+  );
+
+  sl.registerLazySingleton(() => ModelFaqSectionService());
+  sl.registerLazySingleton(
+    () => ModelFaqSectionRepository(
+      sl<ModelFaqSectionService>(),
+      sl<AuthService>(),
+    ),
   );
 }

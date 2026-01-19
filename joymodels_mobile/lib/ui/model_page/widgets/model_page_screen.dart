@@ -5,6 +5,7 @@ import 'package:joymodels_mobile/data/model/models/response_types/model_response
 import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
+import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
 import 'package:joymodels_mobile/ui/model_page/view_model/model_page_view_model.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -556,48 +557,20 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "FAQ",
-            style: theme.textTheme.labelMedium?.copyWith(
-              letterSpacing: 1.08,
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.secondary,
-            ),
-          ),
-          const SizedBox(height: 7),
-          Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: theme.colorScheme.secondary),
-            ),
-            padding: const EdgeInsets.all(10),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: theme.colorScheme.surface,
-                  foregroundImage: NetworkImage(vm.faqUserAvatar),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "FAQ",
+                style: theme.textTheme.labelMedium?.copyWith(
+                  letterSpacing: 1.08,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.secondary,
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(vm.faqUsername, style: theme.textTheme.labelLarge),
-                      const SizedBox(height: 2),
-                      Text(
-                        vm.faqQuestion,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              ),
+              if (vm.hasFAQ)
                 TextButton(
-                  onPressed: vm.onViewAllFAQ,
+                  onPressed: () => vm.onViewAllFAQ(context),
                   style: TextButton.styleFrom(
                     foregroundColor: theme.colorScheme.secondary,
                     minimumSize: Size.zero,
@@ -605,11 +578,291 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
                   ),
                   child: const Text("View All", style: TextStyle(fontSize: 13)),
                 ),
-              ],
+            ],
+          ),
+          const SizedBox(height: 7),
+          vm.hasFAQ ? _buildFAQList(vm, theme) : _buildEmptyFAQ(vm, theme),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyFAQ(ModelPageViewModel vm, ThemeData theme) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.3),
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+      child: Column(
+        children: [
+          Icon(
+            Icons.question_answer_outlined,
+            size: 48,
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "No FAQ yet",
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "Be the first to ask a question about this model",
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () => _showAskQuestionDialog(vm, theme),
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text("Ask a Question"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFAQList(ModelPageViewModel vm, ThemeData theme) {
+    final faq = vm.faqList.first;
+    final hasReplies = faq.replies != null && faq.replies!.isNotEmpty;
+    final replyCount = faq.replies?.length ?? 0;
+
+    return InkWell(
+      onTap: () => vm.onOpenFAQDetail(context, faq),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: theme.colorScheme.secondary),
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                UserAvatar(
+                  imageUrl:
+                      "${ApiConstants.baseUrl}/users/get/${faq.user.uuid}/avatar",
+                  radius: 18,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        faq.user.nickName,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        faq.messageText,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (hasReplies) ...[
+              const SizedBox(height: 10),
+              Container(
+                margin: const EdgeInsets.only(left: 46),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.reply,
+                      size: 16,
+                      color: theme.colorScheme.secondary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        faq.replies!.first.messageText,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Icon(
+                  Icons.comment_outlined,
+                  size: 14,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '$replyCount ${replyCount == 1 ? 'answer' : 'answers'}',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const Spacer(),
+                Icon(
+                  Icons.chevron_right,
+                  size: 18,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAskQuestionDialog(ModelPageViewModel vm, ThemeData theme) {
+    final questionController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.question_answer_outlined,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  const Text('Ask a Question'),
+                ],
+              ),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Ask about "${vm.loadedModel?.name}"',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: questionController,
+                        maxLines: 4,
+                        maxLength: 5000,
+                        decoration: InputDecoration(
+                          hintText: 'Type your question here...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: theme.colorScheme.surfaceContainerHighest,
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your question';
+                          }
+                          if (value.trim().length < 10) {
+                            return 'Question must be at least 10 characters';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ListenableBuilder(
+                  listenable: vm,
+                  builder: (context, _) {
+                    return ElevatedButton(
+                      onPressed: vm.isCreatingFAQ
+                          ? null
+                          : () async {
+                              if (formKey.currentState!.validate()) {
+                                final success = await vm.submitFAQQuestion(
+                                  this.context,
+                                  questionController.text.trim(),
+                                );
+                                if (success && dialogContext.mounted) {
+                                  Navigator.of(dialogContext).pop();
+                                }
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primary,
+                        foregroundColor: theme.colorScheme.onPrimary,
+                      ),
+                      child: vm.isCreatingFAQ
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : const Text('Submit'),
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
