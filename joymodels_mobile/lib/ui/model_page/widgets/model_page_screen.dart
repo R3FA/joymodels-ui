@@ -72,54 +72,56 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            onSelected: (value) {
-              switch (value) {
-                case 'edit':
-                  if (!context.mounted) return;
-                  viewModel.onEditModel(context);
-                  break;
-                case 'delete':
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (BuildContext dialogContext) {
-                      return AlertDialog(
-                        title: const Text('Confirm delete'),
-                        content: const Text(
-                          'Are you sure you want to delete this model?',
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(dialogContext).pop(),
-                            child: const Text('Cancel'),
+          if (viewModel.isModelOwner)
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert),
+              onSelected: (value) {
+                switch (value) {
+                  case 'edit':
+                    if (!context.mounted) return;
+                    viewModel.onEditModel(context);
+                    break;
+                  case 'delete':
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext dialogContext) {
+                        return AlertDialog(
+                          title: const Text('Confirm delete'),
+                          content: const Text(
+                            'Are you sure you want to delete this model?',
                           ),
-                          TextButton(
-                            onPressed: () async {
-                              Navigator.of(dialogContext).pop();
-                              await viewModel.onDeleteModel(context);
-                            },
-                            child: const Text(
-                              'Delete',
-                              style: TextStyle(color: Colors.red),
+                          actions: [
+                            TextButton(
+                              onPressed: () =>
+                                  Navigator.of(dialogContext).pop(),
+                              child: const Text('Cancel'),
                             ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
-              const PopupMenuItem<String>(
-                value: 'delete',
-                child: Text('Delete'),
-              ),
-            ],
-          ),
+                            TextButton(
+                              onPressed: () async {
+                                Navigator.of(dialogContext).pop();
+                                await viewModel.onDeleteModel(context);
+                              },
+                              child: const Text(
+                                'Delete',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                    break;
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
+                const PopupMenuItem<String>(
+                  value: 'delete',
+                  child: Text('Delete'),
+                ),
+              ],
+            ),
         ],
       ),
       body: SingleChildScrollView(
@@ -434,14 +436,15 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
               ),
             ),
           ),
-          IconButton(
-            onPressed: () => _showAddReviewDialog(vm, theme),
-            icon: const Icon(Icons.add_circle_outline),
-            tooltip: 'Add Review',
-            color: theme.colorScheme.secondary,
-            constraints: const BoxConstraints(),
-            padding: const EdgeInsets.all(4),
-          ),
+          if (!vm.hasUserReviewed && !vm.isModelOwner)
+            IconButton(
+              onPressed: () => _showAddReviewDialog(vm, theme),
+              icon: const Icon(Icons.add_circle_outline),
+              tooltip: 'Add Review',
+              color: theme.colorScheme.secondary,
+              constraints: const BoxConstraints(),
+              padding: const EdgeInsets.all(4),
+            ),
         ],
       ),
     );
@@ -474,15 +477,19 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
               ),
             ),
           ),
-          TextButton.icon(
-            onPressed: () => _showAddReviewDialog(vm, theme),
-            icon: const Icon(Icons.add, size: 16),
-            label: const Text("Add Review"),
-            style: TextButton.styleFrom(
-              foregroundColor: theme.colorScheme.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          if (!vm.hasUserReviewed && !vm.isModelOwner)
+            TextButton.icon(
+              onPressed: () => _showAddReviewDialog(vm, theme),
+              icon: const Icon(Icons.add, size: 16),
+              label: const Text("Add Review"),
+              style: TextButton.styleFrom(
+                foregroundColor: theme.colorScheme.primary,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+              ),
             ),
-          ),
         ],
       ),
     );

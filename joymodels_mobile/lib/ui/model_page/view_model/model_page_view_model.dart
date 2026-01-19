@@ -22,6 +22,7 @@ import 'package:joymodels_mobile/ui/model_faq_section_detail_page/view_model/mod
 import 'package:joymodels_mobile/ui/model_faq_section_detail_page/widgets/model_faq_section_detail_page_screen.dart';
 import 'package:joymodels_mobile/ui/model_faq_section_page/view_model/model_faq_section_page_view_model.dart';
 import 'package:joymodels_mobile/ui/model_faq_section_page/widgets/model_faq_section_page_screen.dart';
+import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/ui/model_reviews_page/view_model/model_reviews_page_view_model.dart';
 import 'package:joymodels_mobile/ui/model_reviews_page/widgets/model_reviews_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -42,6 +43,8 @@ class ModelPageViewModel extends ChangeNotifier {
   bool isCreatingFAQ = false;
   bool isCreatingReview = false;
   bool isLoadingReviewTypes = false;
+  bool hasUserReviewed = false;
+  bool isModelOwner = false;
 
   List<ModelReviewTypeResponseApiModel> reviewTypes = [];
 
@@ -63,16 +66,38 @@ class ModelPageViewModel extends ChangeNotifier {
 
     try {
       this.loadedModel = loadedModel;
-      await getModelReviews(loadedModel!);
+      await checkIfModelOwner(loadedModel!);
+      await getModelReviews(loadedModel);
       await isModelLikedByUser(loadedModel);
       await checkIfModelInCart(loadedModel);
       await loadFAQ(loadedModel);
+      await checkIfUserReviewed(loadedModel);
       isLoading = false;
       notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
       isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> checkIfModelOwner(ModelResponseApiModel model) async {
+    final currentUserUuid = await TokenStorage.getCurrentUserUuid();
+    isModelOwner = currentUserUuid == model.user.uuid;
+  }
+
+  Future<bool> checkIfUserReviewed(ModelResponseApiModel model) async {
+    try {
+      hasUserReviewed = await modelReviewsRepository.hasUserReviewed(
+        model.uuid,
+      );
+      notifyListeners();
+      return true;
+    } on SessionExpiredException {
+      onSessionExpired?.call();
+      return false;
+    } catch (e) {
+      return false;
     }
   }
 
@@ -581,6 +606,7 @@ class ModelPageViewModel extends ChangeNotifier {
       );
       await modelReviewsRepository.create(request);
       await getModelReviews(loadedModel!);
+      hasUserReviewed = true;
       isCreatingReview = false;
       notifyListeners();
 
@@ -627,6 +653,8 @@ class ModelPageViewModel extends ChangeNotifier {
     cartItemUuid = null;
     faqList = [];
     reviewTypes = [];
+    hasUserReviewed = false;
+    isModelOwner = false;
     notifyListeners();
   }
 

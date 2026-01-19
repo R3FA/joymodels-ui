@@ -96,4 +96,18 @@ class ModelReviewsRepository {
       );
     }
   }
+
+  Future<bool> hasUserReviewed(String modelUuid) async {
+    final response = await _authService.request(
+      () => _service.hasUserReviewed(modelUuid),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as bool;
+    } else {
+      throw Exception(
+        'Failed to check if user reviewed: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
 }

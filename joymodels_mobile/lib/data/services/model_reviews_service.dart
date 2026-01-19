@@ -81,4 +81,17 @@ class ModelReviewsService {
 
     return response;
   }
+
+  Future<http.Response> hasUserReviewed(String modelUuid) async {
+    final url = Uri.parse("$modelReviewsUrl/has-user-reviewed/$modelUuid");
+
+    final token = await TokenStorage.getAccessToken();
+
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    return response;
+  }
 }
