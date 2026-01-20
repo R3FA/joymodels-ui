@@ -107,7 +107,6 @@ class RegisterPageScreenViewModel with ChangeNotifier {
       successMessage =
           'Registration successful! Redirecting to welcome page...';
       notifyListeners();
-      await Future.delayed(const Duration(seconds: 3));
 
       if (context.mounted) {
         Navigator.of(context).pushReplacement(

@@ -1,13 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/custom_button_style.dart';
 import 'package:joymodels_mobile/ui/core/ui/error_message_text.dart';
 import 'package:joymodels_mobile/ui/core/ui/form_input_decoration.dart';
 import 'package:joymodels_mobile/ui/core/ui/success_message_text.dart';
 import 'package:joymodels_mobile/ui/verify_page/view_model/verify_page_view_model.dart';
+import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
 
-class VerifyPageScreen extends StatelessWidget {
+class VerifyPageScreen extends StatefulWidget {
   const VerifyPageScreen({super.key});
+
+  @override
+  State<VerifyPageScreen> createState() => _VerifyPageScreenState();
+}
+
+class _VerifyPageScreenState extends State<VerifyPageScreen> {
+  late VerifyPageScreenViewModel _viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = context.read<VerifyPageScreenViewModel>();
+    _viewModel.onSessionExpired = _handleSessionExpired;
+    _viewModel.onForbidden = _handleForbidden;
+  }
+
+  void _handleSessionExpired() {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const WelcomePageScreen()),
+      (route) => false,
+    );
+  }
+
+  void _handleForbidden() {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const AccessDeniedScreen()),
+      (route) => false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

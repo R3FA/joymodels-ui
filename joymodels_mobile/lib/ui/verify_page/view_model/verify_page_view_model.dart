@@ -9,7 +9,6 @@ import 'package:joymodels_mobile/data/model/sso/request_types/sso_verify_request
 import 'package:joymodels_mobile/data/repositories/sso_repository.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 import 'package:joymodels_mobile/ui/home_page/widgets/home_page_screen.dart';
-import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 
 class VerifyPageScreenViewModel with ChangeNotifier {
   final ssoRepository = sl<SsoRepository>();
@@ -70,8 +69,6 @@ class VerifyPageScreenViewModel with ChangeNotifier {
       successMessage = "User successfully verified.";
       notifyListeners();
 
-      await Future.delayed(const Duration(seconds: 3));
-
       if (context.mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => HomePageScreen()),
@@ -84,14 +81,7 @@ class VerifyPageScreenViewModel with ChangeNotifier {
       isVerifying = false;
       errorMessage = SessionExpiredException().toString();
       notifyListeners();
-      await Future.delayed(const Duration(seconds: 3));
-      if (context.mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const WelcomePageScreen()),
-          (route) => false,
-        );
-      }
-      clearControllers();
+      onSessionExpired?.call();
       return false;
     } on ForbiddenException {
       isVerifying = false;
@@ -131,13 +121,7 @@ class VerifyPageScreenViewModel with ChangeNotifier {
       isRequestingNewOtpCode = false;
       errorMessage = SessionExpiredException().toString();
       notifyListeners();
-      await Future.delayed(const Duration(seconds: 3));
-      if (context.mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const WelcomePageScreen()),
-          (route) => false,
-        );
-      }
+      onSessionExpired?.call();
       return false;
     } on ForbiddenException {
       isRequestingNewOtpCode = false;
