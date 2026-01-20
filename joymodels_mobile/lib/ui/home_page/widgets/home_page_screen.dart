@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
@@ -21,6 +22,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
     super.initState();
     _viewModel = context.read<HomePageScreenViewModel>();
     _viewModel.onSessionExpired = _handleSessionExpired;
+    _viewModel.onForbidden = _handleForbidden;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _viewModel.init();
     });
@@ -31,6 +33,15 @@ class _HomePageScreenState extends State<HomePageScreen> {
 
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const WelcomePageScreen()),
+      (route) => false,
+    );
+  }
+
+  void _handleForbidden() {
+    if (!mounted) return;
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const AccessDeniedScreen()),
       (route) => false,
     );
   }

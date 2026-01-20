@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/model/shopping_cart/response_types/shopping_cart_item_response_api_model.dart';
+import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
@@ -25,6 +26,7 @@ class _ShoppingCartPageScreenState extends State<ShoppingCartPageScreen> {
     super.initState();
     _viewModel = context.read<ShoppingCartPageViewModel>();
     _viewModel.onSessionExpired = _handleSessionExpired;
+    _viewModel.onForbidden = _handleForbidden;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _viewModel.init();
     });
@@ -35,6 +37,15 @@ class _ShoppingCartPageScreenState extends State<ShoppingCartPageScreen> {
 
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const WelcomePageScreen()),
+      (route) => false,
+    );
+  }
+
+  void _handleForbidden() {
+    if (!mounted) return;
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const AccessDeniedScreen()),
       (route) => false,
     );
   }

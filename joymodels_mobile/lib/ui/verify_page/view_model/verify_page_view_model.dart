@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
+import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/enums/jwt_claim_key_api_enum.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_new_otp_code_request_api_model.dart';
@@ -22,6 +23,9 @@ class VerifyPageScreenViewModel with ChangeNotifier {
 
   String? errorMessage;
   String? successMessage;
+
+  VoidCallback? onSessionExpired;
+  VoidCallback? onForbidden;
 
   String? validateOtpCode(String? otpCode) {
     return RegexValidationViewModel.validateOtpCode(otpCode);
@@ -89,6 +93,11 @@ class VerifyPageScreenViewModel with ChangeNotifier {
       }
       clearControllers();
       return false;
+    } on ForbiddenException {
+      isVerifying = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isVerifying = false;
@@ -130,6 +139,11 @@ class VerifyPageScreenViewModel with ChangeNotifier {
         );
       }
       return false;
+    } on ForbiddenException {
+      isRequestingNewOtpCode = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isRequestingNewOtpCode = false;
@@ -141,6 +155,8 @@ class VerifyPageScreenViewModel with ChangeNotifier {
   @override
   void dispose() {
     otpCodeController.dispose();
+    onSessionExpired = null;
+    onForbidden = null;
     super.dispose();
   }
 }

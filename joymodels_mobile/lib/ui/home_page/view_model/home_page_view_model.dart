@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
+import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/category/request_types/category_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
@@ -43,6 +44,7 @@ class HomePageScreenViewModel with ChangeNotifier {
   String? errorMessage;
 
   VoidCallback? onSessionExpired;
+  VoidCallback? onForbidden;
 
   Future<void> init() async {
     isLoading = true;
@@ -153,6 +155,11 @@ class HomePageScreenViewModel with ChangeNotifier {
       await Future.delayed(const Duration(seconds: 3));
       onSessionExpired?.call();
       return false;
+    } on ForbiddenException {
+      isLoggedUserDataLoading = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isLoggedUserDataLoading = false;
@@ -183,6 +190,11 @@ class HomePageScreenViewModel with ChangeNotifier {
       isCategoriesLoading = false;
       notifyListeners();
       onSessionExpired?.call();
+      return false;
+    } on ForbiddenException {
+      isCategoriesLoading = false;
+      notifyListeners();
+      onForbidden?.call();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -281,6 +293,11 @@ class HomePageScreenViewModel with ChangeNotifier {
       notifyListeners();
       onSessionExpired?.call();
       return false;
+    } on ForbiddenException {
+      isTopArtistsLoading = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isTopArtistsLoading = false;
@@ -310,6 +327,11 @@ class HomePageScreenViewModel with ChangeNotifier {
       await Future.delayed(const Duration(seconds: 3));
       onSessionExpired?.call();
       return false;
+    } on ForbiddenException {
+      isTopArtistsPictureLoading = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isTopArtistsPictureLoading = false;
@@ -336,6 +358,7 @@ class HomePageScreenViewModel with ChangeNotifier {
   void dispose() {
     searchController.dispose();
     onSessionExpired = null;
+    onForbidden = null;
     super.dispose();
   }
 }

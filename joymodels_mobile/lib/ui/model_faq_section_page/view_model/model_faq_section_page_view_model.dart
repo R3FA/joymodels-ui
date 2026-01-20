@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
+import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/request_types/model_faq_section_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/response_types/model_faq_section_response_api_model.dart';
@@ -14,6 +15,7 @@ class ModelFaqSectionPageViewModel extends ChangeNotifier
   bool isLoading = false;
   String? errorMessage;
   VoidCallback? onSessionExpired;
+  VoidCallback? onForbidden;
 
   late String modelUuid;
   String? modelName;
@@ -63,6 +65,11 @@ class ModelFaqSectionPageViewModel extends ChangeNotifier
       notifyListeners();
       onSessionExpired?.call();
       return false;
+    } on ForbiddenException {
+      isLoading = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isLoading = false;
@@ -93,6 +100,7 @@ class ModelFaqSectionPageViewModel extends ChangeNotifier
   @override
   void dispose() {
     onSessionExpired = null;
+    onForbidden = null;
     super.dispose();
   }
 }

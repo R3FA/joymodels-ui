@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
+import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/category/request_types/category_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
@@ -24,6 +25,7 @@ class ModelCreatePageViewModel with ChangeNotifier {
   final modelRepository = sl<ModelRepository>();
 
   VoidCallback? onSessionExpired;
+  VoidCallback? onForbidden;
 
   PaginationResponseApiModel<CategoryResponseApiModel>? categories;
   PaginationResponseApiModel<ModelAvailabilityResponseApiModel>?
@@ -237,6 +239,11 @@ class ModelCreatePageViewModel with ChangeNotifier {
       notifyListeners();
       onSessionExpired?.call();
       return false;
+    } on ForbiddenException {
+      isCategoriesLoading = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isCategoriesLoading = false;
@@ -318,6 +325,11 @@ class ModelCreatePageViewModel with ChangeNotifier {
       isModelAvailabilitiesLoading = false;
       notifyListeners();
       onSessionExpired?.call();
+      return false;
+    } on ForbiddenException {
+      isModelAvailabilitiesLoading = false;
+      notifyListeners();
+      onForbidden?.call();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -441,6 +453,11 @@ class ModelCreatePageViewModel with ChangeNotifier {
       onSessionExpired?.call();
       clearForm();
       return false;
+    } on ForbiddenException {
+      isSubmitting = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isSubmitting = false;
@@ -483,6 +500,7 @@ class ModelCreatePageViewModel with ChangeNotifier {
     modelCategorySearchController.dispose();
     modelPriceController.dispose();
     onSessionExpired = null;
+    onForbidden = null;
     super.dispose();
   }
 }

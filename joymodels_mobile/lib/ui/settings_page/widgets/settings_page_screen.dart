@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/data/core/config/api_constants.dart';
+import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
 import 'package:joymodels_mobile/ui/settings_page/view_model/settings_page_view_model.dart';
 import 'package:joymodels_mobile/ui/home_page/widgets/home_page_screen.dart';
@@ -25,6 +26,7 @@ class _SettingsPageScreenState extends State<SettingsPageScreen>
     super.initState();
     _viewModel = context.read<SettingsPageViewModel>();
     _viewModel.onSessionExpired = _handleSessionExpired;
+    _viewModel.onForbidden = _handleForbidden;
     _viewModel.onProfileSaved = _handleProfileSaved;
     _tabController = TabController(length: 2, vsync: this);
 
@@ -53,6 +55,15 @@ class _SettingsPageScreenState extends State<SettingsPageScreen>
 
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const WelcomePageScreen()),
+      (route) => false,
+    );
+  }
+
+  void _handleForbidden() {
+    if (!mounted) return;
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const AccessDeniedScreen()),
       (route) => false,
     );
   }

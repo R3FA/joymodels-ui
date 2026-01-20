@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
+import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/enums/model_review_enum.dart';
 import 'package:joymodels_mobile/data/model/model_review_type/request_types/model_review_type_search_request_api_model.dart';
@@ -24,6 +25,7 @@ class ModelReviewsPageViewModel extends ChangeNotifier
   bool isLoadingReviewTypes = false;
   String? errorMessage;
   VoidCallback? onSessionExpired;
+  VoidCallback? onForbidden;
 
   String? currentUserUuid;
   late String modelUuid;
@@ -81,6 +83,11 @@ class ModelReviewsPageViewModel extends ChangeNotifier
       notifyListeners();
       onSessionExpired?.call();
       return false;
+    } on ForbiddenException {
+      isLoading = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isLoading = false;
@@ -128,6 +135,11 @@ class ModelReviewsPageViewModel extends ChangeNotifier
       notifyListeners();
       onSessionExpired?.call();
       return false;
+    } on ForbiddenException {
+      isLoadingReviewTypes = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       isLoadingReviewTypes = false;
       notifyListeners();
@@ -162,6 +174,11 @@ class ModelReviewsPageViewModel extends ChangeNotifier
       isDeleting = false;
       notifyListeners();
       onSessionExpired?.call();
+      return false;
+    } on ForbiddenException {
+      isDeleting = false;
+      notifyListeners();
+      onForbidden?.call();
       return false;
     } catch (e) {
       isDeleting = false;
@@ -215,6 +232,11 @@ class ModelReviewsPageViewModel extends ChangeNotifier
       notifyListeners();
       onSessionExpired?.call();
       return false;
+    } on ForbiddenException {
+      isEditing = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       isEditing = false;
       notifyListeners();
@@ -235,6 +257,7 @@ class ModelReviewsPageViewModel extends ChangeNotifier
   @override
   void dispose() {
     onSessionExpired = null;
+    onForbidden = null;
     super.dispose();
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
+import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/category/request_types/category_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
@@ -53,6 +54,7 @@ class ModelSearchPageViewModel
   PaginationResponseApiModel<CategoryResponseApiModel>? categories;
 
   VoidCallback? onSessionExpired;
+  VoidCallback? onForbidden;
 
   @override
   PaginationResponseApiModel<ModelResponseApiModel>? get paginationData =>
@@ -122,6 +124,11 @@ class ModelSearchPageViewModel
       notifyListeners();
       onSessionExpired?.call();
       return false;
+    } on ForbiddenException {
+      isCategoriesLoading = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isCategoriesLoading = false;
@@ -155,6 +162,11 @@ class ModelSearchPageViewModel
       areModelsLoading = false;
       notifyListeners();
       onSessionExpired?.call();
+      return false;
+    } on ForbiddenException {
+      areModelsLoading = false;
+      notifyListeners();
+      onForbidden?.call();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -226,6 +238,7 @@ class ModelSearchPageViewModel
   void dispose() {
     searchController.dispose();
     onSessionExpired = null;
+    onForbidden = null;
     super.dispose();
   }
 }

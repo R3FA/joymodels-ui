@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
+import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_logout_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_password_change_request_api_model.dart';
@@ -58,6 +59,7 @@ class SettingsPageViewModel with ChangeNotifier {
   String? _originalNickname;
 
   VoidCallback? onSessionExpired;
+  VoidCallback? onForbidden;
   VoidCallback? onProfileSaved;
 
   bool get hasProfileChanges {
@@ -101,6 +103,10 @@ class SettingsPageViewModel with ChangeNotifier {
       isLoading = false;
       notifyListeners();
       onSessionExpired?.call();
+    } on ForbiddenException {
+      isLoading = false;
+      notifyListeners();
+      onForbidden?.call();
     } catch (e) {
       errorMessage = e.toString();
       isLoading = false;
@@ -224,6 +230,10 @@ class SettingsPageViewModel with ChangeNotifier {
       isSaving = false;
       notifyListeners();
       onSessionExpired?.call();
+    } on ForbiddenException {
+      isSaving = false;
+      notifyListeners();
+      onForbidden?.call();
     } catch (e) {
       errorMessage = e.toString();
       isSaving = false;
@@ -294,6 +304,10 @@ class SettingsPageViewModel with ChangeNotifier {
       isChangingPassword = false;
       notifyListeners();
       onSessionExpired?.call();
+    } on ForbiddenException {
+      isChangingPassword = false;
+      notifyListeners();
+      onForbidden?.call();
     } catch (e) {
       errorMessage = 'Failed to change password. Please try again.';
       isChangingPassword = false;
@@ -315,6 +329,7 @@ class SettingsPageViewModel with ChangeNotifier {
     newPasswordController.dispose();
     confirmPasswordController.dispose();
     onSessionExpired = null;
+    onForbidden = null;
     onProfileSaved = null;
     super.dispose();
   }
