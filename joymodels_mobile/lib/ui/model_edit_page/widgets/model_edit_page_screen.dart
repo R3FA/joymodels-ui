@@ -6,6 +6,7 @@ import 'package:joymodels_mobile/data/model/models/response_types/model_response
 import 'package:joymodels_mobile/ui/core/ui/form_input_decoration.dart';
 import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
+import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
 import 'package:joymodels_mobile/ui/model_edit_page/view_model/model_edit_page_view_model.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -48,6 +49,7 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
         builder: (context, viewModel, _) {
           final theme = Theme.of(context);
           return Scaffold(
+            endDrawer: const MenuDrawer(),
             bottomNavigationBar: const NavigationBarScreen(),
             appBar: AppBar(
               title: const Text('Edit model'),

@@ -6,6 +6,7 @@ import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
+import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
 import 'package:joymodels_mobile/ui/model_page/view_model/model_page_view_model.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -46,21 +47,24 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
     final theme = Theme.of(context);
 
     if (viewModel.isModelBeingDeleted) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-        bottomNavigationBar: NavigationBarScreen(),
+      return Scaffold(
+        endDrawer: const MenuDrawer(),
+        body: const Center(child: CircularProgressIndicator()),
+        bottomNavigationBar: const NavigationBarScreen(),
       );
     }
 
     if (viewModel.isLoading || viewModel.loadedModel == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-        bottomNavigationBar: NavigationBarScreen(),
+      return Scaffold(
+        endDrawer: const MenuDrawer(),
+        body: const Center(child: CircularProgressIndicator()),
+        bottomNavigationBar: const NavigationBarScreen(),
       );
     }
 
     if (viewModel.errorMessage != null) {
       return Scaffold(
+        endDrawer: const MenuDrawer(),
         body: ErrorDisplay(
           message: viewModel.errorMessage!,
           onRetry: () => viewModel.init(loadedModel: widget.loadedModel),
@@ -70,6 +74,7 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
     }
 
     return Scaffold(
+      endDrawer: const MenuDrawer(),
       appBar: AppBar(
         actions: [
           if (viewModel.isModelOwner)

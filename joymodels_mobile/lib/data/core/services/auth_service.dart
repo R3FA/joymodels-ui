@@ -24,4 +24,22 @@ class AuthService {
 
     return response;
   }
+
+  Future<http.StreamedResponse> requestStreamed(
+    Future<http.StreamedResponse> Function() request,
+  ) async {
+    http.StreamedResponse response = await request();
+
+    // TODO: Add Forbidden Exception handling
+    if (response.statusCode == 401) {
+      final refreshed = await _authRepository.requestAccessTokenChange();
+      if (refreshed) {
+        response = await request();
+      } else {
+        throw SessionExpiredException();
+      }
+    }
+
+    return response;
+  }
 }

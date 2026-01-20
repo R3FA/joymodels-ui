@@ -7,6 +7,7 @@ import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
+import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
 import 'package:joymodels_mobile/ui/model_search_page/view_model/model_search_page_view_model.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -52,7 +53,8 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      bottomNavigationBar: NavigationBarScreen(),
+      endDrawer: const MenuDrawer(),
+      bottomNavigationBar: const NavigationBarScreen(),
       body: SafeArea(
         child: Column(
           children: [

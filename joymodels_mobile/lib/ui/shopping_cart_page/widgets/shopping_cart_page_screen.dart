@@ -5,6 +5,7 @@ import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
+import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
 import 'package:joymodels_mobile/ui/shopping_cart_page/view_model/shopping_cart_page_view_model.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -44,6 +45,7 @@ class _ShoppingCartPageScreenState extends State<ShoppingCartPageScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      endDrawer: const MenuDrawer(),
       appBar: AppBar(title: const Text('Shopping Cart'), centerTitle: true),
       bottomNavigationBar: const NavigationBarScreen(),
       body: SafeArea(

@@ -43,6 +43,45 @@ class ValidationViewModel {
     return null;
   }
 
+  static Future<String?> validateUserPictureOptional(File? userPicture) async {
+    if (userPicture == null) {
+      return null;
+    }
+
+    const int allowedSizeInBytes = 10485760;
+    const int minWidth = 256;
+    const int minHeight = 256;
+    const int maxWidth = 1024;
+    const int maxHeight = 1024;
+    const List<String> allowedExtensions = ['jpg', 'jpeg', 'png'];
+
+    final int fileSize = await userPicture.length();
+    if (fileSize > allowedSizeInBytes) {
+      return "Picture too large. Maximum size limit is 10MB";
+    }
+
+    final String filePath = userPicture.path.toLowerCase();
+    final String ext = filePath.split('.').last;
+    if (!allowedExtensions.contains(ext)) {
+      return "Unsupported picture format. Allowed: .jpg, .jpeg, .png";
+    }
+
+    final Uint8List bytes = await userPicture.readAsBytes();
+    final img.Image? decodedImage = img.decodeImage(bytes);
+    if (decodedImage == null) {
+      return "Unsupported or corrupted image.";
+    }
+
+    if (decodedImage.width < minWidth ||
+        decodedImage.width > maxWidth ||
+        decodedImage.height < minHeight ||
+        decodedImage.height > maxHeight) {
+      return "Image error: ${decodedImage.width}x${decodedImage.height}. Allowed: width between $minWidth-$maxWidth px and height between $minHeight-$maxHeight px.";
+    }
+
+    return null;
+  }
+
   static String? validateModelFile(PlatformFile file) {
     const int maxModelSizeInBytes = 30 * 1024 * 1024;
     const List<String> allowedModelFormats = [

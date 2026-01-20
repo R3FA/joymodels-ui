@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:joymodels_mobile/data/model/model_availability/response_types/model_availability_response_api_model.dart';
 import 'package:joymodels_mobile/ui/core/ui/form_input_decoration.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
+import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
 import 'package:joymodels_mobile/ui/model_create_page/view_model/model_create_page_view_model.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -42,6 +43,7 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      endDrawer: const MenuDrawer(),
       bottomNavigationBar: const NavigationBarScreen(),
       appBar: AppBar(
         title: const Text('Add model'),

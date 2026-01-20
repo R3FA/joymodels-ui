@@ -35,8 +35,8 @@ class NavigationBarScreen extends StatelessWidget {
           label: 'Cart',
         ),
         NavigationDestination(
-          icon: Icon(Icons.settings, size: iconSize),
-          label: 'Settings',
+          icon: Icon(Icons.more_horiz, size: iconSize),
+          label: 'Menu',
         ),
       ],
     );
