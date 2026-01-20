@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/model/enums/model_review_enum.dart';
 import 'package:joymodels_mobile/data/model/model_reviews/response_types/model_review_response_api_model.dart';
+import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
@@ -27,6 +28,7 @@ class _ModelReviewsPageScreenState extends State<ModelReviewsPageScreen> {
     super.initState();
     _viewModel = context.read<ModelReviewsPageViewModel>();
     _viewModel.onSessionExpired = _handleSessionExpired;
+    _viewModel.onForbidden = _handleForbidden;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _viewModel.init(widget.modelUuid);
     });
@@ -37,6 +39,15 @@ class _ModelReviewsPageScreenState extends State<ModelReviewsPageScreen> {
 
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const WelcomePageScreen()),
+      (route) => false,
+    );
+  }
+
+  void _handleForbidden() {
+    if (!mounted) return;
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const AccessDeniedScreen()),
       (route) => false,
     );
   }

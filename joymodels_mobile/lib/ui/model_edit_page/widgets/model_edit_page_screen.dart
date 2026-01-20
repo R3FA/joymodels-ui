@@ -3,9 +3,11 @@ import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_availability/response_types/model_availability_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
+import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/form_input_decoration.dart';
 import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
+import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
 import 'package:joymodels_mobile/ui/model_edit_page/view_model/model_edit_page_view_model.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -26,6 +28,7 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
     super.initState();
     _viewModel = context.read<ModelEditPageViewModel>();
     _viewModel.onSessionExpired = _handleSessionExpired;
+    _viewModel.onForbidden = _handleForbidden;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _viewModel.init(widget.model);
     });
@@ -40,6 +43,15 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
     );
   }
 
+  void _handleForbidden() {
+    if (!mounted) return;
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const AccessDeniedScreen()),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ModelEditPageViewModel>.value(
@@ -48,6 +60,7 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
         builder: (context, viewModel, _) {
           final theme = Theme.of(context);
           return Scaffold(
+            endDrawer: const MenuDrawer(),
             bottomNavigationBar: const NavigationBarScreen(),
             appBar: AppBar(
               title: const Text('Edit model'),

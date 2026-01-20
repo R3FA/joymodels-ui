@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:joymodels_mobile/data/model/model_availability/response_types/model_availability_response_api_model.dart';
+import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/form_input_decoration.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
+import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
 import 'package:joymodels_mobile/ui/model_create_page/view_model/model_create_page_view_model.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +24,7 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
     super.initState();
     _viewModel = context.read<ModelCreatePageViewModel>();
     _viewModel.onSessionExpired = _handleSessionExpired;
+    _viewModel.onForbidden = _handleForbidden;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _viewModel.init();
     });
@@ -36,12 +39,22 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
     );
   }
 
+  void _handleForbidden() {
+    if (!mounted) return;
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const AccessDeniedScreen()),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<ModelCreatePageViewModel>();
     final theme = Theme.of(context);
 
     return Scaffold(
+      endDrawer: const MenuDrawer(),
       bottomNavigationBar: const NavigationBarScreen(),
       appBar: AppBar(
         title: const Text('Add model'),

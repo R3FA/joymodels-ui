@@ -18,7 +18,6 @@ class LoginPageScreenViewModel with ChangeNotifier {
   final passwordController = TextEditingController();
 
   bool isLoading = false;
-  bool isVerifyScreenLoading = false;
 
   String? errorMessage;
   String? successMessage;
@@ -35,7 +34,6 @@ class LoginPageScreenViewModel with ChangeNotifier {
     nicknameController.clear();
     passwordController.clear();
     isLoading = false;
-    isVerifyScreenLoading = false;
     errorMessage = null;
     successMessage = null;
     notifyListeners();
@@ -71,8 +69,6 @@ class LoginPageScreenViewModel with ChangeNotifier {
 
       if (await TokenStorage.getClaimFromToken(JwtClaimKeyApiEnum.role) ==
           UserRoleApiEnum.Unverified.name) {
-        isVerifyScreenLoading = true;
-        notifyListeners();
         if (context.mounted) {
           Navigator.of(
             context,

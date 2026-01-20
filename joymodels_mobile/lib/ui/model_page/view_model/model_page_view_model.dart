@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
+import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/request_types/model_faq_section_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/request_types/model_faq_section_search_request_api_model.dart';
@@ -58,6 +59,7 @@ class ModelPageViewModel extends ChangeNotifier {
   late final PageController galleryController = PageController(initialPage: 0);
 
   VoidCallback? onSessionExpired;
+  VoidCallback? onForbidden;
 
   Future<void> init({required ModelResponseApiModel? loadedModel}) async {
     clear();
@@ -96,6 +98,10 @@ class ModelPageViewModel extends ChangeNotifier {
     } on SessionExpiredException {
       onSessionExpired?.call();
       return false;
+    } on ForbiddenException {
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       return false;
     }
@@ -115,6 +121,10 @@ class ModelPageViewModel extends ChangeNotifier {
     } on SessionExpiredException {
       onSessionExpired?.call();
       return false;
+    } on ForbiddenException {
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       return false;
     }
@@ -131,6 +141,10 @@ class ModelPageViewModel extends ChangeNotifier {
       errorMessage = SessionExpiredException().toString();
       notifyListeners();
       onSessionExpired?.call();
+      return false;
+    } on ForbiddenException {
+      notifyListeners();
+      onForbidden?.call();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -151,6 +165,10 @@ class ModelPageViewModel extends ChangeNotifier {
       errorMessage = SessionExpiredException().toString();
       notifyListeners();
       onSessionExpired?.call();
+      return false;
+    } on ForbiddenException {
+      notifyListeners();
+      onForbidden?.call();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -177,6 +195,11 @@ class ModelPageViewModel extends ChangeNotifier {
       areReviewsLoading = false;
       notifyListeners();
       onSessionExpired?.call();
+      return false;
+    } on ForbiddenException {
+      areReviewsLoading = false;
+      notifyListeners();
+      onForbidden?.call();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -214,6 +237,10 @@ class ModelPageViewModel extends ChangeNotifier {
         notifyListeners();
         onSessionExpired?.call();
         return false;
+      } on ForbiddenException {
+        notifyListeners();
+        onForbidden?.call();
+        return false;
       } catch (e) {
         errorMessage = e.toString();
         notifyListeners();
@@ -228,6 +255,10 @@ class ModelPageViewModel extends ChangeNotifier {
         errorMessage = SessionExpiredException().toString();
         notifyListeners();
         onSessionExpired?.call();
+        return false;
+      } on ForbiddenException {
+        notifyListeners();
+        onForbidden?.call();
         return false;
       } catch (e) {
         errorMessage = e.toString();
@@ -281,6 +312,11 @@ class ModelPageViewModel extends ChangeNotifier {
       isModelBeingDeleted = false;
       notifyListeners();
       onSessionExpired?.call();
+      return false;
+    } on ForbiddenException {
+      isModelBeingDeleted = false;
+      notifyListeners();
+      onForbidden?.call();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -386,6 +422,11 @@ class ModelPageViewModel extends ChangeNotifier {
       notifyListeners();
       onSessionExpired?.call();
       return false;
+    } on ForbiddenException {
+      isAddingToCart = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isAddingToCart = false;
@@ -435,6 +476,11 @@ class ModelPageViewModel extends ChangeNotifier {
       isAddingToCart = false;
       notifyListeners();
       onSessionExpired?.call();
+      return false;
+    } on ForbiddenException {
+      isAddingToCart = false;
+      notifyListeners();
+      onForbidden?.call();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -538,6 +584,11 @@ class ModelPageViewModel extends ChangeNotifier {
       notifyListeners();
       onSessionExpired?.call();
       return false;
+    } on ForbiddenException {
+      isCreatingFAQ = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isCreatingFAQ = false;
@@ -579,6 +630,11 @@ class ModelPageViewModel extends ChangeNotifier {
       isLoadingReviewTypes = false;
       notifyListeners();
       onSessionExpired?.call();
+      return false;
+    } on ForbiddenException {
+      isLoadingReviewTypes = false;
+      notifyListeners();
+      onForbidden?.call();
       return false;
     } catch (e) {
       isLoadingReviewTypes = false;
@@ -626,6 +682,11 @@ class ModelPageViewModel extends ChangeNotifier {
       notifyListeners();
       onSessionExpired?.call();
       return false;
+    } on ForbiddenException {
+      isCreatingReview = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isCreatingReview = false;
@@ -662,6 +723,7 @@ class ModelPageViewModel extends ChangeNotifier {
   void dispose() {
     galleryController.dispose();
     onSessionExpired = null;
+    onForbidden = null;
     super.dispose();
   }
 }

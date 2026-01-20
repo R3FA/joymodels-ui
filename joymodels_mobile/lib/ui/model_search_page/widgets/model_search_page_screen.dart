@@ -3,10 +3,12 @@ import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/request_types/model_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
+import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
+import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
 import 'package:joymodels_mobile/ui/model_search_page/view_model/model_search_page_view_model.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -29,6 +31,7 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     super.initState();
     _viewModel = context.read<ModelSearchPageViewModel>();
     _viewModel.onSessionExpired = _handleSessionExpired;
+    _viewModel.onForbidden = _handleForbidden;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _viewModel.init(
         selectedCategory: widget.selectedCategory,
@@ -46,13 +49,23 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     );
   }
 
+  void _handleForbidden() {
+    if (!mounted) return;
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const AccessDeniedScreen()),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<ModelSearchPageViewModel>();
     final theme = Theme.of(context);
 
     return Scaffold(
-      bottomNavigationBar: NavigationBarScreen(),
+      endDrawer: const MenuDrawer(),
+      bottomNavigationBar: const NavigationBarScreen(),
       body: SafeArea(
         child: Column(
           children: [

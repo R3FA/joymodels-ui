@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
+import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
@@ -18,6 +19,7 @@ class ShoppingCartPageViewModel extends ChangeNotifier
   bool isLoading = false;
   String? errorMessage;
   VoidCallback? onSessionExpired;
+  VoidCallback? onForbidden;
 
   PaginationResponseApiModel<ShoppingCartItemResponseApiModel>? _paginationData;
 
@@ -72,6 +74,10 @@ class ShoppingCartPageViewModel extends ChangeNotifier
       isLoading = false;
       notifyListeners();
       onSessionExpired?.call();
+    } on ForbiddenException {
+      isLoading = false;
+      notifyListeners();
+      onForbidden?.call();
     } catch (e) {
       errorMessage = e.toString();
       isLoading = false;
@@ -91,6 +97,10 @@ class ShoppingCartPageViewModel extends ChangeNotifier
       errorMessage = SessionExpiredException().toString();
       notifyListeners();
       onSessionExpired?.call();
+      return false;
+    } on ForbiddenException {
+      notifyListeners();
+      onForbidden?.call();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -123,6 +133,7 @@ class ShoppingCartPageViewModel extends ChangeNotifier
     searchController.removeListener(_onSearchChanged);
     searchController.dispose();
     onSessionExpired = null;
+    onForbidden = null;
     super.dispose();
   }
 }

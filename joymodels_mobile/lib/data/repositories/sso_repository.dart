@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:joymodels_mobile/data/core/services/auth_service.dart';
+import 'package:joymodels_mobile/data/model/sso/request_types/sso_logout_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_new_otp_code_request_api_model.dart';
+import 'package:joymodels_mobile/data/model/sso/request_types/sso_password_change_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_user_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_user_login_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_verify_request_api_model.dart';
@@ -67,6 +69,30 @@ class SsoRepository {
     } else {
       throw Exception(
         'Failed to login user: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  Future<void> logout(SsoLogoutRequestApiModel request) async {
+    final response = await _authService.request(() => _service.logout(request));
+
+    if (response.statusCode != 204) {
+      throw Exception(
+        'Failed to logout: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  Future<void> requestPasswordChange(
+    SsoPasswordChangeRequestApiModel request,
+  ) async {
+    final response = await _authService.request(
+      () => _service.requestPasswordChange(request),
+    );
+
+    if (response.statusCode != 204) {
+      throw Exception(
+        'Failed to change password: ${response.statusCode} - ${response.body}',
       );
     }
   }

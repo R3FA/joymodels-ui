@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
+import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/category/request_types/category_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
@@ -40,6 +41,7 @@ class ModelEditPageViewModel extends ChangeNotifier {
 
   String? errorMessage;
   VoidCallback? onSessionExpired;
+  VoidCallback? onForbidden;
 
   List<CategoryResponseApiModel> categories = [];
   late ModelResponseApiModel originalModel;
@@ -225,6 +227,11 @@ class ModelEditPageViewModel extends ChangeNotifier {
       notifyListeners();
       onSessionExpired?.call();
       return false;
+    } on ForbiddenException {
+      isCategoriesLoading = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isCategoriesLoading = false;
@@ -310,6 +317,11 @@ class ModelEditPageViewModel extends ChangeNotifier {
       isModelAvailabilitiesLoading = false;
       notifyListeners();
       onSessionExpired?.call();
+      return false;
+    } on ForbiddenException {
+      isModelAvailabilitiesLoading = false;
+      notifyListeners();
+      onForbidden?.call();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -425,6 +437,11 @@ class ModelEditPageViewModel extends ChangeNotifier {
       notifyListeners();
       onSessionExpired?.call();
       return false;
+    } on ForbiddenException {
+      isSaving = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isSaving = false;
@@ -454,6 +471,7 @@ class ModelEditPageViewModel extends ChangeNotifier {
     modelPicturesToDelete.clear();
 
     onSessionExpired = null;
+    onForbidden = null;
 
     super.dispose();
   }

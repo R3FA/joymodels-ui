@@ -5,7 +5,7 @@ import 'package:joymodels_mobile/ui/shopping_cart_page/view_model/shopping_cart_
 import 'package:joymodels_mobile/ui/shopping_cart_page/widgets/shopping_cart_page_screen.dart';
 import 'package:provider/provider.dart';
 
-enum NavBarItem { home, community, add, cart, settings }
+enum NavBarItem { home, community, add, cart, menu }
 
 class NavigationBarViewModel with ChangeNotifier {
   int selectedNavBarItem = 0;
@@ -37,12 +37,17 @@ class NavigationBarViewModel with ChangeNotifier {
     );
   }
 
-  void _navigateToSettings(BuildContext context) {
-    // TODO: Implementiraj
+  void _openMenu(BuildContext context) {
+    Scaffold.of(context).openEndDrawer();
   }
 
   void onNavigationBarItemTapped(BuildContext context, int index) {
     final navBarItem = NavBarItem.values[index];
+
+    if (navBarItem == NavBarItem.menu) {
+      _openMenu(context);
+      return;
+    }
 
     switch (navBarItem) {
       case NavBarItem.home:
@@ -57,8 +62,7 @@ class NavigationBarViewModel with ChangeNotifier {
       case NavBarItem.cart:
         _navigateToCart(context);
         break;
-      case NavBarItem.settings:
-        _navigateToSettings(context);
+      case NavBarItem.menu:
         break;
     }
 
