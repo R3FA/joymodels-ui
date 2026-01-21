@@ -9,6 +9,7 @@ import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
 import 'package:joymodels_mobile/ui/model_faq_section_detail_page/view_model/model_faq_section_detail_page_view_model.dart';
 import 'package:joymodels_mobile/ui/model_faq_section_detail_page/widgets/model_faq_section_detail_page_screen.dart';
 import 'package:joymodels_mobile/ui/model_faq_section_page/view_model/model_faq_section_page_view_model.dart';
+import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -165,6 +166,14 @@ class _ModelFaqSectionPageScreenState extends State<ModelFaqSectionPageScreen> {
     );
   }
 
+  void _navigateToUserProfile(String userUuid) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => UserProfilePageScreen(userUuid: userUuid),
+      ),
+    );
+  }
+
   Widget _buildFAQCard(ModelFaqSectionResponseApiModel faq, ThemeData theme) {
     final replyCount = faq.replies?.length ?? 0;
 
@@ -181,10 +190,13 @@ class _ModelFaqSectionPageScreenState extends State<ModelFaqSectionPageScreen> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  UserAvatar(
-                    imageUrl:
-                        "${ApiConstants.baseUrl}/users/get/${faq.user.uuid}/avatar",
-                    radius: 20,
+                  GestureDetector(
+                    onTap: () => _navigateToUserProfile(faq.user.uuid),
+                    child: UserAvatar(
+                      imageUrl:
+                          "${ApiConstants.baseUrl}/users/get/${faq.user.uuid}/avatar",
+                      radius: 20,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -194,11 +206,15 @@ class _ModelFaqSectionPageScreenState extends State<ModelFaqSectionPageScreen> {
                         Row(
                           children: [
                             Expanded(
-                              child: Text(
-                                faq.user.nickName,
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: theme.colorScheme.primary,
+                              child: GestureDetector(
+                                onTap: () =>
+                                    _navigateToUserProfile(faq.user.uuid),
+                                child: Text(
+                                  faq.user.nickName,
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: theme.colorScheme.primary,
+                                  ),
                                 ),
                               ),
                             ),

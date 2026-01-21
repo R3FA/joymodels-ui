@@ -9,6 +9,7 @@ import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_ba
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
 import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
 import 'package:joymodels_mobile/ui/model_page/view_model/model_page_view_model.dart';
+import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -295,11 +296,14 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
             ),
           ),
           const SizedBox(width: 4),
-          Text(
-            vm.loadedModel?.user.nickName ?? '',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.secondary,
-              fontWeight: FontWeight.w600,
+          GestureDetector(
+            onTap: () => _navigateToUserProfile(vm.loadedModel?.user.uuid),
+            child: Text(
+              vm.loadedModel?.user.nickName ?? '',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.secondary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           const SizedBox(width: 14),
@@ -877,21 +881,27 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                UserAvatar(
-                  imageUrl:
-                      "${ApiConstants.baseUrl}/users/get/${faq.user.uuid}/avatar",
-                  radius: 18,
+                GestureDetector(
+                  onTap: () => _navigateToUserProfile(faq.user.uuid),
+                  child: UserAvatar(
+                    imageUrl:
+                        "${ApiConstants.baseUrl}/users/get/${faq.user.uuid}/avatar",
+                    radius: 18,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        faq.user.nickName,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.primary,
+                      GestureDetector(
+                        onTap: () => _navigateToUserProfile(faq.user.uuid),
+                        child: Text(
+                          faq.user.nickName,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.primary,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -977,6 +987,16 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _navigateToUserProfile(String? userUuid) {
+    if (userUuid == null) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => UserProfilePageScreen(userUuid: userUuid),
       ),
     );
   }

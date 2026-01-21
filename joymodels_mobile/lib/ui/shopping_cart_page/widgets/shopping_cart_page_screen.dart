@@ -8,6 +8,7 @@ import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_ba
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
 import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
 import 'package:joymodels_mobile/ui/shopping_cart_page/view_model/shopping_cart_page_view_model.dart';
+import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -47,6 +48,14 @@ class _ShoppingCartPageScreenState extends State<ShoppingCartPageScreen> {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const AccessDeniedScreen()),
       (route) => false,
+    );
+  }
+
+  void _navigateToUserProfile(String userUuid) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => UserProfilePageScreen(userUuid: userUuid),
+      ),
     );
   }
 
@@ -246,22 +255,28 @@ class _ShoppingCartPageScreenState extends State<ShoppingCartPageScreen> {
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 4),
-        RichText(
-          text: TextSpan(
-            style: theme.textTheme.bodySmall,
-            children: [
-              TextSpan(
-                text: 'by ',
-                style: TextStyle(color: theme.colorScheme.secondary),
+        Row(
+          children: [
+            Text(
+              'by ',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.secondary,
               ),
-              TextSpan(
-                text: model.user.nickName,
-                style: TextStyle(color: theme.colorScheme.primary),
+            ),
+            Flexible(
+              child: GestureDetector(
+                onTap: () => _navigateToUserProfile(model.user.uuid),
+                child: Text(
+                  model.user.nickName,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ],
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         Text(

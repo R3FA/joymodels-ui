@@ -95,27 +95,33 @@ class _HomePageScreenState extends State<HomePageScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        CircleAvatar(
-          radius: 32,
-          backgroundColor: theme.colorScheme.primary,
-          child: viewModel.loggedUserAvatarUrl.isNotEmpty
-              ? ClipOval(
-                  child: Image.memory(
-                    viewModel.loggedUserAvatarUrl,
-                    width: 64,
-                    height: 64,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) =>
-                        const Icon(Icons.person, size: 42, color: Colors.white),
-                  ),
-                )
-              : const Icon(Icons.person, size: 42, color: Colors.white),
+        GestureDetector(
+          onTap: () => viewModel.onOwnProfileTap(context),
+          child: CircleAvatar(
+            radius: 32,
+            backgroundColor: theme.colorScheme.primary,
+            child: viewModel.loggedUserAvatarUrl.isNotEmpty
+                ? ClipOval(
+                    child: Image.memory(
+                      viewModel.loggedUserAvatarUrl,
+                      width: 64,
+                      height: 64,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => const Icon(
+                        Icons.person,
+                        size: 42,
+                        color: Colors.white,
+                      ),
+                    ),
+                  )
+                : const Icon(Icons.person, size: 42, color: Colors.white),
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: viewModel.isSearching
               ? _buildSearchBar(viewModel, theme)
-              : _buildWelcomeText(viewModel, theme),
+              : _buildWelcomeText(viewModel, theme, context),
         ),
         if (viewModel.isSearching)
           TextButton(
@@ -125,6 +131,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
         else ...[
           IconButton(
             icon: const Icon(Icons.notifications_none),
+            // TODO: Implement notifications when ready
             onPressed: () {},
           ),
           IconButton(
@@ -136,7 +143,11 @@ class _HomePageScreenState extends State<HomePageScreen> {
     );
   }
 
-  Widget _buildWelcomeText(HomePageScreenViewModel viewModel, ThemeData theme) {
+  Widget _buildWelcomeText(
+    HomePageScreenViewModel viewModel,
+    ThemeData theme,
+    BuildContext context,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -144,13 +155,16 @@ class _HomePageScreenState extends State<HomePageScreen> {
           children: [
             Text('Hi, ', style: theme.textTheme.titleLarge),
             Flexible(
-              child: Text(
-                viewModel.loggedUsername,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: theme.colorScheme.secondary,
-                  fontWeight: FontWeight.bold,
+              child: GestureDetector(
+                onTap: () => viewModel.onOwnProfileTap(context),
+                child: Text(
+                  viewModel.loggedUsername,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: theme.colorScheme.secondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

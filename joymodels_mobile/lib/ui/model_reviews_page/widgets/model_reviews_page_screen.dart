@@ -8,6 +8,7 @@ import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
 import 'package:joymodels_mobile/ui/model_reviews_page/view_model/model_reviews_page_view_model.dart';
+import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -49,6 +50,14 @@ class _ModelReviewsPageScreenState extends State<ModelReviewsPageScreen> {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const AccessDeniedScreen()),
       (route) => false,
+    );
+  }
+
+  void _navigateToUserProfile(String userUuid) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => UserProfilePageScreen(userUuid: userUuid),
+      ),
     );
   }
 
@@ -173,20 +182,28 @@ class _ModelReviewsPageScreenState extends State<ModelReviewsPageScreen> {
           children: [
             Row(
               children: [
-                UserAvatar(
-                  imageUrl:
-                      "${ApiConstants.baseUrl}/users/get/${review.usersResponse.uuid}/avatar",
-                  radius: 20,
+                GestureDetector(
+                  onTap: () =>
+                      _navigateToUserProfile(review.usersResponse.uuid),
+                  child: UserAvatar(
+                    imageUrl:
+                        "${ApiConstants.baseUrl}/users/get/${review.usersResponse.uuid}/avatar",
+                    radius: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        review.usersResponse.nickName,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+                      GestureDetector(
+                        onTap: () =>
+                            _navigateToUserProfile(review.usersResponse.uuid),
+                        child: Text(
+                          review.usersResponse.nickName,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                       Text(

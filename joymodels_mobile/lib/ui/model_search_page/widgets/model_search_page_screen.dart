@@ -121,8 +121,7 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
           const SizedBox(width: 8),
           IconButton(
             icon: const Icon(Icons.sort),
-            onPressed: () =>
-                viewModel.onFilterPressed(context, widget.selectedCategory),
+            onPressed: () => viewModel.onFilterPressed(context),
           ),
         ],
       ),
@@ -200,32 +199,33 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
     required ThemeData theme,
     required ModelResponseApiModel model,
   }) {
+    final hasImage = model.modelPictures.isNotEmpty;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Material(
         color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           onTap: () => viewModel.onModelTap(context, model),
           borderRadius: BorderRadius.circular(12),
-          splashColor: theme.colorScheme.primary,
-          highlightColor: theme.colorScheme.primary,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
+          child: IntrinsicHeight(
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildModelImage(viewModel, theme, model),
-                const SizedBox(width: 12),
+                _buildModelImage(theme, model, hasImage),
                 Expanded(
-                  child: _buildModelInfo(
-                    theme: theme,
-                    name: model.name,
-                    description: model.description,
-                    category: model.modelCategories.isNotEmpty
-                        ? model.modelCategories[0].categoryName
-                        : 'Unknown',
-                    price: model.price,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: _buildModelInfo(
+                      theme: theme,
+                      name: model.name,
+                      description: model.description,
+                      category: model.modelCategories.isNotEmpty
+                          ? model.modelCategories[0].categoryName
+                          : 'Unknown',
+                      price: model.price,
+                    ),
                   ),
                 ),
               ],
@@ -237,24 +237,28 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
   }
 
   Widget _buildModelImage(
-    ModelSearchPageViewModel viewModel,
     ThemeData theme,
     ModelResponseApiModel model,
+    bool hasImage,
   ) {
-    return Container(
-      width: 64,
-      height: 64,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primary,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: ModelImage(
-          imageUrl:
-              "${ApiConstants.baseUrl}/models/get/${model.uuid}/images/${Uri.encodeComponent(model.modelPictures[0].pictureLocation)}",
-          fit: BoxFit.cover,
-        ),
+    return ClipRRect(
+      borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
+      child: SizedBox(
+        width: 110,
+        child: hasImage
+            ? ModelImage(
+                imageUrl:
+                    "${ApiConstants.baseUrl}/models/get/${model.uuid}/images/${Uri.encodeComponent(model.modelPictures[0].pictureLocation)}",
+                fit: BoxFit.cover,
+              )
+            : Container(
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                child: Icon(
+                  Icons.image_not_supported,
+                  size: 40,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
       ),
     );
   }
@@ -268,17 +272,23 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          name,
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              name,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 6),
+            _buildDescription(theme, description),
+          ],
         ),
-        const SizedBox(height: 4),
-        _buildDescription(theme, description),
         const SizedBox(height: 8),
         _buildCategoryAndPrice(theme, category, price),
       ],
@@ -292,7 +302,7 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
         style: theme.textTheme.bodySmall?.copyWith(
           color: theme.colorScheme.onSurfaceVariant,
         ),
-        maxLines: 3,
+        maxLines: 4,
         overflow: TextOverflow.ellipsis,
       );
     }
@@ -316,7 +326,12 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
       children: [
         Row(
           children: [
-            Text('Category: ', style: theme.textTheme.bodySmall),
+            Text(
+              'Category: ',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
             Text(
               category,
               style: theme.textTheme.bodySmall?.copyWith(
@@ -328,7 +343,7 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
         ),
         Text(
           '${price.toStringAsFixed(2)}\$',
-          style: theme.textTheme.bodyMedium?.copyWith(
+          style: theme.textTheme.titleMedium?.copyWith(
             color: theme.colorScheme.primary,
             fontWeight: FontWeight.bold,
           ),

@@ -17,7 +17,9 @@ import 'package:joymodels_mobile/data/repositories/model_availability_repository
 import 'package:joymodels_mobile/data/repositories/model_repository.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 import 'package:joymodels_mobile/ui/core/view_model/validation_view_model.dart';
+import 'package:joymodels_mobile/ui/model_page/view_model/model_page_view_model.dart';
 import 'package:joymodels_mobile/ui/model_page/widgets/model_page_screen.dart';
+import 'package:provider/provider.dart';
 
 class ModelCreatePageViewModel with ChangeNotifier {
   final categoryRepository = sl<CategoryRepository>();
@@ -58,6 +60,15 @@ class ModelCreatePageViewModel with ChangeNotifier {
 
   int get remainingPhotos => maxPhotos - selectedPhotos.length;
 
+  bool get isFormComplete =>
+      modelNameController.text.trim().isNotEmpty &&
+      modelDescriptionController.text.trim().isNotEmpty &&
+      selectedPhotos.isNotEmpty &&
+      selectedCategories.isNotEmpty &&
+      selectedAvailability != null &&
+      modelPriceController.text.trim().isNotEmpty &&
+      selectedModelFile != null;
+
   Future<void> init() async {
     isLoading = true;
     notifyListeners();
@@ -68,9 +79,14 @@ class ModelCreatePageViewModel with ChangeNotifier {
     isLoading = false;
     notifyListeners();
 
-    modelCategorySearchController.addListener(() {
-      notifyListeners();
-    });
+    modelNameController.addListener(_onFormChanged);
+    modelDescriptionController.addListener(_onFormChanged);
+    modelPriceController.addListener(_onFormChanged);
+    modelCategorySearchController.addListener(_onFormChanged);
+  }
+
+  void _onFormChanged() {
+    notifyListeners();
   }
 
   bool isFormValid() {
@@ -436,9 +452,12 @@ class ModelCreatePageViewModel with ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        Navigator.of(context).push(
+        Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (_) => ModelPageScreen(loadedModel: createdModel),
+            builder: (_) => ChangeNotifierProvider(
+              create: (_) => ModelPageViewModel(),
+              child: ModelPageScreen(loadedModel: createdModel),
+            ),
           ),
         );
       }

@@ -5,6 +5,7 @@ import 'package:joymodels_mobile/data/model/model_faq_section/response_types/mod
 import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
 import 'package:joymodels_mobile/ui/model_faq_section_detail_page/view_model/model_faq_section_detail_page_view_model.dart';
+import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -56,6 +57,14 @@ class _ModelFaqSectionDetailPageScreenState
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const AccessDeniedScreen()),
       (route) => false,
+    );
+  }
+
+  void _navigateToUserProfile(String userUuid) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => UserProfilePageScreen(userUuid: userUuid),
+      ),
     );
   }
 
@@ -116,21 +125,27 @@ class _ModelFaqSectionDetailPageScreenState
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              UserAvatar(
-                imageUrl:
-                    "${ApiConstants.baseUrl}/users/get/${faq.user.uuid}/avatar",
-                radius: 24,
+              GestureDetector(
+                onTap: () => _navigateToUserProfile(faq.user.uuid),
+                child: UserAvatar(
+                  imageUrl:
+                      "${ApiConstants.baseUrl}/users/get/${faq.user.uuid}/avatar",
+                  radius: 24,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      faq.user.nickName,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.primary,
+                    GestureDetector(
+                      onTap: () => _navigateToUserProfile(faq.user.uuid),
+                      child: Text(
+                        faq.user.nickName,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.primary,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -305,10 +320,13 @@ class _ModelFaqSectionDetailPageScreenState
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              UserAvatar(
-                imageUrl:
-                    "${ApiConstants.baseUrl}/users/get/${reply.user.uuid}/avatar",
-                radius: 18,
+              GestureDetector(
+                onTap: () => _navigateToUserProfile(reply.user.uuid),
+                child: UserAvatar(
+                  imageUrl:
+                      "${ApiConstants.baseUrl}/users/get/${reply.user.uuid}/avatar",
+                  radius: 18,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -318,11 +336,15 @@ class _ModelFaqSectionDetailPageScreenState
                     Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            reply.user.nickName,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.secondary,
+                          child: GestureDetector(
+                            onTap: () =>
+                                _navigateToUserProfile(reply.user.uuid),
+                            child: Text(
+                              reply.user.nickName,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.secondary,
+                              ),
                             ),
                           ),
                         ),

@@ -148,6 +148,27 @@ class UsersRepository {
     }
   }
 
+  Future<bool> isFollowingUser(String targetUserUuid) async {
+    final response = await _authService.request(
+      () => _service.isFollowingUser(targetUserUuid),
+    );
+
+    if (response.statusCode == 200) {
+      final body = response.body.trim().toLowerCase();
+      if (body == 'true') {
+        return true;
+      } else if (body == 'false') {
+        return false;
+      } else {
+        throw Exception('Unexpected response body: ${response.body}');
+      }
+    } else {
+      throw Exception(
+        'Failed to check if following user: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
   Future<void> followAnUser(String targetUserUuid) async {
     final response = await _authService.request(
       () => _service.followAnUser(targetUserUuid),

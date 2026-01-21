@@ -10,8 +10,10 @@ import 'package:joymodels_mobile/data/model/pagination/response_types/pagination
 import 'package:joymodels_mobile/data/repositories/category_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_repository.dart';
 import 'package:joymodels_mobile/ui/core/mixins/pagination_mixin.dart';
+import 'package:joymodels_mobile/ui/model_page/view_model/model_page_view_model.dart';
 import 'package:joymodels_mobile/ui/model_page/widgets/model_page_screen.dart';
 import 'package:joymodels_mobile/ui/model_search_page/widgets/model_search_modal_sort_type_screen.dart';
+import 'package:provider/provider.dart';
 
 enum ModelSortType { topSales, priceAsc, priceDesc, nameAz, nameZa }
 
@@ -81,6 +83,10 @@ class ModelSearchPageViewModel
     String? modelName,
   }) async {
     isLoading = true;
+
+    selectedFilterCategory = selectedCategory?.categoryName;
+    selectedFilterSort = null;
+
     notifyListeners();
     try {
       await getCategories();
@@ -176,20 +182,15 @@ class ModelSearchPageViewModel
     }
   }
 
-  void onFilterPressed(
-    BuildContext context,
-    CategoryResponseApiModel? selectedCategory,
-  ) {
+  void onFilterPressed(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => ModelSearchModalSortTypeScreen(
-        categories: categories!.data,
-        selectedCategory: selectedCategory,
-      ),
+      builder: (context) =>
+          ModelSearchModalSortTypeScreen(categories: categories!.data),
     );
   }
 
@@ -224,7 +225,10 @@ class ModelSearchPageViewModel
     if (context.mounted) {
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => ModelPageScreen(loadedModel: model),
+          builder: (context) => ChangeNotifierProvider(
+            create: (_) => ModelPageViewModel(),
+            child: ModelPageScreen(loadedModel: model),
+          ),
         ),
       );
     }

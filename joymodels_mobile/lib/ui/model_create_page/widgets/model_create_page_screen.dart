@@ -65,7 +65,9 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
             child: SizedBox(
               height: 36,
               child: ElevatedButton(
-                onPressed: () => viewModel.onSubmit(context),
+                onPressed: viewModel.isSubmitting || !viewModel.isFormComplete
+                    ? null
+                    : () => viewModel.onSubmit(context),
                 child: const Text(
                   'Create',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -80,6 +82,10 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
   }
 
   Widget _buildBody(ModelCreatePageViewModel viewModel, ThemeData theme) {
+    if (viewModel.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Stack(
       children: [
         SingleChildScrollView(

@@ -5,13 +5,8 @@ import 'package:provider/provider.dart';
 
 class ModelSearchModalSortTypeScreen extends StatefulWidget {
   final List<CategoryResponseApiModel> categories;
-  final CategoryResponseApiModel? selectedCategory;
 
-  const ModelSearchModalSortTypeScreen({
-    super.key,
-    required this.categories,
-    this.selectedCategory,
-  });
+  const ModelSearchModalSortTypeScreen({super.key, required this.categories});
 
   @override
   State<ModelSearchModalSortTypeScreen> createState() =>
@@ -20,14 +15,6 @@ class ModelSearchModalSortTypeScreen extends StatefulWidget {
 
 class _ModelSearchModalSortTypeScreenState
     extends State<ModelSearchModalSortTypeScreen> {
-  late final ModelSearchPageViewModel _viewModel;
-  @override
-  void initState() {
-    super.initState();
-    _viewModel = context.read<ModelSearchPageViewModel>();
-    _viewModel.selectedFilterCategory = widget.selectedCategory?.categoryName;
-  }
-
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<ModelSearchPageViewModel>();
@@ -44,10 +31,7 @@ class _ModelSearchModalSortTypeScreenState
             const SizedBox(height: 18),
             Text("Category", style: theme.textTheme.bodyMedium),
             const SizedBox(height: 6),
-            DropdownButtonFormField<String>(
-              initialValue: widget.selectedCategory?.categoryName,
-              hint: const Text("Choose category"),
-              isExpanded: true,
+            InputDecorator(
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -63,20 +47,31 @@ class _ModelSearchModalSortTypeScreenState
                   vertical: 8,
                 ),
               ),
-              items: [
-                const DropdownMenuItem<String>(value: null, child: Text("All")),
-                ...widget.categories.map(
-                  (cat) => DropdownMenuItem<String>(
-                    value: cat.categoryName,
-                    child: Text(cat.categoryName),
-                  ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: viewModel.selectedFilterCategory,
+                  hint: const Text("Choose category"),
+                  isExpanded: true,
+                  isDense: true,
+                  items: [
+                    const DropdownMenuItem<String>(
+                      value: null,
+                      child: Text("All"),
+                    ),
+                    ...widget.categories.map(
+                      (cat) => DropdownMenuItem<String>(
+                        value: cat.categoryName,
+                        child: Text(cat.categoryName),
+                      ),
+                    ),
+                  ],
+                  onChanged: (cat) {
+                    setState(() {
+                      viewModel.selectedFilterCategory = cat;
+                    });
+                  },
                 ),
-              ],
-              onChanged: (cat) {
-                setState(() {
-                  viewModel.selectedFilterCategory = cat;
-                });
-              },
+              ),
             ),
             const SizedBox(height: 18),
             Text("Sort by", style: theme.textTheme.bodyMedium),

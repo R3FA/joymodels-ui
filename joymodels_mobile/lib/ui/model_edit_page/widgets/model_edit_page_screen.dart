@@ -71,7 +71,10 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
                   child: SizedBox(
                     height: 36,
                     child: ElevatedButton(
-                      onPressed: viewModel.isSaving
+                      onPressed:
+                          viewModel.isSaving ||
+                              !viewModel.isFormComplete ||
+                              !viewModel.hasChanges
                           ? null
                           : () async {
                               await viewModel.onSubmit(context);
@@ -88,40 +91,42 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
                 ),
               ],
             ),
-            body: Stack(
-              children: [
-                SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            body: viewModel.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Stack(
                     children: [
-                      if (viewModel.errorMessage != null)
-                        _buildErrorMessage(viewModel, theme),
+                      SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (viewModel.errorMessage != null)
+                              _buildErrorMessage(viewModel, theme),
 
-                      _buildNameField(viewModel, theme),
-                      const SizedBox(height: 20),
+                            _buildNameField(viewModel, theme),
+                            const SizedBox(height: 20),
 
-                      _buildDescriptionField(viewModel, theme),
-                      const SizedBox(height: 20),
+                            _buildDescriptionField(viewModel, theme),
+                            const SizedBox(height: 20),
 
-                      _buildPhotosSection(viewModel, theme),
-                      const SizedBox(height: 20),
+                            _buildPhotosSection(viewModel, theme),
+                            const SizedBox(height: 20),
 
-                      _buildCategorySection(viewModel, theme),
-                      const SizedBox(height: 20),
+                            _buildCategorySection(viewModel, theme),
+                            const SizedBox(height: 20),
 
-                      _buildAvailabilitySection(viewModel, theme),
-                      const SizedBox(height: 20),
+                            _buildAvailabilitySection(viewModel, theme),
+                            const SizedBox(height: 20),
 
-                      _buildPriceField(viewModel, theme),
-                      const SizedBox(height: 32),
+                            _buildPriceField(viewModel, theme),
+                            const SizedBox(height: 32),
+                          ],
+                        ),
+                      ),
+
+                      if (viewModel.isSaving) _buildLoadingOverlay(theme),
                     ],
                   ),
-                ),
-
-                if (viewModel.isSaving) _buildLoadingOverlay(theme),
-              ],
-            ),
           );
         },
       ),

@@ -11,6 +11,13 @@ class ModelPictureResponseApiModel {
     required this.createdAt,
   });
 
+  String get pictureFileName {
+    if (pictureLocation.contains('/')) {
+      return pictureLocation.split('/').last;
+    }
+    return pictureLocation;
+  }
+
   factory ModelPictureResponseApiModel.fromJson(Map<String, dynamic> json) {
     return ModelPictureResponseApiModel(
       uuid: json['uuid'],

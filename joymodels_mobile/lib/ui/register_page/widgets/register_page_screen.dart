@@ -77,6 +77,7 @@ class RegisterPageScreen extends StatelessWidget {
       controller: viewModel.firstNameController,
       decoration: formInputDecoration('First name', Icons.person_outline),
       validator: viewModel.validateName,
+      maxLength: 100,
       autofillHints: const [AutofillHints.givenName],
       textInputAction: TextInputAction.next,
     );
@@ -86,9 +87,8 @@ class RegisterPageScreen extends StatelessWidget {
     return TextFormField(
       controller: viewModel.lastNameController,
       decoration: formInputDecoration('Last name', Icons.person_outline),
-      validator: (lastName) => (lastName == null || lastName.trim().isEmpty)
-          ? null
-          : viewModel.validateName(lastName),
+      validator: viewModel.validateName,
+      maxLength: 100,
       autofillHints: const [AutofillHints.familyName],
       textInputAction: TextInputAction.next,
     );
@@ -99,6 +99,7 @@ class RegisterPageScreen extends StatelessWidget {
       controller: viewModel.nicknameController,
       decoration: formInputDecoration('Nickname', Icons.face),
       validator: viewModel.validateNickname,
+      maxLength: 50,
       autofillHints: const [AutofillHints.nickname],
       textInputAction: TextInputAction.next,
     );
@@ -110,6 +111,7 @@ class RegisterPageScreen extends StatelessWidget {
       decoration: formInputDecoration('Email', Icons.email_outlined),
       keyboardType: TextInputType.emailAddress,
       validator: viewModel.validateEmail,
+      maxLength: 100,
       autofillHints: const [AutofillHints.email],
       textInputAction: TextInputAction.next,
     );
@@ -124,6 +126,7 @@ class RegisterPageScreen extends StatelessWidget {
       decoration: formInputDecoration('Password', Icons.lock_outline),
       obscureText: true,
       validator: viewModel.validatePassword,
+      maxLength: 50,
       autofillHints: const [AutofillHints.newPassword],
       textInputAction: TextInputAction.done,
       onFieldSubmitted: (_) => viewModel.submitForm(context),

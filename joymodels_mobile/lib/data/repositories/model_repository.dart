@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:joymodels_mobile/data/core/services/auth_service.dart';
 import 'package:joymodels_mobile/data/model/core/response_types/picture_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/request_types/model_create_request_api_model.dart';
+import 'package:joymodels_mobile/data/model/models/request_types/model_get_by_uuid_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/request_types/model_patch_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/request_types/model_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
@@ -13,6 +14,23 @@ class ModelRepository {
   final AuthService _authService;
 
   ModelRepository(this._service, this._authService);
+
+  Future<ModelResponseApiModel> getByUuid(
+    ModelGetByUuidRequestApiModel request,
+  ) async {
+    final response = await _authService.request(
+      () => _service.getByUuid(request),
+    );
+
+    if (response.statusCode == 200) {
+      final jsonMap = jsonDecode(response.body);
+      return ModelResponseApiModel.fromJson(jsonMap);
+    } else {
+      throw Exception(
+        'Failed to fetch model by its uuid: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
 
   Future<PictureResponse> getModelPictures(
     String modelUuid,
