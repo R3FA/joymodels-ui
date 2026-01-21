@@ -4,10 +4,28 @@ import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/model/community_post_question_section/request_types/community_post_question_section_create_answer_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post_question_section/request_types/community_post_question_section_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post_question_section/request_types/community_post_question_section_patch_request_api_model.dart';
+import 'package:joymodels_mobile/data/model/community_post_question_section/request_types/community_post_question_section_search_request_api_model.dart';
 
 class CommunityPostQuestionSectionService {
   final String communityPostQuestionSectionUrl =
       "${ApiConstants.baseUrl}/community-post-question-section";
+
+  Future<http.Response> search(
+    CommunityPostQuestionSectionSearchRequestApiModel request,
+  ) async {
+    final url = Uri.parse(
+      "$communityPostQuestionSectionUrl/search",
+    ).replace(queryParameters: request.toQueryParameters());
+
+    final token = await TokenStorage.getAccessToken();
+
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    return response;
+  }
 
   Future<http.Response> getByUuid(
     String communityPostQuestionSectionUuid,

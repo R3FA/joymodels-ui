@@ -1,10 +1,11 @@
 import 'package:joymodels_mobile/data/model/pagination/request_types/pagination_request_api_model.dart';
 
-class CommunityPostTypeSearchRequestApiModel extends PaginationRequestApiModel {
-  final String? postTypeName;
+class CommunityPostQuestionSectionSearchRequestApiModel
+    extends PaginationRequestApiModel {
+  final String communityPostUuid;
 
-  CommunityPostTypeSearchRequestApiModel({
-    this.postTypeName,
+  CommunityPostQuestionSectionSearchRequestApiModel({
+    required this.communityPostUuid,
     required super.pageNumber,
     required super.pageSize,
     super.orderBy,
@@ -14,8 +15,7 @@ class CommunityPostTypeSearchRequestApiModel extends PaginationRequestApiModel {
   Map<String, String> toQueryParameters() {
     return {
       ...super.toQueryParameters(),
-      if (postTypeName != null && postTypeName!.isNotEmpty)
-        'postTypeName': postTypeName!,
+      'communityPostUuid': communityPostUuid,
     };
   }
 }

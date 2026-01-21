@@ -13,6 +13,8 @@ import 'package:joymodels_mobile/data/repositories/community_post_repository.dar
 import 'package:joymodels_mobile/data/repositories/community_post_review_type_repository.dart';
 import 'package:joymodels_mobile/ui/community_post_create_page/view_model/community_post_create_page_view_model.dart';
 import 'package:joymodels_mobile/ui/community_post_create_page/widgets/community_post_create_page_screen.dart';
+import 'package:joymodels_mobile/ui/community_post_detail_page/view_model/community_post_detail_page_view_model.dart';
+import 'package:joymodels_mobile/ui/community_post_detail_page/widgets/community_post_detail_page_screen.dart';
 import 'package:joymodels_mobile/ui/core/mixins/pagination_mixin.dart';
 import 'package:provider/provider.dart';
 
@@ -188,7 +190,14 @@ class CommunityPageViewModel extends ChangeNotifier
   }
 
   void onPostTap(BuildContext context, CommunityPostResponseApiModel post) {
-    // TODO: Navigate to post detail page
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => CommunityPostDetailPageViewModel()..init(post),
+          child: const CommunityPostDetailPageScreen(),
+        ),
+      ),
+    );
   }
 
   bool isPostLiked(String postUuid) {

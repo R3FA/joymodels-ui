@@ -1,25 +1,23 @@
-class CommunityPostReviewTypeSearchRequestApiModel {
+import 'package:joymodels_mobile/data/model/pagination/request_types/pagination_request_api_model.dart';
+
+class CommunityPostReviewTypeSearchRequestApiModel
+    extends PaginationRequestApiModel {
   final String? communityPostReviewTypeName;
-  final int pageNumber;
-  final int pageSize;
 
   CommunityPostReviewTypeSearchRequestApiModel({
     this.communityPostReviewTypeName,
-    required this.pageNumber,
-    required this.pageSize,
+    required super.pageNumber,
+    required super.pageSize,
+    super.orderBy,
   });
 
+  @override
   Map<String, String> toQueryParameters() {
-    final Map<String, String> params = {
-      'pageNumber': pageNumber.toString(),
-      'pageSize': pageSize.toString(),
+    return {
+      ...super.toQueryParameters(),
+      if (communityPostReviewTypeName != null &&
+          communityPostReviewTypeName!.isNotEmpty)
+        'communityPostReviewTypeName': communityPostReviewTypeName!,
     };
-
-    if (communityPostReviewTypeName != null &&
-        communityPostReviewTypeName!.isNotEmpty) {
-      params['communityPostReviewTypeName'] = communityPostReviewTypeName!;
-    }
-
-    return params;
   }
 }
