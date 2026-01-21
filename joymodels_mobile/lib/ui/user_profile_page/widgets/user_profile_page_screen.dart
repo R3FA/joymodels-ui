@@ -9,6 +9,7 @@ import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
+import 'package:joymodels_mobile/ui/model_page/view_model/model_page_view_model.dart';
 import 'package:joymodels_mobile/ui/model_page/widgets/model_page_screen.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
@@ -386,7 +387,10 @@ class _UserProfilePageScreenState extends State<UserProfilePageScreen>
   void _navigateToModelPage(UserModelLikesSearchResponseApiModel likedModel) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => ModelPageScreen(loadedModel: likedModel.modelResponse),
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => ModelPageViewModel(),
+          child: ModelPageScreen(loadedModel: likedModel.modelResponse),
+        ),
       ),
     );
   }

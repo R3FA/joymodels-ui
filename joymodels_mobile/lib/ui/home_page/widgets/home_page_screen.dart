@@ -131,6 +131,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
         else ...[
           IconButton(
             icon: const Icon(Icons.notifications_none),
+            // TODO: Implement notifications when ready
             onPressed: () {},
           ),
           IconButton(

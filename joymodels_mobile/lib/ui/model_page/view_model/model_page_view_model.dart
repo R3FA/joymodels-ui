@@ -56,7 +56,7 @@ class ModelPageViewModel extends ChangeNotifier {
   ModelCalculatedReviewsResponseApiModel? calculatedReviews;
 
   int galleryIndex = 0;
-  late final PageController galleryController = PageController(initialPage: 0);
+  PageController galleryController = PageController(initialPage: 0);
 
   VoidCallback? onSessionExpired;
   VoidCallback? onForbidden;
@@ -716,6 +716,11 @@ class ModelPageViewModel extends ChangeNotifier {
     reviewTypes = [];
     hasUserReviewed = false;
     isModelOwner = false;
+
+    if (galleryController.hasClients) {
+      galleryController.jumpToPage(0);
+    }
+
     notifyListeners();
   }
 

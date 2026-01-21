@@ -30,6 +30,7 @@ class ModelEditPageViewModel extends ChangeNotifier {
 
   final categorySearchController = TextEditingController();
 
+  bool isLoading = false;
   bool isSaving = false;
   bool isCategoriesLoading = false;
   bool isModelAvailabilitiesLoading = false;
@@ -38,6 +39,37 @@ class ModelEditPageViewModel extends ChangeNotifier {
           modelPictures.length -
           modelPicturesToDelete.length <
       maxPhotos;
+
+  int get totalPhotosCount =>
+      modelPictures.length -
+      modelPicturesToDelete.length +
+      modelPicturesToInsert.length;
+
+  bool get isFormComplete =>
+      nameController.text.trim().isNotEmpty &&
+      descriptionController.text.trim().isNotEmpty &&
+      totalPhotosCount >= 1 &&
+      modelsCategories.isNotEmpty &&
+      selectedAvailability != null &&
+      priceController.text.trim().isNotEmpty;
+
+  bool get hasChanges {
+    if (nameController.text != originalModel.name) return true;
+    if (descriptionController.text != originalModel.description) return true;
+    if (priceController.text != originalModel.price.toString()) return true;
+
+    if (selectedAvailability?.uuid != originalModel.modelAvailability.uuid) {
+      return true;
+    }
+
+    if (modelCategoriesToDelete.isNotEmpty) return true;
+    if (modelCategoriesToInsert.isNotEmpty) return true;
+
+    if (modelPicturesToDelete.isNotEmpty) return true;
+    if (modelPicturesToInsert.isNotEmpty) return true;
+
+    return false;
+  }
 
   String? errorMessage;
   VoidCallback? onSessionExpired;
@@ -62,6 +94,9 @@ class ModelEditPageViewModel extends ChangeNotifier {
   final List<String> modelPicturesToDelete = [];
 
   Future<void> init(ModelResponseApiModel model) async {
+    isLoading = true;
+    notifyListeners();
+
     originalModel = model;
     await getCategories();
     selectedModelCategoriesInit();
@@ -73,6 +108,16 @@ class ModelEditPageViewModel extends ChangeNotifier {
     priceController.text = model.price.toString();
     modelPictures = List.from(model.modelPictures);
 
+    nameController.addListener(_onFormChanged);
+    descriptionController.addListener(_onFormChanged);
+    priceController.addListener(_onFormChanged);
+    categorySearchController.addListener(_onFormChanged);
+
+    isLoading = false;
+    notifyListeners();
+  }
+
+  void _onFormChanged() {
     notifyListeners();
   }
 
@@ -433,7 +478,7 @@ class ModelEditPageViewModel extends ChangeNotifier {
       return true;
     } on SessionExpiredException {
       errorMessage = SessionExpiredException().toString();
-      isModelAvailabilitiesLoading = false;
+      isSaving = false;
       notifyListeners();
       onSessionExpired?.call();
       return false;

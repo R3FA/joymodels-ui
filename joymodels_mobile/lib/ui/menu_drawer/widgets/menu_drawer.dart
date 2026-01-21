@@ -52,7 +52,7 @@ class _MenuDrawerState extends State<MenuDrawer> {
           viewModel: viewModel,
           onUserTap: (userUuid) {
             Navigator.of(modalContext).pop();
-            Navigator.of(context).pop(); // Close drawer
+            Navigator.of(context).pop();
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => UserProfilePageScreen(userUuid: userUuid),
