@@ -4,6 +4,9 @@ import 'package:joymodels_mobile/data/core/repositories/auth_repository.dart';
 import 'package:joymodels_mobile/data/core/services/auth_service.dart';
 import 'package:joymodels_mobile/data/repositories/category_repository.dart';
 import 'package:joymodels_mobile/data/repositories/community_post_repository.dart';
+import 'package:joymodels_mobile/data/repositories/community_post_question_section_repository.dart';
+import 'package:joymodels_mobile/data/repositories/community_post_review_type_repository.dart';
+import 'package:joymodels_mobile/data/repositories/community_post_type_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_availability_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_faq_section_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_repository.dart';
@@ -14,6 +17,9 @@ import 'package:joymodels_mobile/data/repositories/sso_repository.dart';
 import 'package:joymodels_mobile/data/repositories/users_repository.dart';
 import 'package:joymodels_mobile/data/services/category_service.dart';
 import 'package:joymodels_mobile/data/services/community_post_service.dart';
+import 'package:joymodels_mobile/data/services/community_post_question_section_service.dart';
+import 'package:joymodels_mobile/data/services/community_post_review_type_service.dart';
+import 'package:joymodels_mobile/data/services/community_post_type_service.dart';
 import 'package:joymodels_mobile/data/services/model_faq_section_service.dart';
 import 'package:joymodels_mobile/data/services/model_review_type_service.dart';
 import 'package:joymodels_mobile/data/services/shopping_cart_service.dart';
@@ -90,5 +96,29 @@ void dependencyInjectionSetup() {
   sl.registerLazySingleton(
     () =>
         CommunityPostRepository(sl<CommunityPostService>(), sl<AuthService>()),
+  );
+
+  sl.registerLazySingleton(() => CommunityPostTypeService());
+  sl.registerLazySingleton(
+    () => CommunityPostTypeRepository(
+      sl<CommunityPostTypeService>(),
+      sl<AuthService>(),
+    ),
+  );
+
+  sl.registerLazySingleton(() => CommunityPostReviewTypeService());
+  sl.registerLazySingleton(
+    () => CommunityPostReviewTypeRepository(
+      sl<CommunityPostReviewTypeService>(),
+      sl<AuthService>(),
+    ),
+  );
+
+  sl.registerLazySingleton(() => CommunityPostQuestionSectionService());
+  sl.registerLazySingleton(
+    () => CommunityPostQuestionSectionRepository(
+      sl<CommunityPostQuestionSectionService>(),
+      sl<AuthService>(),
+    ),
   );
 }

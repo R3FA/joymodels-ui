@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
+import 'package:joymodels_mobile/ui/community_page/view_model/community_page_view_model.dart';
 import 'package:joymodels_mobile/ui/core/themes/themes.dart';
 import 'package:joymodels_mobile/ui/menu_drawer/view_model/menu_drawer_view_model.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/view_model/navigation_bar_view_model.dart';
@@ -32,6 +33,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => ModelCreatePageViewModel()),
         ChangeNotifierProvider(create: (_) => SettingsPageViewModel()),
         ChangeNotifierProvider(create: (_) => UserProfilePageViewModel()),
+        ChangeNotifierProvider(create: (_) => CommunityPageViewModel()),
       ],
       child: const JoyModelsApp(),
     ),
