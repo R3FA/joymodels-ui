@@ -118,6 +118,19 @@ class UsersService {
     return response;
   }
 
+  Future<http.Response> isFollowingUser(String targetUserUuid) async {
+    final url = Uri.parse("$usersUrl/is-following-user/$targetUserUuid");
+
+    final token = await TokenStorage.getAccessToken();
+
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    return response;
+  }
+
   Future<http.Response> followAnUser(String targetUserUuid) async {
     final url = Uri.parse("$usersUrl/follow-an-user/$targetUserUuid");
 

@@ -11,6 +11,7 @@ import 'package:joymodels_mobile/ui/model_page/view_model/model_page_view_model.
 import 'package:joymodels_mobile/ui/model_search_page/view_model/model_search_page_view_model.dart';
 import 'package:joymodels_mobile/ui/register_page/view_model/register_page_view_model.dart';
 import 'package:joymodels_mobile/ui/settings_page/view_model/settings_page_view_model.dart';
+import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
 import 'package:joymodels_mobile/ui/verify_page/view_model/verify_page_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:joymodels_mobile/ui/welcome_page/view_model/welcome_page_view_model.dart';
@@ -32,6 +33,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => ModelCreatePageViewModel()),
         ChangeNotifierProvider(create: (_) => ModelPageViewModel()),
         ChangeNotifierProvider(create: (_) => SettingsPageViewModel()),
+        ChangeNotifierProvider(create: (_) => UserProfilePageViewModel()),
       ],
       child: const JoyModelsApp(),
     ),

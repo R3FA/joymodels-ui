@@ -81,6 +81,11 @@ class ModelSearchPageViewModel
     String? modelName,
   }) async {
     isLoading = true;
+
+    // Reset filter values to initial state
+    selectedFilterCategory = selectedCategory?.categoryName;
+    selectedFilterSort = null;
+
     notifyListeners();
     try {
       await getCategories();
@@ -176,20 +181,15 @@ class ModelSearchPageViewModel
     }
   }
 
-  void onFilterPressed(
-    BuildContext context,
-    CategoryResponseApiModel? selectedCategory,
-  ) {
+  void onFilterPressed(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => ModelSearchModalSortTypeScreen(
-        categories: categories!.data,
-        selectedCategory: selectedCategory,
-      ),
+      builder: (context) =>
+          ModelSearchModalSortTypeScreen(categories: categories!.data),
     );
   }
 

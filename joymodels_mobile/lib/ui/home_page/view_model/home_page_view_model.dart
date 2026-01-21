@@ -14,6 +14,7 @@ import 'package:joymodels_mobile/data/model/users/response_types/users_response_
 import 'package:joymodels_mobile/data/repositories/category_repository.dart';
 import 'package:joymodels_mobile/data/repositories/users_repository.dart';
 import 'package:joymodels_mobile/ui/model_search_page/widgets/model_search_page_screen.dart';
+import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
 
 class HomePageScreenViewModel with ChangeNotifier {
   final usersRepository = sl<UsersRepository>();
@@ -29,6 +30,7 @@ class HomePageScreenViewModel with ChangeNotifier {
   final searchController = TextEditingController();
 
   String loggedUsername = '';
+  String? loggedUserUuid;
   Uint8List loggedUserAvatarUrl = Uint8List(0);
 
   PaginationResponseApiModel<CategoryResponseApiModel>? categories;
@@ -120,9 +122,13 @@ class HomePageScreenViewModel with ChangeNotifier {
     final username = await TokenStorage.getClaimFromToken(
       JwtClaimKeyApiEnum.userName,
     );
+    final userUuid = await TokenStorage.getClaimFromToken(
+      JwtClaimKeyApiEnum.nameIdentifier,
+    );
 
-    if (username != null) {
+    if (username != null && userUuid != null) {
       loggedUsername = username;
+      loggedUserUuid = userUuid;
       notifyListeners();
     } else {
       errorMessage = SessionExpiredException().toString();
@@ -340,10 +346,24 @@ class HomePageScreenViewModel with ChangeNotifier {
     }
   }
 
+  void onOwnProfileTap(BuildContext context) {
+    if (loggedUserUuid == null) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => UserProfilePageScreen(userUuid: loggedUserUuid!),
+      ),
+    );
+  }
+
   void onArtistTap(BuildContext context, UsersResponseApiModel? artist) {
     if (artist == null) return;
 
-    // TODO: Implementirati kada bude spremno
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => UserProfilePageScreen(userUuid: artist.uuid),
+      ),
+    );
   }
 
   void onViewAllArtistsPressed(BuildContext context) {
