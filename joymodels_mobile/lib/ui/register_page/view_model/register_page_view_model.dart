@@ -92,9 +92,7 @@ class RegisterPageScreenViewModel with ChangeNotifier {
 
     final SsoUserCreateRequestApiModel request = SsoUserCreateRequestApiModel(
       firstName: firstNameController.text,
-      lastName: lastNameController.text.isNotEmpty
-          ? lastNameController.text
-          : null,
+      lastName: lastNameController.text,
       nickname: nicknameController.text,
       email: emailController.text,
       password: passwordController.text,

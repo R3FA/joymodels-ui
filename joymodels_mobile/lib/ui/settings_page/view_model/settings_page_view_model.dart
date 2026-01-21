@@ -148,37 +148,49 @@ class SettingsPageViewModel with ChangeNotifier {
       return;
     }
 
-    if (firstNameController.text.isNotEmpty) {
-      final firstNameError = RegexValidationViewModel.validateName(
-        firstNameController.text,
-      );
-      if (firstNameError != null) {
-        errorMessage = firstNameError;
-        notifyListeners();
-        return;
-      }
+    if (firstNameController.text.isEmpty) {
+      errorMessage = 'First name is required.';
+      notifyListeners();
+      return;
     }
 
-    if (lastNameController.text.isNotEmpty) {
-      final lastNameError = RegexValidationViewModel.validateName(
-        lastNameController.text,
-      );
-      if (lastNameError != null) {
-        errorMessage = lastNameError;
-        notifyListeners();
-        return;
-      }
+    final firstNameError = RegexValidationViewModel.validateName(
+      firstNameController.text,
+    );
+    if (firstNameError != null) {
+      errorMessage = firstNameError;
+      notifyListeners();
+      return;
     }
 
-    if (nicknameController.text.isNotEmpty) {
-      final nicknameError = RegexValidationViewModel.validateNickname(
-        nicknameController.text,
-      );
-      if (nicknameError != null) {
-        errorMessage = nicknameError;
-        notifyListeners();
-        return;
-      }
+    if (lastNameController.text.isEmpty) {
+      errorMessage = 'Last name is required.';
+      notifyListeners();
+      return;
+    }
+
+    final lastNameError = RegexValidationViewModel.validateName(
+      lastNameController.text,
+    );
+    if (lastNameError != null) {
+      errorMessage = lastNameError;
+      notifyListeners();
+      return;
+    }
+
+    if (nicknameController.text.isEmpty) {
+      errorMessage = 'Nickname is required.';
+      notifyListeners();
+      return;
+    }
+
+    final nicknameError = RegexValidationViewModel.validateNickname(
+      nicknameController.text,
+    );
+    if (nicknameError != null) {
+      errorMessage = nicknameError;
+      notifyListeners();
+      return;
     }
 
     if (selectedImagePath != null) {

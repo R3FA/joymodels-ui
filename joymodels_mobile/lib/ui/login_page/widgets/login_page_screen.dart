@@ -59,6 +59,7 @@ class LoginPageScreen extends StatelessWidget {
       controller: viewModel.nicknameController,
       decoration: formInputDecoration('Nickname', Icons.person_outline),
       validator: viewModel.validateNickname,
+      maxLength: 50,
       autofillHints: const [AutofillHints.username],
       textInputAction: TextInputAction.next,
     );
@@ -73,6 +74,7 @@ class LoginPageScreen extends StatelessWidget {
       decoration: formInputDecoration('Password', Icons.lock_outline),
       obscureText: true,
       validator: viewModel.validatePassword,
+      maxLength: 50,
       autofillHints: const [AutofillHints.password],
       textInputAction: TextInputAction.done,
       onFieldSubmitted: (_) => viewModel.login(context),
