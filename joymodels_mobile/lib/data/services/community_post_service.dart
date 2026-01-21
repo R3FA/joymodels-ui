@@ -126,4 +126,30 @@ class CommunityPostService {
 
     return response;
   }
+
+  Future<http.Response> isLiked(String communityPostUuid) async {
+    final url = Uri.parse("$communityPostsUrl/is-liked/$communityPostUuid");
+
+    final token = await TokenStorage.getAccessToken();
+
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    return response;
+  }
+
+  Future<http.Response> isDisliked(String communityPostUuid) async {
+    final url = Uri.parse("$communityPostsUrl/is-disliked/$communityPostUuid");
+
+    final token = await TokenStorage.getAccessToken();
+
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    return response;
+  }
 }

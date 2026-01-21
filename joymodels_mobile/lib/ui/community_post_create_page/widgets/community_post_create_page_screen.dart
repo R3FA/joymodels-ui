@@ -199,15 +199,22 @@ class _CommunityPostCreatePageScreenState
         if (viewModel.isPostTypesLoading)
           const Center(child: CircularProgressIndicator())
         else
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          Row(
             children:
                 viewModel.postTypes?.data.map((postType) {
-                  return _buildPostTypeChip(
-                    viewModel: viewModel,
-                    theme: theme,
-                    postType: postType,
+                  return Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: postType != viewModel.postTypes?.data.last
+                            ? 8
+                            : 0,
+                      ),
+                      child: _buildPostTypeChip(
+                        viewModel: viewModel,
+                        theme: theme,
+                        postType: postType,
+                      ),
+                    ),
                   );
                 }).toList() ??
                 [],
@@ -240,7 +247,7 @@ class _CommunityPostCreatePageScreenState
           ),
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (isSelected) ...[
               Icon(Icons.check, size: 16, color: theme.colorScheme.primary),

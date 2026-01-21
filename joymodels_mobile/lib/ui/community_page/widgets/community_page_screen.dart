@@ -4,7 +4,9 @@ import 'package:joymodels_mobile/data/model/community_post/response_types/commun
 import 'package:joymodels_mobile/ui/community_page/view_model/community_page_view_model.dart';
 import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
+import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
+import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
 import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
@@ -112,10 +114,6 @@ class _CommunityPageScreenState extends State<CommunityPageScreen> {
   Widget _buildHeader(CommunityPageViewModel viewModel, ThemeData theme) {
     return Row(
       children: [
-        IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
         Expanded(
           child: viewModel.isSearching
               ? _buildSearchBar(viewModel, theme)
@@ -186,21 +184,22 @@ class _CommunityPageScreenState extends State<CommunityPageScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 14),
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate((context, index) {
-          if (index >= posts.length) {
-            if (viewModel.hasNextPage) {
-              viewModel.onNextPage();
-              return const Padding(
-                padding: EdgeInsets.all(16),
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-            return null;
+          if (index == posts.length) {
+            return PaginationControls(
+              currentPage: viewModel.currentPage,
+              totalPages: viewModel.totalPages,
+              hasPreviousPage: viewModel.hasPreviousPage,
+              hasNextPage: viewModel.hasNextPage,
+              onPreviousPage: viewModel.onPreviousPage,
+              onNextPage: viewModel.onNextPage,
+              isLoading: viewModel.arePostsLoading,
+            );
           }
           return Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: _buildPostCard(viewModel, theme, posts[index]),
           );
-        }, childCount: posts.length + (viewModel.hasNextPage ? 1 : 0)),
+        }, childCount: posts.length + 1),
       ),
     );
   }
@@ -210,6 +209,11 @@ class _CommunityPageScreenState extends State<CommunityPageScreen> {
     ThemeData theme,
     CommunityPostResponseApiModel post,
   ) {
+    final hasImage = post.pictureLocations.isNotEmpty;
+    final hasYoutubeLink =
+        post.youtubeVideoLink != null && post.youtubeVideoLink!.isNotEmpty;
+    final hasNoMedia = !hasImage && !hasYoutubeLink;
+
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
@@ -220,10 +224,92 @@ class _CommunityPageScreenState extends State<CommunityPageScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildPostTypeBadge(theme, post.communityPostType.communityPostName),
-          if (post.pictureLocations.isNotEmpty) _buildPostImage(theme, post),
+          if (hasImage)
+            _buildPostImage(theme, post)
+          else if (hasYoutubeLink)
+            _buildYoutubeThumbnail(theme, post),
+          if (hasNoMedia) _buildPostDescription(theme, post),
           _buildReadMoreButton(viewModel, theme, post),
           _buildPostFooter(viewModel, theme, post),
         ],
+      ),
+    );
+  }
+
+  String? _extractYoutubeVideoId(String url) {
+    final regExp = RegExp(
+      r'(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})',
+    );
+    final match = regExp.firstMatch(url);
+    return match?.group(1);
+  }
+
+  Widget _buildYoutubeThumbnail(
+    ThemeData theme,
+    CommunityPostResponseApiModel post,
+  ) {
+    final videoId = _extractYoutubeVideoId(post.youtubeVideoLink!);
+    if (videoId == null) {
+      return const SizedBox.shrink();
+    }
+
+    final thumbnailUrl = 'https://img.youtube.com/vi/$videoId/hqdefault.jpg';
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          height: 180,
+          width: double.infinity,
+          color: theme.colorScheme.surfaceContainerHighest,
+          child: Image.network(
+            thumbnailUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => Center(
+              child: Icon(
+                Icons.play_circle_outline,
+                size: 48,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Center(
+                child: CircularProgressIndicator(
+                  value: loadingProgress.expectedTotalBytes != null
+                      ? loadingProgress.cumulativeBytesLoaded /
+                            loadingProgress.expectedTotalBytes!
+                      : null,
+                ),
+              );
+            },
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.7),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.play_arrow, color: Colors.white, size: 32),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPostDescription(
+    ThemeData theme,
+    CommunityPostResponseApiModel post,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Text(
+        post.description,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.onSurface,
+        ),
+        maxLines: 5,
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }
@@ -249,34 +335,13 @@ class _CommunityPageScreenState extends State<CommunityPageScreen> {
   Widget _buildPostImage(ThemeData theme, CommunityPostResponseApiModel post) {
     final firstPicture = post.pictureLocations.first;
     final imageUrl =
-        "${ApiConstants.baseUrl}/community-posts/get/${post.uuid}/pictures/${firstPicture.pictureFileName}";
+        "${ApiConstants.baseUrl}/community-posts/get/${post.uuid}/images/${Uri.encodeComponent(firstPicture.pictureLocation)}";
 
     return Container(
       height: 180,
       width: double.infinity,
       color: theme.colorScheme.surfaceContainerHighest,
-      child: Image.network(
-        imageUrl,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => Center(
-          child: Icon(
-            Icons.image_not_supported,
-            size: 48,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                  : null,
-            ),
-          );
-        },
-      ),
+      child: ModelImage(imageUrl: imageUrl, fit: BoxFit.cover),
     );
   }
 
@@ -356,18 +421,66 @@ class _CommunityPageScreenState extends State<CommunityPageScreen> {
             Icons.comment_outlined,
             post.communityPostCommentCount.toString(),
           ),
-          const SizedBox(width: 12),
-          _buildStatItem(
-            theme,
-            Icons.thumb_up_outlined,
+          const SizedBox(width: 16),
+          _buildLikeButton(viewModel, theme, post),
+          const SizedBox(width: 16),
+          _buildDislikeButton(viewModel, theme, post),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLikeButton(
+    CommunityPageViewModel viewModel,
+    ThemeData theme,
+    CommunityPostResponseApiModel post,
+  ) {
+    final isLiked = viewModel.isPostLiked(post.uuid);
+    return GestureDetector(
+      onTap: () => viewModel.onLikePressed(post),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
             post.communityPostLikes.toString(),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: Colors.blue,
+              fontWeight: isLiked ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Icon(
+            isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
+            size: 22,
             color: Colors.blue,
           ),
-          const SizedBox(width: 12),
-          _buildStatItem(
-            theme,
-            Icons.thumb_down_outlined,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDislikeButton(
+    CommunityPageViewModel viewModel,
+    ThemeData theme,
+    CommunityPostResponseApiModel post,
+  ) {
+    final isDisliked = viewModel.isPostDisliked(post.uuid);
+    return GestureDetector(
+      onTap: () => viewModel.onDislikePressed(post),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
             post.communityPostDislikes.toString(),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: Colors.red,
+              fontWeight: isDisliked ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Icon(
+            isDisliked ? Icons.thumb_down : Icons.thumb_down_outlined,
+            size: 22,
             color: Colors.red,
           ),
         ],
@@ -386,14 +499,14 @@ class _CommunityPageScreenState extends State<CommunityPageScreen> {
       children: [
         Text(
           count,
-          style: theme.textTheme.bodySmall?.copyWith(
+          style: theme.textTheme.bodyMedium?.copyWith(
             color: color ?? theme.colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(width: 4),
         Icon(
           icon,
-          size: 16,
+          size: 22,
           color: color ?? theme.colorScheme.onSurfaceVariant,
         ),
       ],

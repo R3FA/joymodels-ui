@@ -99,10 +99,19 @@ class CommunityPostCreatePageViewModel with ChangeNotifier {
       return false;
     }
 
-    if (youtubeVideoLinkController.text.isNotEmpty &&
-        youtubeVideoLinkController.text.length > 2048) {
-      errorMessage = 'YouTube video link cannot exceed 2048 characters';
-      return false;
+    if (youtubeVideoLinkController.text.isNotEmpty) {
+      if (youtubeVideoLinkController.text.length > 2048) {
+        errorMessage = 'YouTube video link cannot exceed 2048 characters';
+        return false;
+      }
+
+      final youtubeError = RegexValidationViewModel.validateYoutubeVideoLink(
+        youtubeVideoLinkController.text,
+      );
+      if (youtubeError != null) {
+        errorMessage = 'YouTube Link: $youtubeError';
+        return false;
+      }
     }
 
     return true;

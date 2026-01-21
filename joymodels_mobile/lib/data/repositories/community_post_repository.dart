@@ -157,4 +157,32 @@ class CommunityPostRepository {
       );
     }
   }
+
+  Future<bool> isLiked(String communityPostUuid) async {
+    final response = await _authService.request(
+      () => _service.isLiked(communityPostUuid),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as bool;
+    } else {
+      throw Exception(
+        'Failed to check if community post is liked: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  Future<bool> isDisliked(String communityPostUuid) async {
+    final response = await _authService.request(
+      () => _service.isDisliked(communityPostUuid),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as bool;
+    } else {
+      throw Exception(
+        'Failed to check if community post is disliked: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
 }
