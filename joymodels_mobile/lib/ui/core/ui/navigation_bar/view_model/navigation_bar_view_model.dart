@@ -11,9 +11,10 @@ class NavigationBarViewModel with ChangeNotifier {
   int selectedNavBarItem = 0;
 
   void _navigateToHome(BuildContext context) {
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => HomePageScreen()));
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const HomePageScreen()),
+      (route) => false,
+    );
   }
 
   void _navigateToCommunity(BuildContext context) {
@@ -21,19 +22,21 @@ class NavigationBarViewModel with ChangeNotifier {
   }
 
   void _navigateToAddModel(BuildContext context) {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => ModelCreatePageScreen()),
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const ModelCreatePageScreen()),
+      (route) => false,
     );
   }
 
   void _navigateToCart(BuildContext context) {
-    Navigator.of(context).pushReplacement(
+    Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
         builder: (_) => ChangeNotifierProvider(
           create: (_) => ShoppingCartPageViewModel(),
           child: const ShoppingCartPageScreen(),
         ),
       ),
+      (route) => false,
     );
   }
 
