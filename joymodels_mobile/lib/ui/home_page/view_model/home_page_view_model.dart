@@ -14,7 +14,9 @@ import 'package:joymodels_mobile/data/model/users/response_types/users_response_
 import 'package:joymodels_mobile/data/repositories/category_repository.dart';
 import 'package:joymodels_mobile/data/repositories/users_repository.dart';
 import 'package:joymodels_mobile/ui/model_search_page/widgets/model_search_page_screen.dart';
+import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
+import 'package:provider/provider.dart';
 
 class HomePageScreenViewModel with ChangeNotifier {
   final usersRepository = sl<UsersRepository>();
@@ -351,7 +353,10 @@ class HomePageScreenViewModel with ChangeNotifier {
 
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => UserProfilePageScreen(userUuid: loggedUserUuid!),
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => UserProfilePageViewModel()..init(loggedUserUuid!),
+          child: UserProfilePageScreen(userUuid: loggedUserUuid!),
+        ),
       ),
     );
   }
@@ -361,7 +366,10 @@ class HomePageScreenViewModel with ChangeNotifier {
 
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => UserProfilePageScreen(userUuid: artist.uuid),
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => UserProfilePageViewModel()..init(artist.uuid),
+          child: UserProfilePageScreen(userUuid: artist.uuid),
+        ),
       ),
     );
   }

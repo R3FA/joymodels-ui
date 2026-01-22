@@ -12,7 +12,9 @@ import 'package:joymodels_mobile/data/repositories/users_repository.dart';
 import 'package:joymodels_mobile/ui/core/mixins/pagination_mixin.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 import 'package:joymodels_mobile/ui/settings_page/widgets/settings_page_screen.dart';
+import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
+import 'package:provider/provider.dart';
 
 class MenuDrawerViewModel extends ChangeNotifier
     with PaginationMixin<UsersResponseApiModel> {
@@ -144,7 +146,10 @@ class MenuDrawerViewModel extends ChangeNotifier
     Navigator.of(context).pop();
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => UserProfilePageScreen(userUuid: userUuid!),
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => UserProfilePageViewModel()..init(userUuid!),
+          child: UserProfilePageScreen(userUuid: userUuid!),
+        ),
       ),
     );
   }

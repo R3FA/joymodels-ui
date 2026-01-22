@@ -57,8 +57,8 @@ class CommunityPostPatchRequestApiModel {
     }
 
     if (picturesToRemove != null) {
-      for (final pictureLocation in picturesToRemove!) {
-        request.fields['picturesToRemove'] = pictureLocation;
+      for (int i = 0; i < picturesToRemove!.length; i++) {
+        request.fields['picturesToRemove[$i]'] = picturesToRemove![i];
       }
     }
 

@@ -9,6 +9,7 @@ import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_ba
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
 import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
+import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -134,22 +135,55 @@ class _CommunityPageScreenState extends State<CommunityPageScreen> {
   }
 
   Widget _buildSearchBar(CommunityPageViewModel viewModel, ThemeData theme) {
-    return TextField(
-      controller: viewModel.searchController,
-      autofocus: true,
-      decoration: InputDecoration(
-        hintText: 'Search posts...',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TextField(
+          controller: viewModel.searchController,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: 'Search posts...',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: viewModel.searchError != null
+                  ? BorderSide(color: theme.colorScheme.error)
+                  : BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: viewModel.searchError != null
+                  ? BorderSide(color: theme.colorScheme.error)
+                  : BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: viewModel.searchError != null
+                  ? BorderSide(color: theme.colorScheme.error, width: 2)
+                  : BorderSide(color: theme.colorScheme.primary),
+            ),
+            filled: true,
+            fillColor: theme.colorScheme.surfaceContainerHighest,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
+            isDense: true,
+          ),
+          textInputAction: TextInputAction.search,
+          onSubmitted: viewModel.onSearchSubmitted,
         ),
-        filled: true,
-        fillColor: theme.colorScheme.surfaceContainerHighest,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        isDense: true,
-      ),
-      textInputAction: TextInputAction.search,
-      onSubmitted: viewModel.onSearchSubmitted,
+        if (viewModel.searchError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4, left: 12),
+            child: Text(
+              viewModel.searchError!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -223,13 +257,25 @@ class _CommunityPageScreenState extends State<CommunityPageScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildPostTypeBadge(theme, post.communityPostType.communityPostName),
-          if (hasImage)
-            _buildPostImage(theme, post)
-          else if (hasYoutubeLink)
-            _buildYoutubeThumbnail(theme, post),
-          if (hasNoMedia) _buildPostDescription(theme, post),
-          _buildReadMoreButton(viewModel, theme, post),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => viewModel.onPostTap(context, post),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildPostTypeBadge(
+                  theme,
+                  post.communityPostType.communityPostName,
+                ),
+                if (hasImage)
+                  _buildPostImage(theme, post)
+                else if (hasYoutubeLink)
+                  _buildYoutubeThumbnail(theme, post),
+                if (hasNoMedia) _buildPostDescription(theme, post),
+                _buildReadMoreButton(viewModel, theme, post),
+              ],
+            ),
+          ),
           _buildPostFooter(viewModel, theme, post),
         ],
       ),
@@ -516,7 +562,10 @@ class _CommunityPageScreenState extends State<CommunityPageScreen> {
   void _navigateToUserProfile(String userUuid) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => UserProfilePageScreen(userUuid: userUuid),
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => UserProfilePageViewModel()..init(userUuid),
+          child: UserProfilePageScreen(userUuid: userUuid),
+        ),
       ),
     );
   }

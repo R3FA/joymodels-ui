@@ -5,6 +5,7 @@ import 'package:joymodels_mobile/data/model/community_post/request_types/communi
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_patch_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_search_reviewed_users_request_api_model.dart';
+import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_search_user_liked_posts_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_user_review_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_user_review_delete_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post/response_types/community_post_response_api_model.dart';
@@ -182,6 +183,27 @@ class CommunityPostRepository {
     } else {
       throw Exception(
         'Failed to check if community post is disliked: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  Future<PaginationResponseApiModel<CommunityPostResponseApiModel>>
+  searchUsersLikedPosts(
+    CommunityPostSearchUserLikedPostsRequestApiModel request,
+  ) async {
+    final response = await _authService.request(
+      () => _service.searchUsersLikedPosts(request),
+    );
+
+    if (response.statusCode == 200) {
+      final jsonMap = jsonDecode(response.body);
+      return PaginationResponseApiModel<CommunityPostResponseApiModel>.fromJson(
+        jsonMap,
+        (item) => CommunityPostResponseApiModel.fromJson(item),
+      );
+    } else {
+      throw Exception(
+        'Failed to search users liked posts: ${response.statusCode} - ${response.body}',
       );
     }
   }

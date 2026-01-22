@@ -101,6 +101,18 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
 
   VoidCallback? onSessionExpired;
   VoidCallback? onForbidden;
+  VoidCallback? onPostDeleted;
+
+  String? currentUserUuid;
+
+  bool isOwner(String userUuid) {
+    return currentUserUuid != null && currentUserUuid == userUuid;
+  }
+
+  bool get isPostOwner {
+    if (post == null || currentUserUuid == null) return false;
+    return post!.user.uuid == currentUserUuid;
+  }
 
   Future<void> init(CommunityPostResponseApiModel loadedPost) async {
     isLoading = true;
@@ -108,6 +120,7 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
 
     try {
       post = loadedPost;
+      currentUserUuid = await TokenStorage.getCurrentUserUuid();
       await Future.wait([
         _loadReviewTypes(),
         _loadUserReviewStatus(),
@@ -449,6 +462,37 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
     }
   }
 
+  Future<void> deleteQuestion(String uuid) async {
+    try {
+      await communityPostQuestionSectionRepository.delete(uuid);
+      await _refreshPost();
+      await reloadCurrentPage();
+    } on SessionExpiredException {
+      onSessionExpired?.call();
+    } on ForbiddenException {
+      onForbidden?.call();
+    } catch (e) {
+      errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> deletePost() async {
+    if (post == null) return;
+
+    try {
+      await communityPostRepository.delete(post!.uuid);
+      onPostDeleted?.call();
+    } on SessionExpiredException {
+      onSessionExpired?.call();
+    } on ForbiddenException {
+      onForbidden?.call();
+    } catch (e) {
+      errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
   Future<void> _refreshPost() async {
     if (post == null) return;
 
@@ -458,6 +502,12 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
     } catch (e) {
       // Ignore refresh errors, the main operation succeeded
     }
+  }
+
+  void updatePost(CommunityPostResponseApiModel updatedPost) {
+    post = updatedPost;
+    currentImageIndex = 0;
+    notifyListeners();
   }
 
   @override

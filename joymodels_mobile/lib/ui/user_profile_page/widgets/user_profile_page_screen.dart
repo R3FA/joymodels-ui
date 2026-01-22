@@ -5,10 +5,14 @@ import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/model/users/response_types/user_model_likes_search_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/users/response_types/users_response_api_model.dart';
 import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
+import 'package:joymodels_mobile/data/model/community_post/response_types/community_post_response_api_model.dart';
+import 'package:joymodels_mobile/ui/community_post_detail_page/view_model/community_post_detail_page_view_model.dart';
+import 'package:joymodels_mobile/ui/community_post_detail_page/widgets/community_post_detail_page_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
+import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 import 'package:joymodels_mobile/ui/model_page/view_model/model_page_view_model.dart';
 import 'package:joymodels_mobile/ui/model_page/widgets/model_page_screen.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
@@ -36,6 +40,7 @@ class _UserProfilePageScreenState extends State<UserProfilePageScreen>
     _viewModel.onSessionExpired = _handleSessionExpired;
     _viewModel.onForbidden = _handleForbidden;
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(_onTabChanged);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _viewModel.init(widget.userUuid);
@@ -44,8 +49,17 @@ class _UserProfilePageScreenState extends State<UserProfilePageScreen>
 
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _onTabChanged() {
+    if (_tabController.index == 1 &&
+        _viewModel.likedCommunityPosts == null &&
+        !_viewModel.isLikedCommunityPostsLoading) {
+      _viewModel.loadLikedCommunityPosts(resetPage: true);
+    }
   }
 
   void _handleSessionExpired() {
@@ -396,10 +410,178 @@ class _UserProfilePageScreenState extends State<UserProfilePageScreen>
   }
 
   Widget _buildLikedCommunityPostsTab(ThemeData theme) {
-    return _buildEmptyState(
-      theme: theme,
-      icon: Icons.forum_outlined,
-      message: 'Community posts coming soon',
+    final viewModel = context.watch<UserProfilePageViewModel>();
+
+    if (viewModel.isLikedCommunityPostsLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (viewModel.likedCommunityPosts == null) {
+      return _buildEmptyState(
+        theme: theme,
+        icon: Icons.forum_outlined,
+        message: 'Tap to load liked posts',
+      );
+    }
+
+    final likedPosts = viewModel.likedCommunityPosts!.data;
+
+    if (likedPosts.isEmpty) {
+      return _buildEmptyState(
+        theme: theme,
+        icon: Icons.forum_outlined,
+        message: 'No liked community posts yet',
+      );
+    }
+
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(8),
+            itemCount: likedPosts.length,
+            itemBuilder: (_, index) {
+              final post = likedPosts[index];
+              return _buildCommunityPostCard(theme, post);
+            },
+          ),
+        ),
+        if ((viewModel.likedCommunityPosts?.totalPages ?? 1) > 1)
+          PaginationControls(
+            currentPage: viewModel.currentLikedCommunityPostsPage,
+            totalPages: viewModel.likedCommunityPosts!.totalPages,
+            hasPreviousPage: viewModel.likedCommunityPosts!.hasPreviousPage,
+            hasNextPage: viewModel.likedCommunityPosts!.hasNextPage,
+            onPreviousPage: viewModel.onLikedCommunityPostsPreviousPage,
+            onNextPage: viewModel.onLikedCommunityPostsNextPage,
+            isLoading: viewModel.isLikedCommunityPostsLoading,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildCommunityPostCard(
+    ThemeData theme,
+    CommunityPostResponseApiModel post,
+  ) {
+    final hasImage = post.pictureLocations.isNotEmpty;
+    final youtubeVideoId = RegexValidationViewModel.extractYoutubeVideoId(
+      post.youtubeVideoLink,
+    );
+    final hasYoutubeThumbnail = youtubeVideoId != null;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: InkWell(
+        onTap: () => _navigateToCommunityPostDetail(post),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: hasImage
+                      ? ModelImage(
+                          imageUrl:
+                              "${ApiConstants.baseUrl}/community-posts/get/${post.uuid}/images/${Uri.encodeComponent(post.pictureLocations[0].pictureLocation)}",
+                          fit: BoxFit.cover,
+                        )
+                      : hasYoutubeThumbnail
+                      ? Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.network(
+                              'https://img.youtube.com/vi/$youtubeVideoId/mqdefault.jpg',
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, _, _) => Container(
+                                color: Colors.red.withValues(alpha: 0.1),
+                                child: const Icon(
+                                  Icons.play_circle_fill,
+                                  size: 40,
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ),
+                            Center(
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.6),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.play_arrow,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Container(
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.1,
+                          ),
+                          child: Icon(
+                            Icons.article_outlined,
+                            size: 40,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      post.title,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      post.description,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _navigateToCommunityPostDetail(CommunityPostResponseApiModel post) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => CommunityPostDetailPageViewModel()..init(post),
+          child: const CommunityPostDetailPageScreen(),
+        ),
+      ),
     );
   }
 
@@ -448,7 +630,7 @@ class _UserProfilePageScreenState extends State<UserProfilePageScreen>
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => ChangeNotifierProvider(
-                  create: (_) => UserProfilePageViewModel(),
+                  create: (_) => UserProfilePageViewModel()..init(userUuid),
                   child: UserProfilePageScreen(userUuid: userUuid),
                 ),
               ),
@@ -540,32 +722,73 @@ class _FollowModalContentState extends State<_FollowModalContent> {
   }
 
   Widget _buildSearchBar(ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: TextField(
-        controller: widget.viewModel.followModalSearchController,
-        onChanged: _onSearchChanged,
-        decoration: InputDecoration(
-          hintText: 'Search users...',
-          prefixIcon: const Icon(Icons.search),
-          suffixIcon: widget.viewModel.followModalSearchQuery.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    widget.viewModel.followModalSearchController.clear();
-                    _onSearchChanged('');
-                  },
-                )
-              : null,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          filled: true,
-          fillColor: theme.colorScheme.surfaceContainerHighest,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
+    return ListenableBuilder(
+      listenable: widget.viewModel,
+      builder: (context, _) {
+        final hasError = widget.viewModel.followModalSearchError != null;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: widget.viewModel.followModalSearchController,
+                onChanged: _onSearchChanged,
+                decoration: InputDecoration(
+                  hintText: 'Search users...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: widget.viewModel.followModalSearchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            widget.viewModel.followModalSearchController
+                                .clear();
+                            _onSearchChanged('');
+                          },
+                        )
+                      : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: hasError
+                        ? BorderSide(color: theme.colorScheme.error)
+                        : BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: hasError
+                        ? BorderSide(color: theme.colorScheme.error)
+                        : BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: hasError
+                        ? BorderSide(color: theme.colorScheme.error, width: 2)
+                        : BorderSide(color: theme.colorScheme.primary),
+                  ),
+                  filled: true,
+                  fillColor: theme.colorScheme.surfaceContainerHighest,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+              ),
+              if (hasError)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4, left: 12),
+                  child: Text(
+                    widget.viewModel.followModalSearchError!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.error,
+                    ),
+                  ),
+                ),
+            ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

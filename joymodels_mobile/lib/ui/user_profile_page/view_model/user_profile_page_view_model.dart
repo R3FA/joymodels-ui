@@ -11,14 +11,20 @@ import 'package:joymodels_mobile/data/model/users/request_types/user_model_likes
 import 'package:joymodels_mobile/data/model/users/response_types/user_follower_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/users/response_types/user_following_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/users/response_types/user_model_likes_search_response_api_model.dart';
+import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_search_user_liked_posts_request_api_model.dart';
+import 'package:joymodels_mobile/data/model/community_post/response_types/community_post_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/users/response_types/users_response_api_model.dart';
+import 'package:joymodels_mobile/data/repositories/community_post_repository.dart';
 import 'package:joymodels_mobile/data/repositories/users_repository.dart';
+import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 
 class UserProfilePageViewModel with ChangeNotifier {
   final _usersRepository = sl<UsersRepository>();
+  final _communityPostRepository = sl<CommunityPostRepository>();
 
   bool isLoading = false;
   bool isLikedModelsLoading = false;
+  bool isLikedCommunityPostsLoading = false;
   bool isFollowLoading = false;
   bool isOwnProfile = false;
   bool isFollowing = false;
@@ -27,12 +33,16 @@ class UserProfilePageViewModel with ChangeNotifier {
   Uint8List? userAvatar;
 
   PaginationResponseApiModel<UserModelLikesSearchResponseApiModel>? likedModels;
+  PaginationResponseApiModel<CommunityPostResponseApiModel>?
+  likedCommunityPosts;
 
   int currentLikedModelsPage = 1;
+  int currentLikedCommunityPostsPage = 1;
   static const int _pageSize = 4;
 
   bool isFollowModalLoading = false;
   String? followModalErrorMessage;
+  String? followModalSearchError;
   PaginationResponseApiModel<UserFollowingResponseApiModel>? followingList;
   PaginationResponseApiModel<UserFollowerResponseApiModel>? followersList;
   int currentFollowModalPage = 1;
@@ -135,6 +145,55 @@ class UserProfilePageViewModel with ChangeNotifier {
     } catch (_) {
       isFollowing = false;
     }
+  }
+
+  Future<void> loadLikedCommunityPosts({bool resetPage = false}) async {
+    if (user == null) return;
+
+    if (resetPage) {
+      currentLikedCommunityPostsPage = 1;
+    }
+
+    isLikedCommunityPostsLoading = true;
+    notifyListeners();
+
+    try {
+      final request = CommunityPostSearchUserLikedPostsRequestApiModel(
+        userUuid: user!.uuid,
+        pageNumber: currentLikedCommunityPostsPage,
+        pageSize: _pageSize,
+      );
+
+      likedCommunityPosts = await _communityPostRepository
+          .searchUsersLikedPosts(request);
+      isLikedCommunityPostsLoading = false;
+      notifyListeners();
+    } on SessionExpiredException {
+      errorMessage = 'Session expired. Please login again.';
+      isLikedCommunityPostsLoading = false;
+      notifyListeners();
+      onSessionExpired?.call();
+    } on ForbiddenException {
+      isLikedCommunityPostsLoading = false;
+      notifyListeners();
+      onForbidden?.call();
+    } catch (e) {
+      errorMessage = e.toString();
+      isLikedCommunityPostsLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> onLikedCommunityPostsPreviousPage() async {
+    if (likedCommunityPosts?.hasPreviousPage != true || user == null) return;
+    currentLikedCommunityPostsPage--;
+    await loadLikedCommunityPosts();
+  }
+
+  Future<void> onLikedCommunityPostsNextPage() async {
+    if (likedCommunityPosts?.hasNextPage != true || user == null) return;
+    currentLikedCommunityPostsPage++;
+    await loadLikedCommunityPosts();
   }
 
   Future<void> toggleFollow() async {
@@ -274,6 +333,28 @@ class UserProfilePageViewModel with ChangeNotifier {
   }
 
   void onFollowModalSearchChanged(String query, {required bool isFollowing}) {
+    // If empty, clear error and search
+    if (query.isEmpty) {
+      followModalSearchError = null;
+      followModalSearchQuery = query;
+      if (isFollowing) {
+        loadFollowingUsers(resetPage: true);
+      } else {
+        loadFollowerUsers(resetPage: true);
+      }
+      return;
+    }
+
+    // Validate using validateNickname
+    final validationError = RegexValidationViewModel.validateNickname(query);
+    if (validationError != null) {
+      followModalSearchError = validationError;
+      notifyListeners();
+      return;
+    }
+
+    // Clear error and search
+    followModalSearchError = null;
     followModalSearchQuery = query;
     if (isFollowing) {
       loadFollowingUsers(resetPage: true);
@@ -310,6 +391,7 @@ class UserProfilePageViewModel with ChangeNotifier {
     followModalSearchQuery = '';
     followModalSearchController.clear();
     followModalErrorMessage = null;
+    followModalSearchError = null;
   }
 
   @override

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/data/core/config/api_constants.dart';
+import 'package:joymodels_mobile/data/model/community_post/response_types/community_post_response_api_model.dart';
 import 'package:joymodels_mobile/ui/community_post_detail_page/view_model/community_post_detail_page_view_model.dart';
+import 'package:joymodels_mobile/ui/community_post_edit_page/view_model/community_post_edit_page_view_model.dart';
+import 'package:joymodels_mobile/ui/community_post_edit_page/widgets/community_post_edit_page_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
+import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -29,6 +33,12 @@ class _CommunityPostDetailPageScreenState
     _viewModel = context.read<CommunityPostDetailPageViewModel>();
     _viewModel.onSessionExpired = _handleSessionExpired;
     _viewModel.onForbidden = _handleForbidden;
+    _viewModel.onPostDeleted = _handlePostDeleted;
+  }
+
+  void _handlePostDeleted() {
+    if (!mounted) return;
+    Navigator.of(context).pop(true);
   }
 
   void _handleSessionExpired() {
@@ -65,6 +75,72 @@ class _CommunityPostDetailPageScreenState
           ),
         ),
         centerTitle: true,
+        actions: [
+          if (!viewModel.isLoading && viewModel.post != null)
+            PopupMenuButton<String>(
+              icon: Icon(
+                Icons.more_vert,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              onSelected: (value) {
+                if (value == 'edit') {
+                  _navigateToEditPost(viewModel);
+                } else if (value == 'delete') {
+                  _showDeletePostConfirmation(viewModel);
+                } else if (value == 'report') {
+                  _showReportPostDialog();
+                }
+              },
+              itemBuilder: (context) {
+                if (viewModel.isPostOwner) {
+                  return [
+                    PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit, color: theme.colorScheme.primary),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Edit',
+                            style: TextStyle(color: theme.colorScheme.primary),
+                          ),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, color: theme.colorScheme.error),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Delete',
+                            style: TextStyle(color: theme.colorScheme.error),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ];
+                } else {
+                  return [
+                    PopupMenuItem(
+                      value: 'report',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.flag,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text('Report'),
+                        ],
+                      ),
+                    ),
+                  ];
+                }
+              },
+            ),
+        ],
       ),
       body: _buildBody(viewModel, theme),
     );
@@ -90,10 +166,10 @@ class _CommunityPostDetailPageScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (viewModel.hasImages) _buildImageGallery(viewModel, theme),
-          if (viewModel.hasYoutubeLink) _buildYoutubeSection(viewModel, theme),
           _buildTitle(viewModel, theme),
           _buildDescription(viewModel, theme),
+          if (viewModel.hasImages) _buildImageGallery(viewModel, theme),
+          if (viewModel.hasYoutubeLink) _buildYoutubeSection(viewModel, theme),
           _buildAuthorHeader(viewModel, theme),
           _buildInteractionBar(viewModel, theme),
           _buildQuestionsSection(viewModel, theme),
@@ -156,96 +232,111 @@ class _CommunityPostDetailPageScreenState
   ) {
     final pictures = viewModel.post!.pictureLocations;
 
-    return Column(
-      children: [
-        AspectRatio(
-          aspectRatio: 16 / 10,
-          child: Stack(
-            children: [
-              PageView.builder(
-                controller: viewModel.galleryController,
-                onPageChanged: viewModel.onGalleryPageChanged,
-                itemCount: pictures.length,
-                itemBuilder: (context, index) {
-                  final imageUrl =
-                      "${ApiConstants.baseUrl}/community-posts/get/${viewModel.post!.uuid}/images/${Uri.encodeComponent(pictures[index].pictureLocation)}";
-                  return ModelImage(imageUrl: imageUrl, fit: BoxFit.contain);
-                },
-              ),
-              if (pictures.length > 1 && viewModel.currentImageIndex > 0)
-                Positioned(
-                  left: 8,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: IconButton(
-                      onPressed: viewModel.previousImage,
-                      icon: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surface.withValues(
-                            alpha: 0.8,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: AspectRatio(
+                aspectRatio: 16 / 10,
+                child: Stack(
+                  children: [
+                    PageView.builder(
+                      controller: viewModel.galleryController,
+                      onPageChanged: viewModel.onGalleryPageChanged,
+                      itemCount: pictures.length,
+                      itemBuilder: (context, index) {
+                        final imageUrl =
+                            "${ApiConstants.baseUrl}/community-posts/get/${viewModel.post!.uuid}/images/${Uri.encodeComponent(pictures[index].pictureLocation)}";
+                        return ModelImage(
+                          imageUrl: imageUrl,
+                          fit: BoxFit.contain,
+                        );
+                      },
+                    ),
+                    if (pictures.length > 1 && viewModel.currentImageIndex > 0)
+                      Positioned(
+                        left: 8,
+                        top: 0,
+                        bottom: 0,
+                        child: Center(
+                          child: IconButton(
+                            onPressed: viewModel.previousImage,
+                            icon: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surface.withValues(
+                                  alpha: 0.8,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.chevron_left,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ),
                           ),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.chevron_left,
-                          color: theme.colorScheme.onSurface,
                         ),
                       ),
-                    ),
-                  ),
-                ),
-              if (pictures.length > 1 &&
-                  viewModel.currentImageIndex < pictures.length - 1)
-                Positioned(
-                  right: 8,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: IconButton(
-                      onPressed: viewModel.nextImage,
-                      icon: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surface.withValues(
-                            alpha: 0.8,
+                    if (pictures.length > 1 &&
+                        viewModel.currentImageIndex < pictures.length - 1)
+                      Positioned(
+                        right: 8,
+                        top: 0,
+                        bottom: 0,
+                        child: Center(
+                          child: IconButton(
+                            onPressed: viewModel.nextImage,
+                            icon: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surface.withValues(
+                                  alpha: 0.8,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.chevron_right,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ),
                           ),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.chevron_right,
-                          color: theme.colorScheme.onSurface,
                         ),
                       ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-        if (pictures.length > 1)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                pictures.length,
-                (index) => Container(
-                  width: 8,
-                  height: 8,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: index == viewModel.currentImageIndex
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.outlineVariant,
-                  ),
+                  ],
                 ),
               ),
             ),
           ),
-      ],
+          if (pictures.length > 1)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  pictures.length,
+                  (index) => Container(
+                    width: 8,
+                    height: 8,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: index == viewModel.currentImageIndex
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.outlineVariant,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -478,15 +569,49 @@ class _CommunityPostDetailPageScreenState
   void _navigateToUserProfile(String userUuid) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => UserProfilePageScreen(userUuid: userUuid),
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => UserProfilePageViewModel()..init(userUuid),
+          child: UserProfilePageScreen(userUuid: userUuid),
+        ),
       ),
     );
   }
 
+  Future<void> _navigateToEditPost(
+    CommunityPostDetailPageViewModel viewModel,
+  ) async {
+    if (viewModel.post == null) return;
+
+    final result = await Navigator.of(context)
+        .push<CommunityPostResponseApiModel>(
+          MaterialPageRoute(
+            builder: (_) => ChangeNotifierProvider(
+              create: (_) =>
+                  CommunityPostEditPageViewModel()..init(viewModel.post!),
+              child: const CommunityPostEditPageScreen(),
+            ),
+          ),
+        );
+
+    if (result != null) {
+      viewModel.updatePost(result);
+    }
+  }
+
   Future<void> _openYoutubeVideo(String url) async {
     final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
+    try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      try {
+        await launchUrl(uri, mode: LaunchMode.platformDefault);
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not open YouTube video')),
+          );
+        }
+      }
     }
   }
 
@@ -649,6 +774,59 @@ class _CommunityPostDetailPageScreenState
                     ],
                   ),
                 ),
+                PopupMenuButton<String>(
+                  icon: Icon(
+                    Icons.more_vert,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  onSelected: (value) {
+                    if (value == 'delete') {
+                      _showDeleteConfirmation(viewModel, question.uuid);
+                    } else if (value == 'report') {
+                      _showReportDialog(question.uuid);
+                    }
+                  },
+                  itemBuilder: (context) {
+                    if (viewModel.isOwner(question.user.uuid)) {
+                      return [
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.delete,
+                                color: theme.colorScheme.error,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Delete',
+                                style: TextStyle(
+                                  color: theme.colorScheme.error,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ];
+                    } else {
+                      return [
+                        PopupMenuItem(
+                          value: 'report',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.flag,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 8),
+                              const Text('Report'),
+                            ],
+                          ),
+                        ),
+                      ];
+                    }
+                  },
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -750,6 +928,67 @@ class _CommunityPostDetailPageScreenState
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),
                             ),
+                            const Spacer(),
+                            PopupMenuButton<String>(
+                              icon: Icon(
+                                Icons.more_vert,
+                                size: 18,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              padding: EdgeInsets.zero,
+                              onSelected: (value) {
+                                if (value == 'delete') {
+                                  _showDeleteConfirmation(
+                                    viewModel,
+                                    reply.uuid,
+                                  );
+                                } else if (value == 'report') {
+                                  _showReportDialog(reply.uuid);
+                                }
+                              },
+                              itemBuilder: (context) {
+                                if (viewModel.isOwner(reply.user.uuid)) {
+                                  return [
+                                    PopupMenuItem(
+                                      value: 'delete',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.delete,
+                                            color: theme.colorScheme.error,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'Delete',
+                                            style: TextStyle(
+                                              color: theme.colorScheme.error,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ];
+                                } else {
+                                  return [
+                                    PopupMenuItem(
+                                      value: 'report',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.flag,
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          const Text('Report'),
+                                        ],
+                                      ),
+                                    ),
+                                  ];
+                                }
+                              },
+                            ),
                           ],
                         ),
                         const SizedBox(height: 4),
@@ -850,5 +1089,112 @@ class _CommunityPostDetailPageScreenState
     } else {
       return 'Just now';
     }
+  }
+
+  void _showDeleteConfirmation(
+    CommunityPostDetailPageViewModel viewModel,
+    String uuid,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete'),
+        content: const Text('Are you sure you want to delete this?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              viewModel.deleteQuestion(uuid);
+            },
+            child: Text(
+              'Delete',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showReportDialog(String uuid) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Report'),
+        content: const Text('Report this content as inappropriate?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Report submitted')));
+            },
+            child: const Text('Report'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeletePostConfirmation(CommunityPostDetailPageViewModel viewModel) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Post'),
+        content: const Text(
+          'Are you sure you want to delete this post? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              viewModel.deletePost();
+            },
+            child: Text(
+              'Delete',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showReportPostDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Report Post'),
+        content: const Text('Report this post as inappropriate?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Report submitted')));
+            },
+            child: const Text('Report'),
+          ),
+        ],
+      ),
+    );
   }
 }

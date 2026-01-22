@@ -6,6 +6,7 @@ import 'package:joymodels_mobile/data/model/community_post/request_types/communi
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_search_reviewed_users_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_user_review_create_request_api_model.dart';
+import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_search_user_liked_posts_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_user_review_delete_request_api_model.dart';
 
 class CommunityPostService {
@@ -142,6 +143,23 @@ class CommunityPostService {
 
   Future<http.Response> isDisliked(String communityPostUuid) async {
     final url = Uri.parse("$communityPostsUrl/is-disliked/$communityPostUuid");
+
+    final token = await TokenStorage.getAccessToken();
+
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    return response;
+  }
+
+  Future<http.Response> searchUsersLikedPosts(
+    CommunityPostSearchUserLikedPostsRequestApiModel request,
+  ) async {
+    final url = Uri.parse(
+      "$communityPostsUrl/search-users-liked-posts",
+    ).replace(queryParameters: request.toQueryParameters());
 
     final token = await TokenStorage.getAccessToken();
 

@@ -9,6 +9,7 @@ import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
 import 'package:joymodels_mobile/ui/model_faq_section_detail_page/view_model/model_faq_section_detail_page_view_model.dart';
 import 'package:joymodels_mobile/ui/model_faq_section_detail_page/widgets/model_faq_section_detail_page_screen.dart';
 import 'package:joymodels_mobile/ui/model_faq_section_page/view_model/model_faq_section_page_view_model.dart';
+import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -169,7 +170,10 @@ class _ModelFaqSectionPageScreenState extends State<ModelFaqSectionPageScreen> {
   void _navigateToUserProfile(String userUuid) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => UserProfilePageScreen(userUuid: userUuid),
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => UserProfilePageViewModel()..init(userUuid),
+          child: UserProfilePageScreen(userUuid: userUuid),
+        ),
       ),
     );
   }

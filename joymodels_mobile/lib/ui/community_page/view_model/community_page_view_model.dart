@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
@@ -16,6 +18,7 @@ import 'package:joymodels_mobile/ui/community_post_create_page/widgets/community
 import 'package:joymodels_mobile/ui/community_post_detail_page/view_model/community_post_detail_page_view_model.dart';
 import 'package:joymodels_mobile/ui/community_post_detail_page/widgets/community_post_detail_page_screen.dart';
 import 'package:joymodels_mobile/ui/core/mixins/pagination_mixin.dart';
+import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 import 'package:provider/provider.dart';
 
 class CommunityPageViewModel extends ChangeNotifier
@@ -26,11 +29,14 @@ class CommunityPageViewModel extends ChangeNotifier
 
   final searchController = TextEditingController();
 
+  Timer? _searchDebounce;
+
   bool isLoading = false;
   bool isSearching = false;
   bool arePostsLoading = false;
 
   String? errorMessage;
+  String? searchError;
 
   PaginationResponseApiModel<CommunityPostResponseApiModel>? posts;
 
@@ -155,16 +161,71 @@ class CommunityPageViewModel extends ChangeNotifier
 
   void onSearchPressed() {
     isSearching = true;
+    searchController.addListener(_onSearchChanged);
     notifyListeners();
   }
 
   void onSearchCancelled() {
+    _searchDebounce?.cancel();
+    searchController.removeListener(_onSearchChanged);
     isSearching = false;
+    searchError = null;
     searchController.clear();
+    onRefresh();
     notifyListeners();
   }
 
+  void _onSearchChanged() {
+    _searchDebounce?.cancel();
+
+    final query = searchController.text;
+
+    // If empty, clear error and refresh to show all posts
+    if (query.isEmpty) {
+      searchError = null;
+      notifyListeners();
+      onRefresh();
+      return;
+    }
+
+    // Validate using validateText regex
+    final validationError = RegexValidationViewModel.validateText(query);
+    if (validationError != null) {
+      searchError = validationError;
+      notifyListeners();
+      return;
+    }
+
+    // Clear error if validation passes
+    searchError = null;
+    notifyListeners();
+
+    // Debounce the search
+    _searchDebounce = Timer(const Duration(milliseconds: 500), () {
+      searchPosts(
+        CommunityPostSearchRequestApiModel(
+          title: query,
+          pageNumber: 1,
+          pageSize: 5,
+        ),
+      );
+    });
+  }
+
   void onSearchSubmitted(String query) {
+    _searchDebounce?.cancel();
+
+    // Validate before searching
+    if (query.isNotEmpty) {
+      final validationError = RegexValidationViewModel.validateText(query);
+      if (validationError != null) {
+        searchError = validationError;
+        notifyListeners();
+        return;
+      }
+    }
+
+    searchError = null;
     searchPosts(
       CommunityPostSearchRequestApiModel(
         title: query.isNotEmpty ? query : null,
@@ -189,8 +250,11 @@ class CommunityPageViewModel extends ChangeNotifier
     }
   }
 
-  void onPostTap(BuildContext context, CommunityPostResponseApiModel post) {
-    Navigator.of(context).push(
+  Future<void> onPostTap(
+    BuildContext context,
+    CommunityPostResponseApiModel post,
+  ) async {
+    final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (_) => ChangeNotifierProvider(
           create: (_) => CommunityPostDetailPageViewModel()..init(post),
@@ -198,6 +262,10 @@ class CommunityPageViewModel extends ChangeNotifier
         ),
       ),
     );
+
+    if (result == true) {
+      await reloadCurrentPage();
+    }
   }
 
   bool isPostLiked(String postUuid) {
@@ -341,6 +409,8 @@ class CommunityPageViewModel extends ChangeNotifier
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
+    searchController.removeListener(_onSearchChanged);
     searchController.dispose();
     onSessionExpired = null;
     onForbidden = null;
