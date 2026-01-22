@@ -354,6 +354,34 @@ class _ShoppingCartPageScreenState extends State<ShoppingCartPageScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (viewModel.checkoutSuccessMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          viewModel.checkoutSuccessMessage!,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -374,11 +402,20 @@ class _ShoppingCartPageScreenState extends State<ShoppingCartPageScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: viewModel.items.isEmpty ? null : () {},
+                onPressed:
+                    viewModel.items.isEmpty || viewModel.isCheckoutLoading
+                    ? null
+                    : () => viewModel.checkout(),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: const Text('Proceed to Checkout'),
+                child: viewModel.isCheckoutLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Proceed to Checkout'),
               ),
             ),
           ],

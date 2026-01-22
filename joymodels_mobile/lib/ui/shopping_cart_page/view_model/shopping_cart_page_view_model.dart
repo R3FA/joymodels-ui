@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
@@ -6,6 +7,7 @@ import 'package:joymodels_mobile/data/model/models/response_types/model_response
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/shopping_cart/request_types/shopping_cart_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/shopping_cart/response_types/shopping_cart_item_response_api_model.dart';
+import 'package:joymodels_mobile/data/repositories/order_repository.dart';
 import 'package:joymodels_mobile/data/repositories/shopping_cart_repository.dart';
 import 'package:joymodels_mobile/ui/core/mixins/pagination_mixin.dart';
 import 'package:joymodels_mobile/ui/model_page/view_model/model_page_view_model.dart';
@@ -15,11 +17,15 @@ import 'package:provider/provider.dart';
 class ShoppingCartPageViewModel extends ChangeNotifier
     with PaginationMixin<ShoppingCartItemResponseApiModel> {
   final shoppingCartRepository = sl<ShoppingCartRepository>();
+  final orderRepository = sl<OrderRepository>();
 
   bool isLoading = false;
+  bool isCheckoutLoading = false;
   String? errorMessage;
+  String? checkoutSuccessMessage;
   VoidCallback? onSessionExpired;
   VoidCallback? onForbidden;
+  VoidCallback? onCheckoutSuccess;
 
   PaginationResponseApiModel<ShoppingCartItemResponseApiModel>? _paginationData;
 
@@ -109,6 +115,70 @@ class ShoppingCartPageViewModel extends ChangeNotifier
     }
   }
 
+  Future<bool> checkout() async {
+    if (items.isEmpty) return false;
+
+    errorMessage = null;
+    checkoutSuccessMessage = null;
+    isCheckoutLoading = true;
+    notifyListeners();
+
+    try {
+      // 1. Get PaymentIntent from backend
+      final checkoutResponse = await orderRepository.checkout();
+
+      // 2. Initialize Payment Sheet
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: checkoutResponse.clientSecret,
+          customerEphemeralKeySecret: checkoutResponse.ephemeralKey,
+          customerId: checkoutResponse.customerId,
+          merchantDisplayName: 'JoyModels',
+          style: ThemeMode.dark,
+        ),
+      );
+
+      // 3. Present Payment Sheet
+      await Stripe.instance.presentPaymentSheet();
+
+      // 4. Payment successful - reload cart (should be empty now)
+      isCheckoutLoading = false;
+      checkoutSuccessMessage =
+          'Payment successful! Models added to your library.';
+      notifyListeners();
+
+      await loadPage(1);
+      onCheckoutSuccess?.call();
+      return true;
+    } on StripeException catch (e) {
+      isCheckoutLoading = false;
+      if (e.error.code == FailureCode.Canceled) {
+        // User cancelled - not an error
+        notifyListeners();
+        return false;
+      }
+      errorMessage = e.error.localizedMessage ?? 'Payment failed';
+      notifyListeners();
+      return false;
+    } on SessionExpiredException {
+      isCheckoutLoading = false;
+      errorMessage = SessionExpiredException().toString();
+      notifyListeners();
+      onSessionExpired?.call();
+      return false;
+    } on ForbiddenException {
+      isCheckoutLoading = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
+    } catch (e) {
+      isCheckoutLoading = false;
+      errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
   void clearSearch() {
     searchController.clear();
     searchQuery = '';
@@ -134,6 +204,7 @@ class ShoppingCartPageViewModel extends ChangeNotifier
     searchController.dispose();
     onSessionExpired = null;
     onForbidden = null;
+    onCheckoutSuccess = null;
     super.dispose();
   }
 }
