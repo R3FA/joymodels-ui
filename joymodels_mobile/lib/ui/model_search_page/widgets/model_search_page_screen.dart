@@ -90,39 +90,68 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
 
   Widget _buildHeader(ModelSearchPageViewModel viewModel, ThemeData theme) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 12, 16, 12),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(8, 12, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => viewModel.onBackPressed(context),
-          ),
-          Expanded(
-            child: TextField(
-              controller: viewModel.searchController,
-              decoration: InputDecoration(
-                hintText: 'Search models...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: theme.colorScheme.surfaceContainerHighest,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => viewModel.onBackPressed(context),
+              ),
+              Expanded(
+                child: TextField(
+                  controller: viewModel.searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search models...',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: viewModel.searchError != null
+                          ? BorderSide(color: theme.colorScheme.error)
+                          : BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: viewModel.searchError != null
+                          ? BorderSide(color: theme.colorScheme.error)
+                          : BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: viewModel.searchError != null
+                          ? BorderSide(color: theme.colorScheme.error, width: 2)
+                          : BorderSide(color: theme.colorScheme.primary),
+                    ),
+                    filled: true,
+                    fillColor: theme.colorScheme.surfaceContainerHighest,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: (_) => viewModel.onFilterSubmit(),
                 ),
               ),
-              textInputAction: TextInputAction.search,
-              onSubmitted: (_) => viewModel.onFilterSubmit(),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(Icons.sort),
+                onPressed: () => viewModel.onFilterPressed(context),
+              ),
+            ],
+          ),
+          if (viewModel.searchError != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8, left: 56),
+              child: Text(
+                viewModel.searchError!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(Icons.sort),
-            onPressed: () => viewModel.onFilterPressed(context),
-          ),
         ],
       ),
     );

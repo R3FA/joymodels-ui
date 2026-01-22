@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
+import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
 import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -309,7 +310,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
         Text('Top Artists', style: theme.textTheme.titleMedium),
         if (hasArtists)
           TextButton(
-            onPressed: () => viewModel.onViewAllArtistsPressed(context),
+            onPressed: () => _showTopArtistsModal(viewModel, theme),
             style: TextButton.styleFrom(padding: EdgeInsets.zero),
             child: const Text('View All >'),
           ),
@@ -499,6 +500,212 @@ class _HomePageScreenState extends State<HomePageScreen> {
           );
         },
       ),
+    );
+  }
+
+  void _showTopArtistsModal(
+    HomePageScreenViewModel viewModel,
+    ThemeData theme,
+  ) {
+    viewModel.onViewAllArtistsPressed(context);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: theme.colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (modalContext) {
+        return ListenableBuilder(
+          listenable: viewModel,
+          builder: (context, _) {
+            return DraggableScrollableSheet(
+              initialChildSize: 0.7,
+              minChildSize: 0.5,
+              maxChildSize: 0.9,
+              expand: false,
+              builder: (context, scrollController) {
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Top Artists',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTopArtistsSearchField(viewModel, theme),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: _buildTopArtistsModalList(
+                          viewModel,
+                          theme,
+                          scrollController,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    ).then((_) {
+      viewModel.onTopArtistsModalClosed();
+    });
+  }
+
+  Widget _buildTopArtistsSearchField(
+    HomePageScreenViewModel viewModel,
+    ThemeData theme,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: viewModel.topArtistsSearchController,
+          decoration: InputDecoration(
+            hintText: 'Search by nickname...',
+            prefixIcon: const Icon(Icons.search),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: viewModel.topArtistsSearchError != null
+                  ? BorderSide(color: theme.colorScheme.error)
+                  : BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: viewModel.topArtistsSearchError != null
+                  ? BorderSide(color: theme.colorScheme.error)
+                  : BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: viewModel.topArtistsSearchError != null
+                  ? BorderSide(color: theme.colorScheme.error, width: 2)
+                  : BorderSide(color: theme.colorScheme.primary),
+            ),
+            filled: true,
+            fillColor: theme.colorScheme.surfaceContainerHighest,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+          ),
+          onChanged: (value) => viewModel.searchTopArtistsModal(value),
+        ),
+        if (viewModel.topArtistsSearchError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8, left: 12),
+            child: Text(
+              viewModel.topArtistsSearchError!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildTopArtistsModalList(
+    HomePageScreenViewModel viewModel,
+    ThemeData theme,
+    ScrollController scrollController,
+  ) {
+    if (viewModel.isTopArtistsLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final artists = viewModel.topArtists?.data ?? [];
+
+    if (artists.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.people_alt_outlined,
+              size: 48,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No artists found',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.separated(
+            controller: scrollController,
+            itemCount: artists.length,
+            separatorBuilder: (_, _) => const Divider(height: 1),
+            itemBuilder: (context, index) {
+              final artist = artists[index];
+              final avatar = viewModel.topArtistsAvatars[artist.uuid];
+              final hasAvatar = avatar != null && avatar.isNotEmpty;
+
+              return ListTile(
+                leading: CircleAvatar(
+                  radius: 24,
+                  backgroundImage: hasAvatar ? MemoryImage(avatar) : null,
+                  child: hasAvatar ? null : const Icon(Icons.person),
+                ),
+                title: Text(
+                  artist.nickName,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                subtitle: Text(
+                  '${artist.userModelsCount} models',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.secondary,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  viewModel.onArtistTap(context, artist);
+                },
+              );
+            },
+          ),
+        ),
+        PaginationControls(
+          currentPage: viewModel.topArtistsModalCurrentPage,
+          totalPages: viewModel.topArtistsModalTotalPages,
+          hasPreviousPage: viewModel.topArtistsModalHasPreviousPage,
+          hasNextPage: viewModel.topArtistsModalHasNextPage,
+          onPreviousPage: viewModel.onTopArtistsModalPreviousPage,
+          onNextPage: viewModel.onTopArtistsModalNextPage,
+          isLoading: viewModel.isTopArtistsLoading,
+        ),
+      ],
     );
   }
 }

@@ -13,8 +13,11 @@ import 'package:joymodels_mobile/data/model/users/request_types/user_search_requ
 import 'package:joymodels_mobile/data/model/users/response_types/users_response_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/category_repository.dart';
 import 'package:joymodels_mobile/data/repositories/users_repository.dart';
+import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 import 'package:joymodels_mobile/ui/model_search_page/widgets/model_search_page_screen.dart';
+import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
+import 'package:provider/provider.dart';
 
 class HomePageScreenViewModel with ChangeNotifier {
   final usersRepository = sl<UsersRepository>();
@@ -28,6 +31,17 @@ class HomePageScreenViewModel with ChangeNotifier {
   bool isTopArtistsPictureLoading = false;
 
   final searchController = TextEditingController();
+  final topArtistsSearchController = TextEditingController();
+  String? topArtistsSearchError;
+  int _topArtistsModalPage = 1;
+  String? _topArtistsModalSearchQuery;
+  static const int _topArtistsModalPageSize = 10;
+
+  int get topArtistsModalCurrentPage => topArtists?.pageNumber ?? 1;
+  int get topArtistsModalTotalPages => topArtists?.totalPages ?? 1;
+  bool get topArtistsModalHasPreviousPage =>
+      topArtists?.hasPreviousPage ?? false;
+  bool get topArtistsModalHasNextPage => topArtists?.hasNextPage ?? false;
 
   String loggedUsername = '';
   String? loggedUserUuid;
@@ -277,16 +291,20 @@ class HomePageScreenViewModel with ChangeNotifier {
     }
   }
 
-  Future<bool> getTopArtists() async {
+  Future<bool> getTopArtists({
+    String? nickname,
+    int pageNumber = 1,
+    int pageSize = 5,
+  }) async {
     errorMessage = null;
     isTopArtistsLoading = true;
     notifyListeners();
 
     try {
       final artistSearch = UsersSearchRequestApiModel(
-        nickname: null,
-        pageNumber: 1,
-        pageSize: 5,
+        nickname: nickname,
+        pageNumber: pageNumber,
+        pageSize: pageSize,
       );
 
       topArtists = await usersRepository.searchTopArtists(artistSearch);
@@ -351,7 +369,10 @@ class HomePageScreenViewModel with ChangeNotifier {
 
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => UserProfilePageScreen(userUuid: loggedUserUuid!),
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => UserProfilePageViewModel()..init(loggedUserUuid!),
+          child: UserProfilePageScreen(userUuid: loggedUserUuid!),
+        ),
       ),
     );
   }
@@ -361,13 +382,79 @@ class HomePageScreenViewModel with ChangeNotifier {
 
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => UserProfilePageScreen(userUuid: artist.uuid),
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => UserProfilePageViewModel()..init(artist.uuid),
+          child: UserProfilePageScreen(userUuid: artist.uuid),
+        ),
       ),
     );
   }
 
-  void onViewAllArtistsPressed(BuildContext context) {
-    // TODO: Implementirati kada bude spremno
+  Future<void> searchTopArtistsModal(String query) async {
+    final trimmedQuery = query.trim();
+
+    if (trimmedQuery.isNotEmpty) {
+      final validationError = RegexValidationViewModel.validateNickname(
+        trimmedQuery,
+      );
+      if (validationError != null) {
+        topArtistsSearchError = validationError;
+        notifyListeners();
+        return;
+      }
+    }
+
+    topArtistsSearchError = null;
+    _topArtistsModalPage = 1;
+    _topArtistsModalSearchQuery = trimmedQuery.isEmpty ? null : trimmedQuery;
+    notifyListeners();
+
+    await getTopArtists(
+      nickname: _topArtistsModalSearchQuery,
+      pageNumber: _topArtistsModalPage,
+      pageSize: _topArtistsModalPageSize,
+    );
+    await getTopArtistsProfilePicture();
+  }
+
+  Future<void> onTopArtistsModalNextPage() async {
+    if (!topArtistsModalHasNextPage || isTopArtistsLoading) return;
+    _topArtistsModalPage++;
+    await getTopArtists(
+      nickname: _topArtistsModalSearchQuery,
+      pageNumber: _topArtistsModalPage,
+      pageSize: _topArtistsModalPageSize,
+    );
+    await getTopArtistsProfilePicture();
+  }
+
+  Future<void> onTopArtistsModalPreviousPage() async {
+    if (!topArtistsModalHasPreviousPage || isTopArtistsLoading) return;
+    _topArtistsModalPage--;
+    await getTopArtists(
+      nickname: _topArtistsModalSearchQuery,
+      pageNumber: _topArtistsModalPage,
+      pageSize: _topArtistsModalPageSize,
+    );
+    await getTopArtistsProfilePicture();
+  }
+
+  Future<void> onTopArtistsModalClosed() async {
+    topArtistsSearchController.clear();
+    topArtistsSearchError = null;
+    _topArtistsModalPage = 1;
+    _topArtistsModalSearchQuery = null;
+    await getTopArtists();
+    await getTopArtistsProfilePicture();
+  }
+
+  Future<void> onViewAllArtistsPressed(BuildContext context) async {
+    topArtistsSearchController.clear();
+    topArtistsSearchError = null;
+    _topArtistsModalPage = 1;
+    _topArtistsModalSearchQuery = null;
+    await getTopArtists(pageSize: _topArtistsModalPageSize);
+    await getTopArtistsProfilePicture();
   }
 
   void onViewAllModelsPressed(BuildContext context) {
@@ -377,6 +464,7 @@ class HomePageScreenViewModel with ChangeNotifier {
   @override
   void dispose() {
     searchController.dispose();
+    topArtistsSearchController.dispose();
     onSessionExpired = null;
     onForbidden = null;
     super.dispose();

@@ -80,6 +80,16 @@ class RegexValidationViewModel {
     return null;
   }
 
+  static String? extractYoutubeVideoId(String? url) {
+    if (url == null || url.isEmpty) return null;
+
+    final regex = RegExp(
+      r'(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)',
+    );
+    final match = regex.firstMatch(url);
+    return match?.group(1);
+  }
+
   static String? validatePrice(String? price) {
     if (price == null || price.trim().isEmpty) {
       return 'Price cannot be empty string.';

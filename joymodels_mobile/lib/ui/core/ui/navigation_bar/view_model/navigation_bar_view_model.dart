@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:joymodels_mobile/ui/community_page/widgets/community_page_screen.dart';
 import 'package:joymodels_mobile/ui/home_page/widgets/home_page_screen.dart';
 import 'package:joymodels_mobile/ui/model_create_page/widgets/model_create_page_screen.dart';
 import 'package:joymodels_mobile/ui/shopping_cart_page/view_model/shopping_cart_page_view_model.dart';
@@ -11,29 +12,35 @@ class NavigationBarViewModel with ChangeNotifier {
   int selectedNavBarItem = 0;
 
   void _navigateToHome(BuildContext context) {
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => HomePageScreen()));
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const HomePageScreen()),
+      (route) => false,
+    );
   }
 
   void _navigateToCommunity(BuildContext context) {
-    // TODO: Implementiraj
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const CommunityPageScreen()),
+      (route) => false,
+    );
   }
 
   void _navigateToAddModel(BuildContext context) {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => ModelCreatePageScreen()),
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const ModelCreatePageScreen()),
+      (route) => false,
     );
   }
 
   void _navigateToCart(BuildContext context) {
-    Navigator.of(context).pushReplacement(
+    Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
         builder: (_) => ChangeNotifierProvider(
           create: (_) => ShoppingCartPageViewModel(),
           child: const ShoppingCartPageScreen(),
         ),
       ),
+      (route) => false,
     );
   }
 

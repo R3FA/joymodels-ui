@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
+import 'package:joymodels_mobile/ui/community_page/view_model/community_page_view_model.dart';
 import 'package:joymodels_mobile/ui/core/themes/themes.dart';
 import 'package:joymodels_mobile/ui/menu_drawer/view_model/menu_drawer_view_model.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/view_model/navigation_bar_view_model.dart';
@@ -10,7 +11,6 @@ import 'package:joymodels_mobile/ui/model_create_page/view_model/model_create_pa
 import 'package:joymodels_mobile/ui/model_search_page/view_model/model_search_page_view_model.dart';
 import 'package:joymodels_mobile/ui/register_page/view_model/register_page_view_model.dart';
 import 'package:joymodels_mobile/ui/settings_page/view_model/settings_page_view_model.dart';
-import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
 import 'package:joymodels_mobile/ui/verify_page/view_model/verify_page_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:joymodels_mobile/ui/welcome_page/view_model/welcome_page_view_model.dart';
@@ -31,7 +31,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => ModelSearchPageViewModel()),
         ChangeNotifierProvider(create: (_) => ModelCreatePageViewModel()),
         ChangeNotifierProvider(create: (_) => SettingsPageViewModel()),
-        ChangeNotifierProvider(create: (_) => UserProfilePageViewModel()),
+        ChangeNotifierProvider(create: (_) => CommunityPageViewModel()),
       ],
       child: const JoyModelsApp(),
     ),

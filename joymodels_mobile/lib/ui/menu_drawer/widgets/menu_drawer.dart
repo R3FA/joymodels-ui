@@ -6,6 +6,7 @@ import 'package:joymodels_mobile/data/model/users/response_types/users_response_
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
 import 'package:joymodels_mobile/ui/menu_drawer/view_model/menu_drawer_view_model.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
+import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -55,7 +56,10 @@ class _MenuDrawerState extends State<MenuDrawer> {
             Navigator.of(context).pop();
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) => UserProfilePageScreen(userUuid: userUuid),
+                builder: (_) => ChangeNotifierProvider(
+                  create: (_) => UserProfilePageViewModel()..init(userUuid),
+                  child: UserProfilePageScreen(userUuid: userUuid),
+                ),
               ),
             );
           },

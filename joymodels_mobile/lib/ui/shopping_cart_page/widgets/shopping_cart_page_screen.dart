@@ -8,6 +8,7 @@ import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_ba
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
 import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
 import 'package:joymodels_mobile/ui/shopping_cart_page/view_model/shopping_cart_page_view_model.dart';
+import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -54,7 +55,10 @@ class _ShoppingCartPageScreenState extends State<ShoppingCartPageScreen> {
   void _navigateToUserProfile(String userUuid) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => UserProfilePageScreen(userUuid: userUuid),
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => UserProfilePageViewModel()..init(userUuid),
+          child: UserProfilePageScreen(userUuid: userUuid),
+        ),
       ),
     );
   }

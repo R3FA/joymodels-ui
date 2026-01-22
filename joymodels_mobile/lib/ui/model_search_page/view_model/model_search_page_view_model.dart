@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
@@ -10,6 +12,7 @@ import 'package:joymodels_mobile/data/model/pagination/response_types/pagination
 import 'package:joymodels_mobile/data/repositories/category_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_repository.dart';
 import 'package:joymodels_mobile/ui/core/mixins/pagination_mixin.dart';
+import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 import 'package:joymodels_mobile/ui/model_page/view_model/model_page_view_model.dart';
 import 'package:joymodels_mobile/ui/model_page/widgets/model_page_screen.dart';
 import 'package:joymodels_mobile/ui/model_search_page/widgets/model_search_modal_sort_type_screen.dart';
@@ -41,6 +44,8 @@ class ModelSearchPageViewModel
   final categoryRepository = sl<CategoryRepository>();
 
   final searchController = TextEditingController();
+  Timer? _searchDebounce;
+  String? searchError;
 
   ModelSortType? selectedFilterSort;
   String? selectedFilterCategory;
@@ -87,6 +92,12 @@ class ModelSearchPageViewModel
     selectedFilterCategory = selectedCategory?.categoryName;
     selectedFilterSort = null;
 
+    if (modelName != null && modelName.isNotEmpty) {
+      searchController.text = modelName;
+    }
+
+    searchController.addListener(_onSearchChanged);
+
     notifyListeners();
     try {
       await getCategories();
@@ -105,6 +116,50 @@ class ModelSearchPageViewModel
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  void _onSearchChanged() {
+    _searchDebounce?.cancel();
+
+    final query = searchController.text;
+
+    if (query.isEmpty) {
+      searchError = null;
+      notifyListeners();
+      _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+        searchModels(
+          ModelSearchRequestApiModel(
+            categoryName: selectedFilterCategory,
+            orderBy: selectedFilterSort?.queryParam,
+            pageNumber: 1,
+            pageSize: 10,
+          ),
+        );
+      });
+      return;
+    }
+
+    final validationError = RegexValidationViewModel.validateText(query);
+    if (validationError != null) {
+      searchError = validationError;
+      notifyListeners();
+      return;
+    }
+
+    searchError = null;
+    notifyListeners();
+
+    _searchDebounce = Timer(const Duration(milliseconds: 500), () {
+      searchModels(
+        ModelSearchRequestApiModel(
+          modelName: query,
+          categoryName: selectedFilterCategory,
+          orderBy: selectedFilterSort?.queryParam,
+          pageNumber: 1,
+          pageSize: 10,
+        ),
+      );
+    });
   }
 
   Future<bool> getCategories() async {
@@ -240,6 +295,8 @@ class ModelSearchPageViewModel
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
+    searchController.removeListener(_onSearchChanged);
     searchController.dispose();
     onSessionExpired = null;
     onForbidden = null;

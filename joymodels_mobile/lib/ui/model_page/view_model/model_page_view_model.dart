@@ -300,10 +300,10 @@ class ModelPageViewModel extends ChangeNotifier {
       await modelRepository.delete(loadedModel!.uuid);
       isModelBeingDeleted = false;
       if (context.mounted) {
-        Navigator.of(
-          context,
-          rootNavigator: true,
-        ).pushReplacement(MaterialPageRoute(builder: (_) => HomePageScreen()));
+        Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const HomePageScreen()),
+          (route) => false,
+        );
       }
       notifyListeners();
       return true;
