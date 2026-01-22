@@ -307,7 +307,6 @@ class _CommunityPostEditPageScreenState
           spacing: 12,
           runSpacing: 12,
           children: [
-            // Existing photos
             ...viewModel.existingPictureLocations.asMap().entries.map(
               (entry) => _buildExistingPhotoItem(
                 viewModel: viewModel,
@@ -316,8 +315,6 @@ class _CommunityPostEditPageScreenState
                 index: entry.key,
               ),
             ),
-
-            // New photos
             ...viewModel.newPhotos.asMap().entries.map(
               (entry) => _buildNewPhotoItem(
                 viewModel: viewModel,
@@ -408,7 +405,6 @@ class _CommunityPostEditPageScreenState
             ),
           ),
         ),
-        // Badge to indicate it's a new photo
         Positioned(
           bottom: 4,
           left: 4,

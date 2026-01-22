@@ -34,14 +34,12 @@ class CommunityPostEditPageViewModel with ChangeNotifier {
 
   static const int maxPhotos = 4;
 
-  // Original values for change detection
   String _originalTitle = '';
   String _originalDescription = '';
   String _originalYoutubeVideoLink = '';
   CommunityPostTypeResponseApiModel? _originalPostType;
   List<String> _originalPictureLocations = [];
 
-  // Current state
   List<Uint8List> newPhotos = [];
   List<String> newPhotoNames = [];
   List<String> existingPictureLocations = [];
@@ -84,7 +82,6 @@ class CommunityPostEditPageViewModel with ChangeNotifier {
 
     post = loadedPost;
 
-    // Set original values
     _originalTitle = loadedPost.title;
     _originalDescription = loadedPost.description;
     _originalYoutubeVideoLink = loadedPost.youtubeVideoLink ?? '';
@@ -92,7 +89,6 @@ class CommunityPostEditPageViewModel with ChangeNotifier {
         .map((p) => p.pictureLocation)
         .toList();
 
-    // Set current values
     titleController.text = loadedPost.title;
     descriptionController.text = loadedPost.description;
     youtubeVideoLinkController.text = loadedPost.youtubeVideoLink ?? '';
@@ -100,7 +96,6 @@ class CommunityPostEditPageViewModel with ChangeNotifier {
 
     await getPostTypes();
 
-    // Find and set the original post type
     if (postTypes != null) {
       for (final postType in postTypes!.data) {
         if (postType.uuid == loadedPost.communityPostType.uuid) {

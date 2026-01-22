@@ -44,7 +44,6 @@ class CommunityPageViewModel extends ChangeNotifier
   CommunityPostReviewTypeResponseApiModel? likeReviewType;
   CommunityPostReviewTypeResponseApiModel? dislikeReviewType;
 
-  // Track which posts user has liked/disliked (postUuid -> reviewType)
   final Map<String, String> _userReviews = {};
 
   VoidCallback? onSessionExpired;
@@ -123,9 +122,7 @@ class CommunityPageViewModel extends ChangeNotifier
         } else {
           _userReviews.remove(post.uuid);
         }
-      } catch (e) {
-        // Ignore errors for individual posts
-      }
+      } catch (_) {}
     }
   }
 
@@ -180,7 +177,6 @@ class CommunityPageViewModel extends ChangeNotifier
 
     final query = searchController.text;
 
-    // If empty, clear error and refresh to show all posts
     if (query.isEmpty) {
       searchError = null;
       notifyListeners();
@@ -188,7 +184,6 @@ class CommunityPageViewModel extends ChangeNotifier
       return;
     }
 
-    // Validate using validateText regex
     final validationError = RegexValidationViewModel.validateText(query);
     if (validationError != null) {
       searchError = validationError;
@@ -196,11 +191,9 @@ class CommunityPageViewModel extends ChangeNotifier
       return;
     }
 
-    // Clear error if validation passes
     searchError = null;
     notifyListeners();
 
-    // Debounce the search
     _searchDebounce = Timer(const Duration(milliseconds: 500), () {
       searchPosts(
         CommunityPostSearchRequestApiModel(
@@ -215,7 +208,6 @@ class CommunityPageViewModel extends ChangeNotifier
   void onSearchSubmitted(String query) {
     _searchDebounce?.cancel();
 
-    // Validate before searching
     if (query.isNotEmpty) {
       final validationError = RegexValidationViewModel.validateText(query);
       if (validationError != null) {
@@ -290,7 +282,6 @@ class CommunityPageViewModel extends ChangeNotifier
 
     try {
       if (isPostLiked(post.uuid)) {
-        // Already liked, remove like
         await communityPostRepository.deleteUserReview(
           CommunityPostUserReviewDeleteRequestApiModel(
             communityPostUuid: post.uuid,
@@ -300,7 +291,6 @@ class CommunityPageViewModel extends ChangeNotifier
         setPostReviewStatus(post.uuid, null);
         _updatePostLikeCount(post.uuid, -1, 0);
       } else {
-        // If disliked, remove dislike first
         if (isPostDisliked(post.uuid) && dislikeReviewType != null) {
           await communityPostRepository.deleteUserReview(
             CommunityPostUserReviewDeleteRequestApiModel(
@@ -310,7 +300,6 @@ class CommunityPageViewModel extends ChangeNotifier
           );
           _updatePostLikeCount(post.uuid, 0, -1);
         }
-        // Add like
         await communityPostRepository.createUserReview(
           CommunityPostUserReviewCreateRequestApiModel(
             communityPostUuid: post.uuid,
@@ -335,7 +324,6 @@ class CommunityPageViewModel extends ChangeNotifier
 
     try {
       if (isPostDisliked(post.uuid)) {
-        // Already disliked, remove dislike
         await communityPostRepository.deleteUserReview(
           CommunityPostUserReviewDeleteRequestApiModel(
             communityPostUuid: post.uuid,
@@ -345,7 +333,6 @@ class CommunityPageViewModel extends ChangeNotifier
         setPostReviewStatus(post.uuid, null);
         _updatePostLikeCount(post.uuid, 0, -1);
       } else {
-        // If liked, remove like first
         if (isPostLiked(post.uuid) && likeReviewType != null) {
           await communityPostRepository.deleteUserReview(
             CommunityPostUserReviewDeleteRequestApiModel(
@@ -355,7 +342,6 @@ class CommunityPageViewModel extends ChangeNotifier
           );
           _updatePostLikeCount(post.uuid, -1, 0);
         }
-        // Add dislike
         await communityPostRepository.createUserReview(
           CommunityPostUserReviewCreateRequestApiModel(
             communityPostUuid: post.uuid,

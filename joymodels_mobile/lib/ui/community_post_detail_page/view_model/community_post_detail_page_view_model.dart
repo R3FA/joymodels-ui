@@ -41,7 +41,6 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
   int currentImageIndex = 0;
   final PageController galleryController = PageController();
 
-  // Questions section with PaginationMixin
   PaginationResponseApiModel<CommunityPostQuestionSectionResponseApiModel>?
   questionsPagination;
   bool isLoadingQuestions = false;
@@ -67,7 +66,6 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
   bool isSubmittingReply = false;
   String? replyingToQuestionUuid;
 
-  // Track expanded replies state: questionUuid -> number of visible replies
   final Map<String, int> _visibleRepliesCount = {};
   final Set<String> _expandedQuestions = {};
   static const int _repliesPerPage = 5;
@@ -82,11 +80,9 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
 
   void toggleReplies(String questionUuid) {
     if (_expandedQuestions.contains(questionUuid)) {
-      // Hide all replies
       _expandedQuestions.remove(questionUuid);
       _visibleRepliesCount.remove(questionUuid);
     } else {
-      // Show replies (start with first 5)
       _expandedQuestions.add(questionUuid);
       _visibleRepliesCount[questionUuid] = _repliesPerPage;
     }
@@ -161,9 +157,7 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
 
       isLiked = results[0];
       isDisliked = results[1];
-    } catch (e) {
-      // Ignore errors
-    }
+    } catch (_) {}
   }
 
   Future<void> onLikePressed() async {
@@ -308,7 +302,6 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
     return match?.group(1);
   }
 
-  // Questions section methods
   Future<void> loadQuestions({int? pageNumber}) async {
     if (post == null) return;
 
@@ -324,7 +317,6 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
         ),
       );
 
-      // Filter to show only parent questions (not replies)
       final parentQuestions = response.data
           .where((q) => q.parentMessage == null)
           .toList();
@@ -388,7 +380,6 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
       questionController.clear();
       isSubmittingQuestion = false;
 
-      // Refresh post to get updated comment count and reload questions
       await _refreshPost();
       await loadQuestions(pageNumber: 1);
     } on SessionExpiredException {
@@ -444,7 +435,6 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
       replyController.clear();
       isSubmittingReply = false;
 
-      // Refresh post to get updated comment count and reload questions
       await _refreshPost();
       await reloadCurrentPage();
     } on SessionExpiredException {
@@ -499,9 +489,7 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
     try {
       post = await communityPostRepository.getByUuid(post!.uuid);
       notifyListeners();
-    } catch (e) {
-      // Ignore refresh errors, the main operation succeeded
-    }
+    } catch (_) {}
   }
 
   void updatePost(CommunityPostResponseApiModel updatedPost) {

@@ -333,7 +333,6 @@ class UserProfilePageViewModel with ChangeNotifier {
   }
 
   void onFollowModalSearchChanged(String query, {required bool isFollowing}) {
-    // If empty, clear error and search
     if (query.isEmpty) {
       followModalSearchError = null;
       followModalSearchQuery = query;
@@ -345,7 +344,6 @@ class UserProfilePageViewModel with ChangeNotifier {
       return;
     }
 
-    // Validate using validateNickname
     final validationError = RegexValidationViewModel.validateNickname(query);
     if (validationError != null) {
       followModalSearchError = validationError;
@@ -353,7 +351,6 @@ class UserProfilePageViewModel with ChangeNotifier {
       return;
     }
 
-    // Clear error and search
     followModalSearchError = null;
     followModalSearchQuery = query;
     if (isFollowing) {
