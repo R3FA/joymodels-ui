@@ -11,6 +11,8 @@ import 'package:joymodels_mobile/data/repositories/sso_repository.dart';
 import 'package:joymodels_mobile/data/repositories/users_repository.dart';
 import 'package:joymodels_mobile/ui/core/mixins/pagination_mixin.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
+import 'package:joymodels_mobile/ui/library_page/view_model/library_page_view_model.dart';
+import 'package:joymodels_mobile/ui/library_page/widgets/library_page_screen.dart';
 import 'package:joymodels_mobile/ui/settings_page/widgets/settings_page_screen.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
@@ -130,7 +132,14 @@ class MenuDrawerViewModel extends ChangeNotifier
 
   void navigateToLibrary(BuildContext context) {
     Navigator.of(context).pop();
-    // TODO: Navigate to Library page
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => LibraryPageViewModel(),
+          child: const LibraryPageScreen(),
+        ),
+      ),
+    );
   }
 
   void navigateToSettings(BuildContext context) {

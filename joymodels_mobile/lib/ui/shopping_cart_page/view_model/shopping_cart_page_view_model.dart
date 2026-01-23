@@ -124,10 +124,8 @@ class ShoppingCartPageViewModel extends ChangeNotifier
     notifyListeners();
 
     try {
-      // 1. Get PaymentIntent from backend
       final checkoutResponse = await orderRepository.checkout();
 
-      // 2. Initialize Payment Sheet
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: checkoutResponse.clientSecret,
@@ -138,10 +136,8 @@ class ShoppingCartPageViewModel extends ChangeNotifier
         ),
       );
 
-      // 3. Present Payment Sheet
       await Stripe.instance.presentPaymentSheet();
 
-      // 4. Payment successful - reload cart (should be empty now)
       isCheckoutLoading = false;
       checkoutSuccessMessage =
           'Payment successful! Models added to your library.';
@@ -153,7 +149,6 @@ class ShoppingCartPageViewModel extends ChangeNotifier
     } on StripeException catch (e) {
       isCheckoutLoading = false;
       if (e.error.code == FailureCode.Canceled) {
-        // User cancelled - not an error
         notifyListeners();
         return false;
       }

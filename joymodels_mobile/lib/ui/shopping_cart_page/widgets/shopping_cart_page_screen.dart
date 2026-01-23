@@ -29,9 +29,33 @@ class _ShoppingCartPageScreenState extends State<ShoppingCartPageScreen> {
     _viewModel = context.read<ShoppingCartPageViewModel>();
     _viewModel.onSessionExpired = _handleSessionExpired;
     _viewModel.onForbidden = _handleForbidden;
+    _viewModel.onCheckoutSuccess = _handleCheckoutSuccess;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _viewModel.init();
     });
+  }
+
+  void _handleCheckoutSuccess() {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.white),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text('Payment successful! Models added to your library.'),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
   }
 
   void _handleSessionExpired() {
