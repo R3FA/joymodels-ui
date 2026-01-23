@@ -7,6 +7,8 @@ import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
+import 'package:joymodels_mobile/ui/library_page/view_model/library_page_view_model.dart';
+import 'package:joymodels_mobile/ui/library_page/widgets/library_page_screen.dart';
 import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
 import 'package:joymodels_mobile/ui/model_page/view_model/model_page_view_model.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
@@ -51,6 +53,19 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const AccessDeniedScreen()),
       (route) => false,
+    );
+  }
+
+  void _navigateToLibraryWithModel(String? modelName) {
+    if (modelName == null) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => LibraryPageViewModel(),
+          child: LibraryPageScreen(initialSearchQuery: modelName),
+        ),
+      ),
     );
   }
 
@@ -743,40 +758,78 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
             ),
             if (!vm.isModelOwner) ...[
               const SizedBox(width: 6),
-              IconButton(
-                onPressed: vm.isAddingToCart
-                    ? null
-                    : () => vm.onToggleCart(context),
-                icon: vm.isAddingToCart
-                    ? SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            vm.isInCart
-                                ? theme.colorScheme.error
-                                : theme.colorScheme.primary,
+              if (vm.isOwnedInLibrary)
+                InkWell(
+                  onTap: () =>
+                      _navigateToLibraryWithModel(vm.loadedModel?.name),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.green),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.check_circle,
+                          color: Colors.green,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Owned',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      )
-                    : Icon(
-                        vm.isInCart
-                            ? Icons.remove_shopping_cart
-                            : Icons.add_shopping_cart,
-                      ),
-                tooltip: vm.isInCart ? 'Remove from Cart' : 'Add to Cart',
-                color: vm.isInCart
-                    ? theme.colorScheme.error
-                    : theme.colorScheme.primary,
-                style: IconButton.styleFrom(
-                  backgroundColor: vm.isInCart
-                      ? theme.colorScheme.errorContainer.withValues(alpha: 0.5)
-                      : theme.colorScheme.primaryContainer.withValues(
-                          alpha: 0.5,
+                      ],
+                    ),
+                  ),
+                )
+              else
+                IconButton(
+                  onPressed: vm.isAddingToCart
+                      ? null
+                      : () => vm.onToggleCart(context),
+                  icon: vm.isAddingToCart
+                      ? SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              vm.isInCart
+                                  ? theme.colorScheme.error
+                                  : theme.colorScheme.primary,
+                            ),
+                          ),
+                        )
+                      : Icon(
+                          vm.isInCart
+                              ? Icons.remove_shopping_cart
+                              : Icons.add_shopping_cart,
                         ),
+                  tooltip: vm.isInCart ? 'Remove from Cart' : 'Add to Cart',
+                  color: vm.isInCart
+                      ? theme.colorScheme.error
+                      : theme.colorScheme.primary,
+                  style: IconButton.styleFrom(
+                    backgroundColor: vm.isInCart
+                        ? theme.colorScheme.errorContainer.withValues(
+                            alpha: 0.5,
+                          )
+                        : theme.colorScheme.primaryContainer.withValues(
+                            alpha: 0.5,
+                          ),
+                  ),
                 ),
-              ),
             ],
           ],
         ),

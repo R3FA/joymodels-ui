@@ -29,9 +29,33 @@ class _ShoppingCartPageScreenState extends State<ShoppingCartPageScreen> {
     _viewModel = context.read<ShoppingCartPageViewModel>();
     _viewModel.onSessionExpired = _handleSessionExpired;
     _viewModel.onForbidden = _handleForbidden;
+    _viewModel.onCheckoutSuccess = _handleCheckoutSuccess;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _viewModel.init();
     });
+  }
+
+  void _handleCheckoutSuccess() {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.white),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text('Payment successful! Models added to your library.'),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
   }
 
   void _handleSessionExpired() {
@@ -354,6 +378,34 @@ class _ShoppingCartPageScreenState extends State<ShoppingCartPageScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (viewModel.checkoutSuccessMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          viewModel.checkoutSuccessMessage!,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -374,11 +426,20 @@ class _ShoppingCartPageScreenState extends State<ShoppingCartPageScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: viewModel.items.isEmpty ? null : () {},
+                onPressed:
+                    viewModel.items.isEmpty || viewModel.isCheckoutLoading
+                    ? null
+                    : () => viewModel.checkout(),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: const Text('Proceed to Checkout'),
+                child: viewModel.isCheckoutLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Proceed to Checkout'),
               ),
             ),
           ],

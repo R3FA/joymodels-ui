@@ -12,6 +12,8 @@ import 'package:joymodels_mobile/data/repositories/model_faq_section_repository.
 import 'package:joymodels_mobile/data/repositories/model_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_review_type_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_reviews_repository.dart';
+import 'package:joymodels_mobile/data/repositories/library_repository.dart';
+import 'package:joymodels_mobile/data/repositories/order_repository.dart';
 import 'package:joymodels_mobile/data/repositories/shopping_cart_repository.dart';
 import 'package:joymodels_mobile/data/repositories/sso_repository.dart';
 import 'package:joymodels_mobile/data/repositories/users_repository.dart';
@@ -22,6 +24,8 @@ import 'package:joymodels_mobile/data/services/community_post_review_type_servic
 import 'package:joymodels_mobile/data/services/community_post_type_service.dart';
 import 'package:joymodels_mobile/data/services/model_faq_section_service.dart';
 import 'package:joymodels_mobile/data/services/model_review_type_service.dart';
+import 'package:joymodels_mobile/data/services/library_service.dart';
+import 'package:joymodels_mobile/data/services/order_service.dart';
 import 'package:joymodels_mobile/data/services/shopping_cart_service.dart';
 import 'package:joymodels_mobile/data/services/model_availability_service.dart';
 import 'package:joymodels_mobile/data/services/model_reviews_service.dart';
@@ -74,6 +78,16 @@ void dependencyInjectionSetup() {
   sl.registerLazySingleton(() => ShoppingCartService());
   sl.registerLazySingleton(
     () => ShoppingCartRepository(sl<ShoppingCartService>(), sl<AuthService>()),
+  );
+
+  sl.registerLazySingleton(() => OrderService());
+  sl.registerLazySingleton(
+    () => OrderRepository(sl<OrderService>(), sl<AuthService>()),
+  );
+
+  sl.registerLazySingleton(() => LibraryService());
+  sl.registerLazySingleton(
+    () => LibraryRepository(sl<LibraryService>(), sl<AuthService>()),
   );
 
   sl.registerLazySingleton(() => ModelFaqSectionService());

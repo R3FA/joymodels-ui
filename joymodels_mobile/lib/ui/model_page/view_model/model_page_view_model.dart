@@ -11,6 +11,7 @@ import 'package:joymodels_mobile/data/model/model_reviews/request_types/model_re
 import 'package:joymodels_mobile/data/model/model_reviews/response_types/model_calculated_reviews_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/shopping_cart/request_types/shopping_cart_item_add_request_api_model.dart';
+import 'package:joymodels_mobile/data/repositories/library_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_faq_section_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_review_type_repository.dart';
@@ -34,6 +35,7 @@ class ModelPageViewModel extends ChangeNotifier {
   final modelReviewTypeRepository = sl<ModelReviewTypeRepository>();
   final shoppingCartRepository = sl<ShoppingCartRepository>();
   final modelFaqSectionRepository = sl<ModelFaqSectionRepository>();
+  final libraryRepository = sl<LibraryRepository>();
 
   bool isLoading = false;
   bool areReviewsLoading = false;
@@ -46,6 +48,7 @@ class ModelPageViewModel extends ChangeNotifier {
   bool isLoadingReviewTypes = false;
   bool hasUserReviewed = false;
   bool isModelOwner = false;
+  bool isOwnedInLibrary = false;
 
   List<ModelReviewTypeResponseApiModel> reviewTypes = [];
 
@@ -69,6 +72,7 @@ class ModelPageViewModel extends ChangeNotifier {
     try {
       this.loadedModel = loadedModel;
       await checkIfModelOwner(loadedModel!);
+      await checkIfOwnedInLibrary(loadedModel);
       await getModelReviews(loadedModel);
       await isModelLikedByUser(loadedModel);
       await checkIfModelInCart(loadedModel);
@@ -86,6 +90,24 @@ class ModelPageViewModel extends ChangeNotifier {
   Future<void> checkIfModelOwner(ModelResponseApiModel model) async {
     final currentUserUuid = await TokenStorage.getCurrentUserUuid();
     isModelOwner = currentUserUuid == model.user.uuid;
+  }
+
+  Future<bool> checkIfOwnedInLibrary(ModelResponseApiModel model) async {
+    try {
+      isOwnedInLibrary = await libraryRepository.hasPurchasedModel(model.uuid);
+      notifyListeners();
+      return true;
+    } on SessionExpiredException {
+      onSessionExpired?.call();
+      return false;
+    } on ForbiddenException {
+      notifyListeners();
+      onForbidden?.call();
+      return false;
+    } catch (e) {
+      isOwnedInLibrary = false;
+      return false;
+    }
   }
 
   Future<bool> checkIfUserReviewed(ModelResponseApiModel model) async {
@@ -716,6 +738,7 @@ class ModelPageViewModel extends ChangeNotifier {
     reviewTypes = [];
     hasUserReviewed = false;
     isModelOwner = false;
+    isOwnedInLibrary = false;
 
     if (galleryController.hasClients) {
       galleryController.jumpToPage(0);

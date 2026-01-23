@@ -19,10 +19,11 @@ class ErrorDisplay extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: 80, color: theme.colorScheme.error),
             const SizedBox(height: 16),
