@@ -3,7 +3,9 @@ import 'package:intl/intl.dart';
 import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/response_types/model_faq_section_response_api_model.dart';
 import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
+import 'package:joymodels_mobile/ui/core/ui/report_dialog.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
+import 'package:joymodels_mobile/data/model/enums/reported_entity_type_api_enum.dart';
 import 'package:joymodels_mobile/ui/model_faq_section_detail_page/view_model/model_faq_section_detail_page_view_model.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
@@ -178,9 +180,7 @@ class _ModelFaqSectionDetailPageScreenState
                   faq.uuid,
                   isQuestion: true,
                 ),
-                onReport: () {
-                  // TODO: Implement report
-                },
+                onReport: () => _showReportDialog(faq.uuid, faq.messageText),
               ),
             ],
           ),
@@ -374,9 +374,8 @@ class _ModelFaqSectionDetailPageScreenState
                             reply.uuid,
                             isQuestion: false,
                           ),
-                          onReport: () {
-                            // TODO: Implement report
-                          },
+                          onReport: () =>
+                              _showReportDialog(reply.uuid, reply.messageText),
                         ),
                       ],
                     ),
@@ -740,5 +739,20 @@ class _ModelFaqSectionDetailPageScreenState
         ),
       ),
     );
+  }
+
+  void _showReportDialog(String uuid, String? description) async {
+    final result = await ReportDialog.show(
+      context: context,
+      entityType: ReportedEntityTypeApiEnum.modelFaqQuestion,
+      entityUuid: uuid,
+      entityDescription: description,
+    );
+
+    if (result == true && mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Report submitted')));
+    }
   }
 }

@@ -6,7 +6,9 @@ import 'package:joymodels_mobile/data/model/model_reviews/response_types/model_r
 import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
+import 'package:joymodels_mobile/ui/core/ui/report_dialog.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
+import 'package:joymodels_mobile/data/model/enums/reported_entity_type_api_enum.dart';
 import 'package:joymodels_mobile/ui/model_reviews_page/view_model/model_reviews_page_view_model.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
@@ -516,46 +518,22 @@ class _ModelReviewsPageScreenState extends State<ModelReviewsPageScreen> {
     );
   }
 
-  void _showReportDialog(ModelReviewResponseApiModel review, ThemeData theme) {
-    showDialog(
+  void _showReportDialog(
+    ModelReviewResponseApiModel review,
+    ThemeData theme,
+  ) async {
+    final result = await ReportDialog.show(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Icon(Icons.flag, color: theme.colorScheme.error),
-              const SizedBox(width: 12),
-              const Text('Report Review'),
-            ],
-          ),
-          content: const Text(
-            'Report functionality will be implemented soon. This review will be flagged for moderator review.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Report feature coming soon'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.error,
-                foregroundColor: theme.colorScheme.onError,
-              ),
-              child: const Text('Report'),
-            ),
-          ],
-        );
-      },
+      entityType: ReportedEntityTypeApiEnum.modelReview,
+      entityUuid: review.uuid,
+      entityDescription: review.modelReviewText,
     );
+
+    if (result == true && mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Report submitted')));
+    }
   }
 
   Color _getReviewTypeColor(String reviewType, ThemeData theme) {

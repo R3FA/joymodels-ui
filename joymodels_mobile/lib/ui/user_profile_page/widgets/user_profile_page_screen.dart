@@ -11,7 +11,9 @@ import 'package:joymodels_mobile/ui/community_post_detail_page/widgets/community
 import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
+import 'package:joymodels_mobile/ui/core/ui/report_dialog.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
+import 'package:joymodels_mobile/data/model/enums/reported_entity_type_api_enum.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 import 'package:joymodels_mobile/ui/model_page/view_model/model_page_view_model.dart';
 import 'package:joymodels_mobile/ui/model_page/widgets/model_page_screen.dart';
@@ -133,7 +135,14 @@ class _UserProfilePageScreenState extends State<UserProfilePageScreen>
                 onPressed: () => viewModel.onBackPressed(context),
               ),
               const Spacer(),
-              if (!viewModel.isOwnProfile)
+              if (!viewModel.isOwnProfile) ...[
+                IconButton(
+                  icon: Icon(
+                    Icons.flag_outlined,
+                    color: theme.colorScheme.error,
+                  ),
+                  onPressed: () => _showReportUserDialog(viewModel.user!),
+                ),
                 viewModel.isFollowLoading
                     ? const SizedBox(
                         width: 48,
@@ -151,6 +160,7 @@ class _UserProfilePageScreenState extends State<UserProfilePageScreen>
                         ),
                         onPressed: viewModel.toggleFollow,
                       ),
+              ],
             ],
           ),
           const SizedBox(height: 8),
@@ -639,6 +649,21 @@ class _UserProfilePageScreenState extends State<UserProfilePageScreen>
         );
       },
     );
+  }
+
+  void _showReportUserDialog(UsersResponseApiModel user) async {
+    final result = await ReportDialog.show(
+      context: context,
+      entityType: ReportedEntityTypeApiEnum.user,
+      entityUuid: user.uuid,
+      entityDescription: '@${user.nickName}',
+    );
+
+    if (result == true && mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Report submitted')));
+    }
   }
 }
 

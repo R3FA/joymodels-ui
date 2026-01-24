@@ -14,6 +14,7 @@ import 'package:joymodels_mobile/data/repositories/model_review_type_repository.
 import 'package:joymodels_mobile/data/repositories/model_reviews_repository.dart';
 import 'package:joymodels_mobile/data/repositories/library_repository.dart';
 import 'package:joymodels_mobile/data/repositories/notification_repository.dart';
+import 'package:joymodels_mobile/data/repositories/report_repository.dart';
 import 'package:joymodels_mobile/data/repositories/order_repository.dart';
 import 'package:joymodels_mobile/data/repositories/shopping_cart_repository.dart';
 import 'package:joymodels_mobile/data/repositories/sso_repository.dart';
@@ -27,6 +28,7 @@ import 'package:joymodels_mobile/data/services/model_faq_section_service.dart';
 import 'package:joymodels_mobile/data/services/model_review_type_service.dart';
 import 'package:joymodels_mobile/data/services/library_service.dart';
 import 'package:joymodels_mobile/data/services/notification_service.dart';
+import 'package:joymodels_mobile/data/services/report_service.dart';
 import 'package:joymodels_mobile/data/services/order_service.dart';
 import 'package:joymodels_mobile/data/services/shopping_cart_service.dart';
 import 'package:joymodels_mobile/data/services/model_availability_service.dart';
@@ -141,5 +143,10 @@ void dependencyInjectionSetup() {
   sl.registerLazySingleton(() => NotificationService());
   sl.registerLazySingleton(
     () => NotificationRepository(sl<NotificationService>(), sl<AuthService>()),
+  );
+
+  sl.registerLazySingleton(() => ReportService());
+  sl.registerLazySingleton(
+    () => ReportRepository(sl<ReportService>(), sl<AuthService>()),
   );
 }

@@ -8,7 +8,9 @@ import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
+import 'package:joymodels_mobile/ui/core/ui/report_dialog.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
+import 'package:joymodels_mobile/data/model/enums/reported_entity_type_api_enum.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
@@ -88,7 +90,7 @@ class _CommunityPostDetailPageScreenState
                 } else if (value == 'delete') {
                   _showDeletePostConfirmation(viewModel);
                 } else if (value == 'report') {
-                  _showReportPostDialog();
+                  _showReportPostDialog(viewModel.post!.uuid);
                 }
               },
               itemBuilder: (context) {
@@ -1120,29 +1122,18 @@ class _CommunityPostDetailPageScreenState
     );
   }
 
-  void _showReportDialog(String uuid) {
-    showDialog(
+  void _showReportDialog(String uuid) async {
+    final result = await ReportDialog.show(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Report'),
-        content: const Text('Report this content as inappropriate?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Report submitted')));
-            },
-            child: const Text('Report'),
-          ),
-        ],
-      ),
+      entityType: ReportedEntityTypeApiEnum.communityPostComment,
+      entityUuid: uuid,
     );
+
+    if (result == true && mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Report submitted')));
+    }
   }
 
   void _showDeletePostConfirmation(CommunityPostDetailPageViewModel viewModel) {
@@ -1173,28 +1164,17 @@ class _CommunityPostDetailPageScreenState
     );
   }
 
-  void _showReportPostDialog() {
-    showDialog(
+  void _showReportPostDialog(String postUuid) async {
+    final result = await ReportDialog.show(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Report Post'),
-        content: const Text('Report this post as inappropriate?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Report submitted')));
-            },
-            child: const Text('Report'),
-          ),
-        ],
-      ),
+      entityType: ReportedEntityTypeApiEnum.communityPost,
+      entityUuid: postUuid,
     );
+
+    if (result == true && mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Report submitted')));
+    }
   }
 }

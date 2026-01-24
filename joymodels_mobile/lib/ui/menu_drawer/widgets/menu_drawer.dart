@@ -2,14 +2,20 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/data/core/config/api_constants.dart';
+import 'package:joymodels_mobile/data/model/enums/report_reason_api_enum.dart';
+import 'package:joymodels_mobile/data/model/enums/report_status_api_enum.dart';
+import 'package:joymodels_mobile/data/model/enums/reported_entity_type_api_enum.dart';
+import 'package:joymodels_mobile/data/model/report/response_types/report_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/users/response_types/users_response_api_model.dart';
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
 import 'package:joymodels_mobile/ui/menu_drawer/view_model/menu_drawer_view_model.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
+import 'package:joymodels_mobile/ui/my_reports/view_model/my_reports_view_model.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class MenuDrawer extends StatefulWidget {
   const MenuDrawer({super.key});
@@ -68,6 +74,20 @@ class _MenuDrawerState extends State<MenuDrawer> {
     );
   }
 
+  void _showMyReportsModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (modalContext) {
+        return ChangeNotifierProvider(
+          create: (_) => MyReportsViewModel()..init(),
+          child: const _MyReportsModalContent(),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<MenuDrawerViewModel>();
@@ -88,6 +108,11 @@ class _MenuDrawerState extends State<MenuDrawer> {
               icon: Icons.library_books,
               label: 'Library',
               onTap: () => viewModel.navigateToLibrary(context),
+            ),
+            _buildMenuItem(
+              icon: Icons.flag_outlined,
+              label: 'My Reports',
+              onTap: _showMyReportsModal,
             ),
             _buildMenuItem(
               icon: Icons.settings,
@@ -427,5 +452,357 @@ class _SearchUsersModalContentState extends State<_SearchUsersModalContent> {
         color: theme.colorScheme.onSurfaceVariant,
       ),
     );
+  }
+}
+
+class _MyReportsModalContent extends StatelessWidget {
+  const _MyReportsModalContent();
+
+  void _showDeleteConfirmation(
+    BuildContext context,
+    MyReportsViewModel viewModel,
+    ReportResponseApiModel report,
+  ) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete Report'),
+        content: const Text('Are you sure you want to delete this report?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              viewModel.deleteReport(context, report.uuid);
+            },
+            child: Text(
+              'Delete',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final viewModel = context.watch<MyReportsViewModel>();
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.75,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          _buildHandle(theme),
+          _buildHeader(theme),
+          Expanded(child: _buildReportsList(context, viewModel, theme)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHandle(ThemeData theme) {
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      width: 40,
+      height: 4,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
+  }
+
+  Widget _buildHeader(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Text(
+        'My Reports',
+        style: theme.textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReportsList(
+    BuildContext context,
+    MyReportsViewModel viewModel,
+    ThemeData theme,
+  ) {
+    if (viewModel.isLoading && viewModel.reports.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (viewModel.errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
+            const SizedBox(height: 16),
+            Text(
+              viewModel.errorMessage!,
+              style: TextStyle(color: theme.colorScheme.error),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => viewModel.loadReports(),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (viewModel.reports.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.flag_outlined,
+              size: 64,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No reports yet',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Stack(
+      children: [
+        Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                itemCount: viewModel.reports.length,
+                itemBuilder: (context, index) {
+                  return _buildReportTile(
+                    context,
+                    viewModel,
+                    viewModel.reports[index],
+                    theme,
+                  );
+                },
+              ),
+            ),
+            PaginationControls(
+              currentPage: viewModel.currentPage,
+              totalPages: viewModel.totalPages,
+              hasPreviousPage: viewModel.hasPreviousPage,
+              hasNextPage: viewModel.hasNextPage,
+              onPreviousPage: viewModel.onPreviousPage,
+              onNextPage: viewModel.onNextPage,
+              isLoading: viewModel.isLoading,
+            ),
+          ],
+        ),
+        if (viewModel.isDeleting)
+          Container(
+            color: Colors.black26,
+            child: const Center(child: CircularProgressIndicator()),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildReportTile(
+    BuildContext context,
+    MyReportsViewModel viewModel,
+    ReportResponseApiModel report,
+    ThemeData theme,
+  ) {
+    final entityType = ReportedEntityTypeApiEnum.fromApiString(
+      report.reportedEntityType,
+    );
+    final reason = ReportReasonApiEnum.fromApiString(report.reason);
+    final status = ReportStatusApiEnum.fromApiString(report.status);
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  _getEntityIcon(entityType),
+                  size: 20,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _getEntityTypeLabel(entityType),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                _buildStatusChip(status, theme),
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert, size: 20),
+                  onSelected: (value) {
+                    if (value == 'delete') {
+                      _showDeleteConfirmation(context, viewModel, report);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, color: theme.colorScheme.error),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Delete',
+                            style: TextStyle(color: theme.colorScheme.error),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  Icons.label_outline,
+                  size: 16,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  reason.displayName,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+            if (report.getPreviewText() != null) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  report.getPreviewText()!,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ),
+            ],
+            if (report.description != null &&
+                report.description!.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                report.description!,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontStyle: FontStyle.italic,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+            const SizedBox(height: 8),
+            Text(
+              timeago.format(report.createdAt),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusChip(ReportStatusApiEnum status, ThemeData theme) {
+    Color color;
+    switch (status) {
+      case ReportStatusApiEnum.pending:
+        color = Colors.orange;
+        break;
+      case ReportStatusApiEnum.reviewed:
+        color = Colors.blue;
+        break;
+      case ReportStatusApiEnum.resolved:
+        color = Colors.green;
+        break;
+      case ReportStatusApiEnum.dismissed:
+        color = Colors.grey;
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        status.toApiString(),
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  IconData _getEntityIcon(ReportedEntityTypeApiEnum entityType) {
+    switch (entityType) {
+      case ReportedEntityTypeApiEnum.user:
+        return Icons.person;
+      case ReportedEntityTypeApiEnum.communityPost:
+        return Icons.article;
+      case ReportedEntityTypeApiEnum.communityPostComment:
+        return Icons.comment;
+      case ReportedEntityTypeApiEnum.modelReview:
+        return Icons.star;
+      case ReportedEntityTypeApiEnum.modelFaqQuestion:
+        return Icons.help_outline;
+    }
+  }
+
+  String _getEntityTypeLabel(ReportedEntityTypeApiEnum entityType) {
+    switch (entityType) {
+      case ReportedEntityTypeApiEnum.user:
+        return 'User';
+      case ReportedEntityTypeApiEnum.communityPost:
+        return 'Community Post';
+      case ReportedEntityTypeApiEnum.communityPostComment:
+        return 'Comment';
+      case ReportedEntityTypeApiEnum.modelReview:
+        return 'Model Review';
+      case ReportedEntityTypeApiEnum.modelFaqQuestion:
+        return 'FAQ Question';
+    }
   }
 }
