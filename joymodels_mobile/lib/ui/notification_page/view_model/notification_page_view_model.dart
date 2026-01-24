@@ -53,6 +53,7 @@ class NotificationPageViewModel extends ChangeNotifier
       final request = NotificationSearchRequestApiModel(
         pageNumber: pageNumber ?? currentPage,
         pageSize: _pageSize,
+        orderBy: 'CreatedAt:desc',
       );
 
       notificationPagination = await _notificationRepository.search(request);
