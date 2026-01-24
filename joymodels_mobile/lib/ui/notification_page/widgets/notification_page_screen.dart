@@ -219,7 +219,7 @@ class _NotificationPageScreenState extends State<NotificationPageScreen> {
             ),
             title: Text(
               notification.title,
-              style: theme.textTheme.bodyMedium?.copyWith(
+              style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: notification.isRead
                     ? FontWeight.normal
                     : FontWeight.bold,
@@ -232,7 +232,7 @@ class _NotificationPageScreenState extends State<NotificationPageScreen> {
                   notification.message,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall,
+                  style: theme.textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 4),
                 Text(

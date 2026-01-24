@@ -653,7 +653,7 @@ class _MyReportsModalContent extends StatelessWidget {
                 Expanded(
                   child: Text(
                     _getEntityTypeLabel(entityType),
-                    style: theme.textTheme.titleSmall?.copyWith(
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -695,12 +695,28 @@ class _MyReportsModalContent extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   reason.displayName,
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
             ),
+            if (report.getPreviewText() != null) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  report.getPreviewText()!,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ),
+            ],
             if (report.description != null &&
                 report.description!.isNotEmpty) ...[
               const SizedBox(height: 4),
@@ -708,7 +724,10 @@ class _MyReportsModalContent extends StatelessWidget {
                 report.description!,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontStyle: FontStyle.italic,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
             const SizedBox(height: 8),

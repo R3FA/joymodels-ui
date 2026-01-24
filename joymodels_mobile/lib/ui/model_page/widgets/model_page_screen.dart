@@ -587,36 +587,49 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
                           ),
                         )
                       else
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
+                        Row(
                           children: vm.reviewTypes.map((reviewType) {
                             final isSelected =
                                 selectedReviewTypeUuid == reviewType.uuid;
-                            return ChoiceChip(
-                              label: Text(reviewType.modelReviewTypeName),
-                              selected: isSelected,
-                              onSelected: (selected) {
-                                setDialogState(() {
-                                  selectedReviewTypeUuid = selected
-                                      ? reviewType.uuid
-                                      : null;
-                                });
-                              },
-                              selectedColor: _getReviewTypeColor(
-                                reviewType.modelReviewTypeName,
-                                theme,
-                              ).withValues(alpha: 0.3),
-                              labelStyle: TextStyle(
-                                color: isSelected
-                                    ? _getReviewTypeColor(
-                                        reviewType.modelReviewTypeName,
-                                        theme,
-                                      )
-                                    : theme.colorScheme.onSurface,
-                                fontWeight: isSelected
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
+                            return Expanded(
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  right: vm.reviewTypes.last != reviewType
+                                      ? 8.0
+                                      : 0,
+                                ),
+                                child: ChoiceChip(
+                                  label: SizedBox(
+                                    width: double.infinity,
+                                    child: Text(
+                                      reviewType.modelReviewTypeName,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  selected: isSelected,
+                                  onSelected: (selected) {
+                                    setDialogState(() {
+                                      selectedReviewTypeUuid = selected
+                                          ? reviewType.uuid
+                                          : null;
+                                    });
+                                  },
+                                  selectedColor: _getReviewTypeColor(
+                                    reviewType.modelReviewTypeName,
+                                    theme,
+                                  ).withValues(alpha: 0.3),
+                                  labelStyle: TextStyle(
+                                    color: isSelected
+                                        ? _getReviewTypeColor(
+                                            reviewType.modelReviewTypeName,
+                                            theme,
+                                          )
+                                        : theme.colorScheme.onSurface,
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                ),
                               ),
                             );
                           }).toList(),
