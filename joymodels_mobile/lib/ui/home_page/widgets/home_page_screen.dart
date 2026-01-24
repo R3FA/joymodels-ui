@@ -4,6 +4,8 @@ import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
 import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
+import 'package:joymodels_mobile/ui/notification_page/view_model/notification_page_view_model.dart';
+import 'package:joymodels_mobile/ui/notification_page/widgets/notification_page_screen.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
 import 'package:provider/provider.dart';
 import '../view_model/home_page_view_model.dart';
@@ -45,6 +47,18 @@ class _HomePageScreenState extends State<HomePageScreen> {
       MaterialPageRoute(builder: (_) => const AccessDeniedScreen()),
       (route) => false,
     );
+  }
+
+  void _navigateToNotifications() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => NotificationPageViewModel(),
+          child: const NotificationPageScreen(),
+        ),
+      ),
+    );
+    _viewModel.fetchUnreadNotificationCount();
   }
 
   @override
@@ -130,10 +144,26 @@ class _HomePageScreenState extends State<HomePageScreen> {
             child: const Text('Cancel'),
           )
         else ...[
-          IconButton(
-            icon: const Icon(Icons.notifications_none),
-            // TODO: Implement notifications when ready
-            onPressed: () {},
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_none),
+                onPressed: () => _navigateToNotifications(),
+              ),
+              if (viewModel.unreadNotificationCount > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+            ],
           ),
           IconButton(
             icon: const Icon(Icons.search),
