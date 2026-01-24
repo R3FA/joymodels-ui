@@ -6,6 +6,7 @@ import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/category/request_types/category_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
+import 'package:joymodels_mobile/data/model/models/request_types/model_best_selling_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/request_types/model_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
@@ -31,8 +32,7 @@ extension ModelSortTypeQueryParam on ModelSortType {
         return "Price:asc";
       case ModelSortType.priceDesc:
         return "Price:desc";
-      // TODO: implement for topSales when needed
-      default:
+      case ModelSortType.topSales:
         return null;
     }
   }
@@ -72,15 +72,19 @@ class ModelSearchPageViewModel
 
   @override
   Future<void> loadPage(int pageNumber) async {
-    await searchModels(
-      ModelSearchRequestApiModel(
-        modelName: searchController.text,
-        categoryName: selectedFilterCategory,
-        orderBy: selectedFilterSort?.queryParam,
-        pageNumber: pageNumber,
-        pageSize: 10,
-      ),
-    );
+    if (selectedFilterSort == ModelSortType.topSales) {
+      await loadBestSelling(pageNumber: pageNumber);
+    } else {
+      await searchModels(
+        ModelSearchRequestApiModel(
+          modelName: searchController.text,
+          categoryName: selectedFilterCategory,
+          orderBy: selectedFilterSort?.queryParam,
+          pageNumber: pageNumber,
+          pageSize: 10,
+        ),
+      );
+    }
   }
 
   Future<void> init({
@@ -237,6 +241,41 @@ class ModelSearchPageViewModel
     }
   }
 
+  Future<bool> loadBestSelling({int pageNumber = 1}) async {
+    errorMessage = null;
+    areModelsLoading = true;
+    notifyListeners();
+
+    try {
+      final request = ModelBestSellingRequestApiModel(
+        pageNumber: pageNumber,
+        pageSize: 10,
+      );
+
+      models = await modelRepository.bestSelling(request);
+      areModelsLoading = false;
+      notifyListeners();
+
+      return true;
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      areModelsLoading = false;
+      notifyListeners();
+      onSessionExpired?.call();
+      return false;
+    } on ForbiddenException {
+      areModelsLoading = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
+    } catch (e) {
+      errorMessage = e.toString();
+      areModelsLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   void onFilterPressed(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -252,7 +291,7 @@ class ModelSearchPageViewModel
   String labelForSortType(ModelSortType type) {
     switch (type) {
       case ModelSortType.topSales:
-        return "Top sales (naknadno implementirati)";
+        return "Top Sales";
       case ModelSortType.priceAsc:
         return "Price: Low to High";
       case ModelSortType.priceDesc:
@@ -265,15 +304,19 @@ class ModelSearchPageViewModel
   }
 
   void onFilterSubmit() {
-    final modelSearchRequest = ModelSearchRequestApiModel(
-      modelName: searchController.text,
-      categoryName: selectedFilterCategory,
-      orderBy: selectedFilterSort?.queryParam,
-      pageNumber: 1,
-      pageSize: 10,
-    );
+    if (selectedFilterSort == ModelSortType.topSales) {
+      loadBestSelling();
+    } else {
+      final modelSearchRequest = ModelSearchRequestApiModel(
+        modelName: searchController.text,
+        categoryName: selectedFilterCategory,
+        orderBy: selectedFilterSort?.queryParam,
+        pageNumber: 1,
+        pageSize: 10,
+      );
 
-    searchModels(modelSearchRequest);
+      searchModels(modelSearchRequest);
+    }
   }
 
   void onModelTap(BuildContext context, ModelResponseApiModel model) {
