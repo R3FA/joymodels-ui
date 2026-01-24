@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:joymodels_mobile/data/core/services/auth_service.dart';
 import 'package:joymodels_mobile/data/model/order/request_types/order_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/order/response_types/order_checkout_response_api_model.dart';
+import 'package:joymodels_mobile/data/model/order/response_types/order_confirm_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/order/response_types/order_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
 import 'package:joymodels_mobile/data/services/order_service.dart';
@@ -91,5 +92,14 @@ class OrderRepository {
         'Failed to fetch orders: ${response.statusCode} - ${response.body}',
       );
     }
+  }
+
+  Future<OrderConfirmResponseApiModel> confirm(String paymentIntentId) async {
+    final response = await _authService.request(
+      () => _service.confirm(paymentIntentId),
+    );
+
+    final jsonMap = jsonDecode(response.body) as Map<String, dynamic>;
+    return OrderConfirmResponseApiModel.fromJson(jsonMap);
   }
 }

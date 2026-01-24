@@ -44,4 +44,16 @@ class OrderService {
 
     return response;
   }
+
+  Future<http.Response> confirm(String paymentIntentId) async {
+    final url = Uri.parse("$orderUrl/confirm/$paymentIntentId");
+    final token = await TokenStorage.getAccessToken();
+
+    final response = await http.post(
+      url,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    return response;
+  }
 }

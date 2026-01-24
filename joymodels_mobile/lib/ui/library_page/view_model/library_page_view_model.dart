@@ -211,12 +211,10 @@ class LibraryPageViewModel extends ChangeNotifier
 
     final header = String.fromCharCodes(bytes.take(80));
 
-    // ZIP: PK (0x50 0x4B)
     if (bytes[0] == 0x50 && bytes[1] == 0x4B) {
       return '.zip';
     }
 
-    // GLB (glTF Binary): glTF magic
     if (bytes[0] == 0x67 &&
         bytes[1] == 0x6C &&
         bytes[2] == 0x54 &&
@@ -224,22 +222,18 @@ class LibraryPageViewModel extends ChangeNotifier
       return '.glb';
     }
 
-    // GLTF (JSON): starts with {
     if (bytes[0] == 0x7B && header.contains('"asset"')) {
       return '.gltf';
     }
 
-    // FBX Binary: Kaydara FBX Binary
     if (header.contains('Kaydara FBX Binary')) {
       return '.fbx';
     }
 
-    // FBX ASCII: starts with ; FBX
     if (header.startsWith('; FBX')) {
       return '.fbx';
     }
 
-    // OBJ: text file with v, vt, vn, f lines
     if (header.startsWith('# ') ||
         header.startsWith('v ') ||
         header.startsWith('vt ') ||
@@ -247,27 +241,22 @@ class LibraryPageViewModel extends ChangeNotifier
       return '.obj';
     }
 
-    // STL ASCII: starts with "solid"
     if (header.toLowerCase().startsWith('solid')) {
       return '.stl';
     }
 
-    // BLEND: starts with "BLENDER"
     if (header.startsWith('BLENDER')) {
       return '.blend';
     }
 
-    // Maya Binary (.mb): starts with "FOR4" or "FOR8"
     if (header.startsWith('FOR4') || header.startsWith('FOR8')) {
       return '.mb';
     }
 
-    // Maya ASCII (.ma): starts with "//Maya ASCII"
     if (header.contains('Maya ASCII')) {
       return '.ma';
     }
 
-    // WEBP: RIFF....WEBP
     if (bytes[0] == 0x52 &&
         bytes[1] == 0x49 &&
         bytes[2] == 0x46 &&
@@ -279,7 +268,6 @@ class LibraryPageViewModel extends ChangeNotifier
       return '.webp';
     }
 
-    // PNG: 0x89 PNG
     if (bytes[0] == 0x89 &&
         bytes[1] == 0x50 &&
         bytes[2] == 0x4E &&
@@ -287,7 +275,6 @@ class LibraryPageViewModel extends ChangeNotifier
       return '.png';
     }
 
-    // JPEG: 0xFF 0xD8 0xFF
     if (bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF) {
       return '.jpg';
     }

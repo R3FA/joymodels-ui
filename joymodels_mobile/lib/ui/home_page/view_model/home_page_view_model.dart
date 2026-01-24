@@ -12,6 +12,7 @@ import 'package:joymodels_mobile/data/model/pagination/response_types/pagination
 import 'package:joymodels_mobile/data/model/users/request_types/user_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/users/response_types/users_response_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/category_repository.dart';
+import 'package:joymodels_mobile/data/repositories/notification_repository.dart';
 import 'package:joymodels_mobile/data/repositories/users_repository.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 import 'package:joymodels_mobile/ui/model_search_page/widgets/model_search_page_screen.dart';
@@ -22,8 +23,10 @@ import 'package:provider/provider.dart';
 class HomePageScreenViewModel with ChangeNotifier {
   final usersRepository = sl<UsersRepository>();
   final categoryRepository = sl<CategoryRepository>();
+  final notificationRepository = sl<NotificationRepository>();
 
   bool isLoading = false;
+  int unreadNotificationCount = 0;
   bool isSearching = false;
   bool isLoggedUserDataLoading = false;
   bool isCategoriesLoading = false;
@@ -71,6 +74,7 @@ class HomePageScreenViewModel with ChangeNotifier {
       await getCategories();
       await getTopArtists();
       await getTopArtistsProfilePicture();
+      await fetchUnreadNotificationCount();
 
       isLoading = false;
       notifyListeners();
@@ -459,6 +463,15 @@ class HomePageScreenViewModel with ChangeNotifier {
 
   void onViewAllModelsPressed(BuildContext context) {
     // TODO: Implementirati kada bude spremno
+  }
+
+  Future<void> fetchUnreadNotificationCount() async {
+    try {
+      unreadNotificationCount = await notificationRepository.getUnreadCount();
+      notifyListeners();
+    } catch (e) {
+      unreadNotificationCount = 0;
+    }
   }
 
   @override
