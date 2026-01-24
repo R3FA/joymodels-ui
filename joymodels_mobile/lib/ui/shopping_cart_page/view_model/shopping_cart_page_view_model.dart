@@ -138,14 +138,24 @@ class ShoppingCartPageViewModel extends ChangeNotifier
 
       await Stripe.instance.presentPaymentSheet();
 
-      isCheckoutLoading = false;
-      checkoutSuccessMessage =
-          'Payment successful! Models added to your library.';
-      notifyListeners();
+      final confirmResponse = await orderRepository.confirm(
+        checkoutResponse.paymentIntentId,
+      );
 
-      await loadPage(1);
-      onCheckoutSuccess?.call();
-      return true;
+      isCheckoutLoading = false;
+
+      if (confirmResponse.success) {
+        checkoutSuccessMessage =
+            'Payment successful! Models added to your library.';
+        notifyListeners();
+        await loadPage(1);
+        onCheckoutSuccess?.call();
+        return true;
+      } else {
+        errorMessage = confirmResponse.message;
+        notifyListeners();
+        return false;
+      }
     } on StripeException catch (e) {
       isCheckoutLoading = false;
       if (e.error.code == FailureCode.Canceled) {

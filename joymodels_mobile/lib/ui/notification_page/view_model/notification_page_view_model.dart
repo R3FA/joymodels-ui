@@ -85,7 +85,7 @@ class NotificationPageViewModel extends ChangeNotifier
       unreadCount = await _notificationRepository.getUnreadCount();
       notifyListeners();
     } catch (e) {
-      // Silently fail for unread count
+      unreadCount = 0;
     }
   }
 
