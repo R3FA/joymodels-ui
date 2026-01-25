@@ -11,6 +11,7 @@ import 'package:joymodels_mobile/data/model/shopping_cart/response_types/shoppin
 import 'package:joymodels_mobile/data/repositories/order_repository.dart';
 import 'package:joymodels_mobile/data/repositories/shopping_cart_repository.dart';
 import 'package:joymodels_mobile/ui/core/mixins/pagination_mixin.dart';
+import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 import 'package:joymodels_mobile/ui/model_page/view_model/model_page_view_model.dart';
 import 'package:joymodels_mobile/ui/model_page/widgets/model_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -39,6 +40,7 @@ class ShoppingCartPageViewModel extends ChangeNotifier
 
   final TextEditingController searchController = TextEditingController();
   String searchQuery = '';
+  String? searchErrorMessage;
 
   static const int pageSize = 5;
 
@@ -54,10 +56,21 @@ class ShoppingCartPageViewModel extends ChangeNotifier
   }
 
   void _onSearchChanged() {
-    if (searchController.text != searchQuery) {
-      searchQuery = searchController.text;
-      loadPage(1);
+    final newQuery = searchController.text.trim();
+    if (newQuery == searchQuery) return;
+
+    if (newQuery.isNotEmpty) {
+      final validationError = RegexValidationViewModel.validateText(newQuery);
+      if (validationError != null) {
+        searchErrorMessage = validationError;
+        notifyListeners();
+        return;
+      }
     }
+
+    searchErrorMessage = null;
+    searchQuery = newQuery;
+    loadPage(1);
   }
 
   @override
@@ -201,6 +214,7 @@ class ShoppingCartPageViewModel extends ChangeNotifier
   void clearSearch() {
     searchController.clear();
     searchQuery = '';
+    searchErrorMessage = null;
     loadPage(1);
   }
 

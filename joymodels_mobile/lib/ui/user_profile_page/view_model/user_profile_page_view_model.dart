@@ -369,7 +369,7 @@ class UserProfilePageViewModel with ChangeNotifier {
       return;
     }
 
-    final validationError = RegexValidationViewModel.validateNickname(query);
+    final validationError = RegexValidationViewModel.validateText(query);
     if (validationError != null) {
       followModalSearchError = validationError;
       notifyListeners();

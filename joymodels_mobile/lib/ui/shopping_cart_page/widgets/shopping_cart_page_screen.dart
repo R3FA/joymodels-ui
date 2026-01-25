@@ -110,21 +110,53 @@ class _ShoppingCartPageScreenState extends State<ShoppingCartPageScreen> {
   Widget _buildSearchBar(ShoppingCartPageViewModel viewModel, ThemeData theme) {
     return Container(
       padding: const EdgeInsets.all(16),
-      child: TextField(
-        controller: viewModel.searchController,
-        decoration: InputDecoration(
-          hintText: 'Search models in cart...',
-          prefixIcon: const Icon(Icons.search),
-          suffixIcon: viewModel.searchQuery.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: viewModel.clearSearch,
-                )
-              : null,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          filled: true,
-          fillColor: theme.colorScheme.surfaceContainerHighest,
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: viewModel.searchController,
+            decoration: InputDecoration(
+              hintText: 'Search models in cart...',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: viewModel.searchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: viewModel.clearSearch,
+                    )
+                  : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: viewModel.searchErrorMessage != null
+                    ? BorderSide(color: theme.colorScheme.error)
+                    : BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: viewModel.searchErrorMessage != null
+                    ? BorderSide(color: theme.colorScheme.error)
+                    : BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: viewModel.searchErrorMessage != null
+                    ? BorderSide(color: theme.colorScheme.error, width: 2)
+                    : BorderSide(color: theme.colorScheme.primary),
+              ),
+              filled: true,
+              fillColor: theme.colorScheme.surfaceContainerHighest,
+            ),
+          ),
+          if (viewModel.searchErrorMessage != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8, left: 12),
+              child: Text(
+                viewModel.searchErrorMessage!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

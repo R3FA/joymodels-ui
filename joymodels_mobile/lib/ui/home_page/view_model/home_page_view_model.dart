@@ -43,6 +43,7 @@ class HomePageScreenViewModel with ChangeNotifier {
   final searchController = TextEditingController();
   final topArtistsSearchController = TextEditingController();
   final recommendedModelsSearchController = TextEditingController();
+  String? searchError;
   String? topArtistsSearchError;
   String? recommendedModelsSearchError;
   int _topArtistsModalPage = 1;
@@ -114,12 +115,31 @@ class HomePageScreenViewModel with ChangeNotifier {
   void onSearchCancelled() {
     isSearching = false;
     searchController.clear();
+    searchError = null;
     notifyListeners();
   }
 
   void onSearchSubmitted(BuildContext context, String query) {
+    final trimmedQuery = query.trim();
+    if (trimmedQuery.isEmpty) {
+      searchError = null;
+      notifyListeners();
+      return;
+    }
+
+    final validationError = RegexValidationViewModel.validateText(trimmedQuery);
+    if (validationError != null) {
+      searchError = validationError;
+      notifyListeners();
+      return;
+    }
+
+    searchError = null;
+    notifyListeners();
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => ModelsSearchScreen(modelName: query)),
+      MaterialPageRoute(
+        builder: (_) => ModelsSearchScreen(modelName: trimmedQuery),
+      ),
     );
   }
 
@@ -483,7 +503,7 @@ class HomePageScreenViewModel with ChangeNotifier {
     final trimmedQuery = query.trim();
 
     if (trimmedQuery.isNotEmpty) {
-      final validationError = RegexValidationViewModel.validateNickname(
+      final validationError = RegexValidationViewModel.validateText(
         trimmedQuery,
       );
       if (validationError != null) {
