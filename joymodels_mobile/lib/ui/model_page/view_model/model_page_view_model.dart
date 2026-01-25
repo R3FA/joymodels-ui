@@ -48,7 +48,7 @@ class ModelPageViewModel extends ChangeNotifier {
   bool isCreatingReview = false;
   bool isLoadingReviewTypes = false;
   bool hasUserReviewed = false;
-  bool isModelOwner = false;
+  bool isAdminOrRoot = false;
   bool isOwnedInLibrary = false;
 
   List<ModelReviewTypeResponseApiModel> reviewTypes = [];
@@ -72,13 +72,13 @@ class ModelPageViewModel extends ChangeNotifier {
 
     try {
       this.loadedModel = loadedModel;
-      await checkIfModelOwner(loadedModel!);
-      await checkIfOwnedInLibrary(loadedModel);
-      await getModelReviews(loadedModel);
-      await isModelLikedByUser(loadedModel);
-      await checkIfModelInCart(loadedModel);
-      await loadFAQ(loadedModel);
-      await checkIfUserReviewed(loadedModel);
+      await checkAdminStatus();
+      await checkIfOwnedInLibrary(this.loadedModel!);
+      await getModelReviews(this.loadedModel!);
+      await isModelLikedByUser(this.loadedModel!);
+      await checkIfModelInCart(this.loadedModel!);
+      await loadFAQ(this.loadedModel!);
+      await checkIfUserReviewed(this.loadedModel!);
       isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -88,9 +88,8 @@ class ModelPageViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> checkIfModelOwner(ModelResponseApiModel model) async {
-    final currentUserUuid = await TokenStorage.getCurrentUserUuid();
-    isModelOwner = currentUserUuid == model.user.uuid;
+  Future<void> checkAdminStatus() async {
+    isAdminOrRoot = await TokenStorage.isAdminOrRoot();
   }
 
   Future<bool> checkIfOwnedInLibrary(ModelResponseApiModel model) async {
@@ -807,7 +806,7 @@ class ModelPageViewModel extends ChangeNotifier {
     faqList = [];
     reviewTypes = [];
     hasUserReviewed = false;
-    isModelOwner = false;
+    isAdminOrRoot = false;
     isOwnedInLibrary = false;
 
     if (galleryController.hasClients) {

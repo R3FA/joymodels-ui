@@ -12,33 +12,50 @@ class NavigationBarScreen extends StatelessWidget {
     const double iconSize = 32;
     const double navBarHeight = 70;
 
-    return NavigationBar(
-      height: navBarHeight,
-      selectedIndex: viewModel.selectedNavBarItem,
-      onDestinationSelected: (index) =>
-          viewModel.onNavigationBarItemTapped(context, index),
-      destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.home, size: iconSize),
-          label: 'Home',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.group, size: iconSize),
-          label: 'Community',
-        ),
-        NavigationDestination(
+    final destinations = <NavigationDestination>[
+      const NavigationDestination(
+        icon: Icon(Icons.home, size: iconSize),
+        label: 'Home',
+      ),
+      const NavigationDestination(
+        icon: Icon(Icons.group, size: iconSize),
+        label: 'Community',
+      ),
+      if (viewModel.isAdminOrRoot)
+        const NavigationDestination(
           icon: Icon(Icons.add_box, size: iconSize),
           label: 'Add',
         ),
-        NavigationDestination(
-          icon: Icon(Icons.shopping_cart, size: iconSize),
-          label: 'Cart',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.more_horiz, size: iconSize),
-          label: 'Menu',
-        ),
-      ],
+      const NavigationDestination(
+        icon: Icon(Icons.shopping_cart, size: iconSize),
+        label: 'Cart',
+      ),
+      const NavigationDestination(
+        icon: Icon(Icons.more_horiz, size: iconSize),
+        label: 'Menu',
+      ),
+    ];
+
+    // Adjust selected index when Add is hidden
+    int adjustedIndex = viewModel.selectedNavBarItem;
+    if (!viewModel.isAdminOrRoot && adjustedIndex >= 2) {
+      adjustedIndex = adjustedIndex > 2 ? adjustedIndex - 1 : adjustedIndex;
+    }
+    // Clamp to valid range
+    adjustedIndex = adjustedIndex.clamp(0, destinations.length - 1);
+
+    return NavigationBar(
+      height: navBarHeight,
+      selectedIndex: adjustedIndex,
+      onDestinationSelected: (index) {
+        // Convert display index back to NavBarItem index
+        int actualIndex = index;
+        if (!viewModel.isAdminOrRoot && index >= 2) {
+          actualIndex = index + 1; // Skip 'add' index
+        }
+        viewModel.onNavigationBarItemTapped(context, actualIndex);
+      },
+      destinations: destinations,
     );
   }
 }
