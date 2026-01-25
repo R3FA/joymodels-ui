@@ -5,6 +5,7 @@ import 'package:joymodels_mobile/data/model/models/request_types/model_best_sell
 import 'package:joymodels_mobile/data/model/models/request_types/model_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/request_types/model_get_by_uuid_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/request_types/model_patch_request_api_model.dart';
+import 'package:joymodels_mobile/data/model/models/request_types/model_recommended_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/request_types/model_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
@@ -87,6 +88,26 @@ class ModelRepository {
     } else {
       throw Exception(
         'Failed to fetch best selling models: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  Future<PaginationResponseApiModel<ModelResponseApiModel>> recommended(
+    ModelRecommendedRequestApiModel request,
+  ) async {
+    final response = await _authService.request(
+      () => _service.recommended(request),
+    );
+
+    if (response.statusCode == 200) {
+      final jsonMap = jsonDecode(response.body);
+      return PaginationResponseApiModel<ModelResponseApiModel>.fromJson(
+        jsonMap,
+        (item) => ModelResponseApiModel.fromJson(item),
+      );
+    } else {
+      throw Exception(
+        'Failed to fetch recommended models: ${response.statusCode} - ${response.body}',
       );
     }
   }

@@ -8,14 +8,18 @@ import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.
 import 'package:joymodels_mobile/data/model/category/request_types/category_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/enums/jwt_claim_key_api_enum.dart';
+import 'package:joymodels_mobile/data/model/models/request_types/model_recommended_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/users/request_types/user_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/users/response_types/users_response_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/category_repository.dart';
+import 'package:joymodels_mobile/data/repositories/model_repository.dart';
 import 'package:joymodels_mobile/data/repositories/notification_repository.dart';
 import 'package:joymodels_mobile/data/repositories/users_repository.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
+import 'package:joymodels_mobile/ui/model_page/view_model/model_page_view_model.dart';
+import 'package:joymodels_mobile/ui/model_page/widgets/model_page_screen.dart';
 import 'package:joymodels_mobile/ui/model_search_page/widgets/model_search_page_screen.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/view_model/user_profile_page_view_model.dart';
 import 'package:joymodels_mobile/ui/user_profile_page/widgets/user_profile_page_screen.dart';
@@ -25,6 +29,7 @@ class HomePageScreenViewModel with ChangeNotifier {
   final usersRepository = sl<UsersRepository>();
   final categoryRepository = sl<CategoryRepository>();
   final notificationRepository = sl<NotificationRepository>();
+  final modelRepository = sl<ModelRepository>();
 
   bool isLoading = false;
   int unreadNotificationCount = 0;
@@ -33,19 +38,35 @@ class HomePageScreenViewModel with ChangeNotifier {
   bool isCategoriesLoading = false;
   bool isTopArtistsLoading = false;
   bool isTopArtistsPictureLoading = false;
+  bool isRecommendedModelsLoading = false;
 
   final searchController = TextEditingController();
   final topArtistsSearchController = TextEditingController();
+  final recommendedModelsSearchController = TextEditingController();
   String? topArtistsSearchError;
+  String? recommendedModelsSearchError;
   int _topArtistsModalPage = 1;
   String? _topArtistsModalSearchQuery;
   static const int _topArtistsModalPageSize = 10;
+
+  int _recommendedModelsModalPage = 1;
+  String? _recommendedModelsModalSearchQuery;
+  static const int _recommendedModelsModalPageSize = 10;
 
   int get topArtistsModalCurrentPage => topArtists?.pageNumber ?? 1;
   int get topArtistsModalTotalPages => topArtists?.totalPages ?? 1;
   bool get topArtistsModalHasPreviousPage =>
       topArtists?.hasPreviousPage ?? false;
   bool get topArtistsModalHasNextPage => topArtists?.hasNextPage ?? false;
+
+  int get recommendedModelsModalCurrentPage =>
+      recommendedModels?.pageNumber ?? 1;
+  int get recommendedModelsModalTotalPages =>
+      recommendedModels?.totalPages ?? 1;
+  bool get recommendedModelsModalHasPreviousPage =>
+      recommendedModels?.hasPreviousPage ?? false;
+  bool get recommendedModelsModalHasNextPage =>
+      recommendedModels?.hasNextPage ?? false;
 
   String loggedUsername = '';
   String? loggedUserUuid;
@@ -56,9 +77,7 @@ class HomePageScreenViewModel with ChangeNotifier {
   PaginationResponseApiModel<UsersResponseApiModel>? topArtists;
   Map<String, Uint8List> topArtistsAvatars = {};
 
-  // TODO: Implementirati kada bude spremno za recommendera
   PaginationResponseApiModel<ModelResponseApiModel>? recommendedModels;
-  Map<String, Uint8List> recommendedModelsAvatars = {};
 
   String? selectedCategory;
   String? errorMessage;
@@ -75,6 +94,7 @@ class HomePageScreenViewModel with ChangeNotifier {
       await getCategories();
       await getTopArtists();
       await getTopArtistsProfilePicture();
+      await getRecommendedModels();
       await fetchUnreadNotificationCount();
 
       isLoading = false;
@@ -389,6 +409,50 @@ class HomePageScreenViewModel with ChangeNotifier {
     }
   }
 
+  Future<bool> getRecommendedModels({
+    String? modelName,
+    int pageNumber = 1,
+    int pageSize = 5,
+  }) async {
+    errorMessage = null;
+    isRecommendedModelsLoading = true;
+    notifyListeners();
+
+    try {
+      final request = ModelRecommendedRequestApiModel(
+        modelName: modelName,
+        pageNumber: pageNumber,
+        pageSize: pageSize,
+      );
+
+      recommendedModels = await modelRepository.recommended(request);
+      isRecommendedModelsLoading = false;
+      notifyListeners();
+      return true;
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      isRecommendedModelsLoading = false;
+      notifyListeners();
+      onSessionExpired?.call();
+      return false;
+    } on ForbiddenException {
+      isRecommendedModelsLoading = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isRecommendedModelsLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      errorMessage = e.toString();
+      isRecommendedModelsLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   void onOwnProfileTap(BuildContext context) {
     if (loggedUserUuid == null) return;
 
@@ -482,8 +546,85 @@ class HomePageScreenViewModel with ChangeNotifier {
     await getTopArtistsProfilePicture();
   }
 
-  void onViewAllModelsPressed(BuildContext context) {
-    // TODO: Implementirati kada bude spremno
+  Future<void> onViewAllModelsPressed(BuildContext context) async {
+    recommendedModelsSearchController.clear();
+    recommendedModelsSearchError = null;
+    _recommendedModelsModalPage = 1;
+    _recommendedModelsModalSearchQuery = null;
+    await getRecommendedModels(pageSize: _recommendedModelsModalPageSize);
+  }
+
+  Future<void> searchRecommendedModelsModal(String query) async {
+    final trimmedQuery = query.trim();
+
+    if (trimmedQuery.isNotEmpty) {
+      final validationError = RegexValidationViewModel.validateText(
+        trimmedQuery,
+      );
+      if (validationError != null) {
+        recommendedModelsSearchError = validationError;
+        notifyListeners();
+        return;
+      }
+    }
+
+    recommendedModelsSearchError = null;
+    _recommendedModelsModalPage = 1;
+    _recommendedModelsModalSearchQuery = trimmedQuery.isEmpty
+        ? null
+        : trimmedQuery;
+    notifyListeners();
+
+    await getRecommendedModels(
+      modelName: _recommendedModelsModalSearchQuery,
+      pageNumber: _recommendedModelsModalPage,
+      pageSize: _recommendedModelsModalPageSize,
+    );
+  }
+
+  Future<void> onRecommendedModelsModalNextPage() async {
+    if (!recommendedModelsModalHasNextPage || isRecommendedModelsLoading) {
+      return;
+    }
+    _recommendedModelsModalPage++;
+    await getRecommendedModels(
+      modelName: _recommendedModelsModalSearchQuery,
+      pageNumber: _recommendedModelsModalPage,
+      pageSize: _recommendedModelsModalPageSize,
+    );
+  }
+
+  Future<void> onRecommendedModelsModalPreviousPage() async {
+    if (!recommendedModelsModalHasPreviousPage || isRecommendedModelsLoading) {
+      return;
+    }
+    _recommendedModelsModalPage--;
+    await getRecommendedModels(
+      modelName: _recommendedModelsModalSearchQuery,
+      pageNumber: _recommendedModelsModalPage,
+      pageSize: _recommendedModelsModalPageSize,
+    );
+  }
+
+  Future<void> onRecommendedModelsModalClosed() async {
+    recommendedModelsSearchController.clear();
+    recommendedModelsSearchError = null;
+    _recommendedModelsModalPage = 1;
+    _recommendedModelsModalSearchQuery = null;
+    await getRecommendedModels();
+  }
+
+  void onModelTap(BuildContext context, ModelResponseApiModel? model) {
+    if (model == null) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => ModelPageViewModel(),
+          child: ModelPageScreen(loadedModel: model),
+        ),
+      ),
+    );
   }
 
   Future<void> fetchUnreadNotificationCount() async {
@@ -507,6 +648,7 @@ class HomePageScreenViewModel with ChangeNotifier {
   void dispose() {
     searchController.dispose();
     topArtistsSearchController.dispose();
+    recommendedModelsSearchController.dispose();
     onSessionExpired = null;
     onForbidden = null;
     super.dispose();

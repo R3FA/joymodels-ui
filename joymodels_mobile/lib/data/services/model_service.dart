@@ -5,6 +5,7 @@ import 'package:joymodels_mobile/data/model/models/request_types/model_best_sell
 import 'package:joymodels_mobile/data/model/models/request_types/model_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/request_types/model_get_by_uuid_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/request_types/model_patch_request_api_model.dart';
+import 'package:joymodels_mobile/data/model/models/request_types/model_recommended_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/request_types/model_search_request_api_model.dart';
 
 class ModelService {
@@ -63,6 +64,23 @@ class ModelService {
   ) async {
     final url = Uri.parse(
       "$modelsUrl/best-selling",
+    ).replace(queryParameters: request.toQueryParameters());
+
+    final token = await TokenStorage.getAccessToken();
+
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    return response;
+  }
+
+  Future<http.Response> recommended(
+    ModelRecommendedRequestApiModel request,
+  ) async {
+    final url = Uri.parse(
+      "$modelsUrl/recommended",
     ).replace(queryParameters: request.toQueryParameters());
 
     final token = await TokenStorage.getAccessToken();

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
+import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/pagination_controls.dart';
 import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
@@ -455,14 +457,10 @@ class _HomePageScreenState extends State<HomePageScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // TODO: Implement functionality for recommended models
-        Text(
-          'Recommended Models (in works)',
-          style: theme.textTheme.titleMedium,
-        ),
+        Text('Recommended Models', style: theme.textTheme.titleMedium),
         if (hasModels)
           TextButton(
-            onPressed: () => viewModel.onViewAllModelsPressed(context),
+            onPressed: () => _showRecommendedModelsModal(viewModel, theme),
             style: TextButton.styleFrom(padding: EdgeInsets.zero),
             child: const Text('View All >'),
           ),
@@ -477,7 +475,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
   ) {
     if (!hasModels) {
       return Container(
-        height: 115,
+        height: 140,
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(10),
@@ -505,26 +503,68 @@ class _HomePageScreenState extends State<HomePageScreen> {
     }
 
     return SizedBox(
-      height: 115,
+      height: 140,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: viewModel.recommendedModels?.data.length ?? 0,
         separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (_, i) {
-          return Container(
-            width: 150,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: theme.colorScheme.surfaceContainerHighest,
-            ),
-            child: Center(
-              child: Text(
-                'Placeholder for model name',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontStyle: FontStyle.italic,
-                ),
-                textAlign: TextAlign.center,
+          final model = viewModel.recommendedModels?.data[i];
+          final hasPicture = model?.modelPictures.isNotEmpty ?? false;
+          final imageUrl = hasPicture
+              ? '${ApiConstants.baseUrl}/models/get/${model?.uuid}/images/${Uri.encodeComponent(model?.modelPictures.first.pictureLocation ?? '')}'
+              : '';
+
+          return GestureDetector(
+            onTap: () => viewModel.onModelTap(context, model),
+            child: Container(
+              width: 130,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: theme.colorScheme.surfaceContainerHighest,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(10),
+                    ),
+                    child: SizedBox(
+                      height: 85,
+                      width: double.infinity,
+                      child: hasPicture
+                          ? ModelImage(imageUrl: imageUrl, fit: BoxFit.cover)
+                          : Icon(
+                              Icons.view_in_ar,
+                              size: 42,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          model?.name ?? '',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          '\$${model?.price.toStringAsFixed(2) ?? '0.00'}',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.secondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           );
@@ -734,6 +774,225 @@ class _HomePageScreenState extends State<HomePageScreen> {
           onPreviousPage: viewModel.onTopArtistsModalPreviousPage,
           onNextPage: viewModel.onTopArtistsModalNextPage,
           isLoading: viewModel.isTopArtistsLoading,
+        ),
+      ],
+    );
+  }
+
+  void _showRecommendedModelsModal(
+    HomePageScreenViewModel viewModel,
+    ThemeData theme,
+  ) {
+    viewModel.onViewAllModelsPressed(context);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: theme.colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (modalContext) {
+        return ListenableBuilder(
+          listenable: viewModel,
+          builder: (context, _) {
+            return DraggableScrollableSheet(
+              initialChildSize: 0.7,
+              minChildSize: 0.5,
+              maxChildSize: 0.9,
+              expand: false,
+              builder: (context, scrollController) {
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Recommended Models',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildRecommendedModelsSearchField(viewModel, theme),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: _buildRecommendedModelsModalList(
+                          viewModel,
+                          theme,
+                          scrollController,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    ).then((_) {
+      viewModel.onRecommendedModelsModalClosed();
+    });
+  }
+
+  Widget _buildRecommendedModelsSearchField(
+    HomePageScreenViewModel viewModel,
+    ThemeData theme,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: viewModel.recommendedModelsSearchController,
+          decoration: InputDecoration(
+            hintText: 'Search by model name...',
+            prefixIcon: const Icon(Icons.search),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: viewModel.recommendedModelsSearchError != null
+                  ? BorderSide(color: theme.colorScheme.error)
+                  : BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: viewModel.recommendedModelsSearchError != null
+                  ? BorderSide(color: theme.colorScheme.error)
+                  : BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: viewModel.recommendedModelsSearchError != null
+                  ? BorderSide(color: theme.colorScheme.error, width: 2)
+                  : BorderSide(color: theme.colorScheme.primary),
+            ),
+            filled: true,
+            fillColor: theme.colorScheme.surfaceContainerHighest,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+          ),
+          onChanged: (value) => viewModel.searchRecommendedModelsModal(value),
+        ),
+        if (viewModel.recommendedModelsSearchError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8, left: 12),
+            child: Text(
+              viewModel.recommendedModelsSearchError!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildRecommendedModelsModalList(
+    HomePageScreenViewModel viewModel,
+    ThemeData theme,
+    ScrollController scrollController,
+  ) {
+    if (viewModel.isRecommendedModelsLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final models = viewModel.recommendedModels?.data ?? [];
+
+    if (models.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.view_in_ar_outlined,
+              size: 48,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No models found',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.separated(
+            controller: scrollController,
+            itemCount: models.length,
+            separatorBuilder: (_, _) => const Divider(height: 1),
+            itemBuilder: (context, index) {
+              final model = models[index];
+              final hasPicture = model.modelPictures.isNotEmpty;
+              final imageUrl = hasPicture
+                  ? '${ApiConstants.baseUrl}/models/get/${model.uuid}/images/${Uri.encodeComponent(model.modelPictures.first.pictureLocation)}'
+                  : '';
+
+              return ListTile(
+                leading: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: SizedBox(
+                    width: 56,
+                    height: 56,
+                    child: hasPicture
+                        ? ModelImage(imageUrl: imageUrl, fit: BoxFit.cover)
+                        : Container(
+                            color: theme.colorScheme.surfaceContainerHighest,
+                            child: Icon(
+                              Icons.view_in_ar,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                  ),
+                ),
+                title: Text(
+                  model.name,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                subtitle: Text(
+                  '\$${model.price.toStringAsFixed(2)}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.secondary,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  viewModel.onModelTap(context, model);
+                },
+              );
+            },
+          ),
+        ),
+        PaginationControls(
+          currentPage: viewModel.recommendedModelsModalCurrentPage,
+          totalPages: viewModel.recommendedModelsModalTotalPages,
+          hasPreviousPage: viewModel.recommendedModelsModalHasPreviousPage,
+          hasNextPage: viewModel.recommendedModelsModalHasNextPage,
+          onPreviousPage: viewModel.onRecommendedModelsModalPreviousPage,
+          onNextPage: viewModel.onRecommendedModelsModalNextPage,
+          isLoading: viewModel.isRecommendedModelsLoading,
         ),
       ],
     );
