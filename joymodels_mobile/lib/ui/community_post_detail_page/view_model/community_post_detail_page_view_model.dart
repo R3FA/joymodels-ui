@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_user_review_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_user_review_delete_request_api_model.dart';
@@ -198,6 +199,9 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
       onSessionExpired?.call();
     } on ForbiddenException {
       onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
       notifyListeners();
@@ -242,6 +246,9 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
       onSessionExpired?.call();
     } on ForbiddenException {
       onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
       notifyListeners();
@@ -345,6 +352,10 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
       isLoadingQuestions = false;
       notifyListeners();
       onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isLoadingQuestions = false;
+      notifyListeners();
     } catch (e) {
       isLoadingQuestions = false;
       errorMessage = 'Failed to load questions: $e';
@@ -390,6 +401,10 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
       isSubmittingQuestion = false;
       notifyListeners();
       onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isSubmittingQuestion = false;
+      notifyListeners();
     } catch (e) {
       isSubmittingQuestion = false;
       errorMessage = e.toString();
@@ -445,6 +460,10 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
       isSubmittingReply = false;
       notifyListeners();
       onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isSubmittingReply = false;
+      notifyListeners();
     } catch (e) {
       isSubmittingReply = false;
       errorMessage = e.toString();
@@ -461,6 +480,9 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
       onSessionExpired?.call();
     } on ForbiddenException {
       onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
       notifyListeners();
@@ -477,6 +499,9 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
       onSessionExpired?.call();
     } on ForbiddenException {
       onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
       notifyListeners();

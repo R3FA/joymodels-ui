@@ -1,4 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
+
+import 'package:http/http.dart' as http;
+import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/services/auth_service.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_logout_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_new_otp_code_request_api_model.dart';
@@ -19,7 +23,12 @@ class SsoRepository {
   Future<SsoUserResponseApiModel> create(
     SsoUserCreateRequestApiModel request,
   ) async {
-    final response = await _service.create(request);
+    final http.Response response;
+    try {
+      response = await _service.create(request);
+    } on SocketException {
+      throw NetworkException();
+    }
 
     if (response.statusCode == 200) {
       final jsonMap = jsonDecode(response.body);
@@ -61,7 +70,12 @@ class SsoRepository {
   }
 
   Future<SsoLoginResponse> login(SsoUserLoginRequestApiModel request) async {
-    final response = await _service.login(request);
+    final http.Response response;
+    try {
+      response = await _service.login(request);
+    } on SocketException {
+      throw NetworkException();
+    }
 
     if (response.statusCode == 200) {
       final jsonMap = jsonDecode(response.body);

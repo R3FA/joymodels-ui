@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/report/request_types/report_search_request_api_model.dart';
@@ -65,6 +66,11 @@ class MyReportsViewModel extends ChangeNotifier
       notifyListeners();
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       errorMessage = 'Failed to load reports';
       isLoading = false;
@@ -102,6 +108,11 @@ class MyReportsViewModel extends ChangeNotifier
       isDeleting = false;
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isDeleting = false;
+      notifyListeners();
       return false;
     } catch (e) {
       isDeleting = false;

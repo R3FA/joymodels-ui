@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/request_types/model_faq_section_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/request_types/model_faq_section_search_request_api_model.dart';
@@ -104,8 +105,13 @@ class ModelPageViewModel extends ChangeNotifier {
       notifyListeners();
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      notifyListeners();
+      return false;
     } catch (e) {
       isOwnedInLibrary = false;
+      notifyListeners();
       return false;
     }
   }
@@ -124,7 +130,13 @@ class ModelPageViewModel extends ChangeNotifier {
       notifyListeners();
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      notifyListeners();
+      return false;
     } catch (e) {
+      errorMessage = e.toString();
+      notifyListeners();
       return false;
     }
   }
@@ -147,7 +159,13 @@ class ModelPageViewModel extends ChangeNotifier {
       notifyListeners();
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      notifyListeners();
+      return false;
     } catch (e) {
+      errorMessage = e.toString();
+      notifyListeners();
       return false;
     }
   }
@@ -167,6 +185,10 @@ class ModelPageViewModel extends ChangeNotifier {
     } on ForbiddenException {
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      notifyListeners();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -191,6 +213,10 @@ class ModelPageViewModel extends ChangeNotifier {
     } on ForbiddenException {
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      notifyListeners();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -222,6 +248,11 @@ class ModelPageViewModel extends ChangeNotifier {
       areReviewsLoading = false;
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      areReviewsLoading = false;
+      notifyListeners();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -263,6 +294,10 @@ class ModelPageViewModel extends ChangeNotifier {
         notifyListeners();
         onForbidden?.call();
         return false;
+      } on NetworkException {
+        errorMessage = NetworkException().toString();
+        notifyListeners();
+        return false;
       } catch (e) {
         errorMessage = e.toString();
         notifyListeners();
@@ -281,6 +316,10 @@ class ModelPageViewModel extends ChangeNotifier {
       } on ForbiddenException {
         notifyListeners();
         onForbidden?.call();
+        return false;
+      } on NetworkException {
+        errorMessage = NetworkException().toString();
+        notifyListeners();
         return false;
       } catch (e) {
         errorMessage = e.toString();
@@ -339,6 +378,11 @@ class ModelPageViewModel extends ChangeNotifier {
       isModelBeingDeleted = false;
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isModelBeingDeleted = false;
+      notifyListeners();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -449,6 +493,11 @@ class ModelPageViewModel extends ChangeNotifier {
       notifyListeners();
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isAddingToCart = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isAddingToCart = false;
@@ -503,6 +552,11 @@ class ModelPageViewModel extends ChangeNotifier {
       isAddingToCart = false;
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isAddingToCart = false;
+      notifyListeners();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -611,6 +665,11 @@ class ModelPageViewModel extends ChangeNotifier {
       notifyListeners();
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isCreatingFAQ = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isCreatingFAQ = false;
@@ -658,7 +717,13 @@ class ModelPageViewModel extends ChangeNotifier {
       notifyListeners();
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isLoadingReviewTypes = false;
+      notifyListeners();
+      return false;
     } catch (e) {
+      errorMessage = e.toString();
       isLoadingReviewTypes = false;
       notifyListeners();
       return false;
@@ -708,6 +773,11 @@ class ModelPageViewModel extends ChangeNotifier {
       isCreatingReview = false;
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isCreatingReview = false;
+      notifyListeners();
       return false;
     } catch (e) {
       errorMessage = e.toString();

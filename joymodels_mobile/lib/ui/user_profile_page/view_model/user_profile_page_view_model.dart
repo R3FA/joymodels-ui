@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/users/request_types/user_follower_search_request_api_model.dart';
@@ -89,6 +90,10 @@ class UserProfilePageViewModel with ChangeNotifier {
       isLoading = false;
       notifyListeners();
       onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isLoading = false;
+      notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
       isLoading = false;
@@ -132,6 +137,10 @@ class UserProfilePageViewModel with ChangeNotifier {
       isLikedModelsLoading = false;
       notifyListeners();
       onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isLikedModelsLoading = false;
+      notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
       isLikedModelsLoading = false;
@@ -177,6 +186,10 @@ class UserProfilePageViewModel with ChangeNotifier {
       isLikedCommunityPostsLoading = false;
       notifyListeners();
       onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isLikedCommunityPostsLoading = false;
+      notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
       isLikedCommunityPostsLoading = false;
@@ -223,6 +236,10 @@ class UserProfilePageViewModel with ChangeNotifier {
       isFollowLoading = false;
       notifyListeners();
       onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isFollowLoading = false;
+      notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
       isFollowLoading = false;
@@ -285,6 +302,10 @@ class UserProfilePageViewModel with ChangeNotifier {
       isFollowModalLoading = false;
       notifyListeners();
       onForbidden?.call();
+    } on NetworkException {
+      followModalErrorMessage = NetworkException().toString();
+      isFollowModalLoading = false;
+      notifyListeners();
     } catch (e) {
       followModalErrorMessage = e.toString();
       isFollowModalLoading = false;
@@ -325,6 +346,10 @@ class UserProfilePageViewModel with ChangeNotifier {
       isFollowModalLoading = false;
       notifyListeners();
       onForbidden?.call();
+    } on NetworkException {
+      followModalErrorMessage = NetworkException().toString();
+      isFollowModalLoading = false;
+      notifyListeners();
     } catch (e) {
       followModalErrorMessage = e.toString();
       isFollowModalLoading = false;

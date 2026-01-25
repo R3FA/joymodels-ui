@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/category/request_types/category_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
@@ -277,6 +278,11 @@ class ModelEditPageViewModel extends ChangeNotifier {
       notifyListeners();
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isCategoriesLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isCategoriesLoading = false;
@@ -367,6 +373,11 @@ class ModelEditPageViewModel extends ChangeNotifier {
       isModelAvailabilitiesLoading = false;
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isModelAvailabilitiesLoading = false;
+      notifyListeners();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -486,6 +497,11 @@ class ModelEditPageViewModel extends ChangeNotifier {
       isSaving = false;
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isSaving = false;
+      notifyListeners();
       return false;
     } catch (e) {
       errorMessage = e.toString();

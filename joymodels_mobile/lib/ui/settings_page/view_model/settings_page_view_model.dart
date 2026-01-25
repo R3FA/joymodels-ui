@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_logout_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_password_change_request_api_model.dart';
@@ -107,6 +108,10 @@ class SettingsPageViewModel with ChangeNotifier {
       isLoading = false;
       notifyListeners();
       onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isLoading = false;
+      notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
       isLoading = false;
@@ -246,6 +251,10 @@ class SettingsPageViewModel with ChangeNotifier {
       isSaving = false;
       notifyListeners();
       onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isSaving = false;
+      notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
       isSaving = false;
@@ -320,6 +329,10 @@ class SettingsPageViewModel with ChangeNotifier {
       isChangingPassword = false;
       notifyListeners();
       onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isChangingPassword = false;
+      notifyListeners();
     } catch (e) {
       errorMessage = 'Failed to change password. Please try again.';
       isChangingPassword = false;

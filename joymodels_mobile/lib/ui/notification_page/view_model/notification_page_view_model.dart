@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/notification/request_types/notification_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/notification/response_types/notification_response_api_model.dart';
@@ -72,6 +73,11 @@ class NotificationPageViewModel extends ChangeNotifier
       notifyListeners();
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isLoading = false;
@@ -84,8 +90,16 @@ class NotificationPageViewModel extends ChangeNotifier
     try {
       unreadCount = await _notificationRepository.getUnreadCount();
       notifyListeners();
+    } on SessionExpiredException {
+      onSessionExpired?.call();
+    } on ForbiddenException {
+      onForbidden?.call();
+    } on NetworkException {
+      unreadCount = 0;
+      notifyListeners();
     } catch (e) {
       unreadCount = 0;
+      notifyListeners();
     }
   }
 
@@ -122,7 +136,13 @@ class NotificationPageViewModel extends ChangeNotifier
     } on ForbiddenException {
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      notifyListeners();
+      return false;
     } catch (e) {
+      errorMessage = e.toString();
+      notifyListeners();
       return false;
     }
   }
@@ -168,7 +188,13 @@ class NotificationPageViewModel extends ChangeNotifier
     } on ForbiddenException {
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      notifyListeners();
+      return false;
     } catch (e) {
+      errorMessage = e.toString();
+      notifyListeners();
       return false;
     }
   }
@@ -198,7 +224,13 @@ class NotificationPageViewModel extends ChangeNotifier
     } on ForbiddenException {
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      notifyListeners();
+      return false;
     } catch (e) {
+      errorMessage = e.toString();
+      notifyListeners();
       return false;
     }
   }

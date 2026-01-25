@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/enums/model_review_enum.dart';
 import 'package:joymodels_mobile/data/model/model_review_type/request_types/model_review_type_search_request_api_model.dart';
@@ -88,6 +89,11 @@ class ModelReviewsPageViewModel extends ChangeNotifier
       notifyListeners();
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isLoading = false;
@@ -140,6 +146,11 @@ class ModelReviewsPageViewModel extends ChangeNotifier
       notifyListeners();
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isLoadingReviewTypes = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       isLoadingReviewTypes = false;
       notifyListeners();
@@ -179,6 +190,11 @@ class ModelReviewsPageViewModel extends ChangeNotifier
       isDeleting = false;
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isDeleting = false;
+      notifyListeners();
       return false;
     } catch (e) {
       isDeleting = false;
@@ -236,6 +252,11 @@ class ModelReviewsPageViewModel extends ChangeNotifier
       isEditing = false;
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isEditing = false;
+      notifyListeners();
       return false;
     } catch (e) {
       isEditing = false;
