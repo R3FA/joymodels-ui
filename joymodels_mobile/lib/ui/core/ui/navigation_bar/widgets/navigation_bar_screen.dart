@@ -36,22 +36,19 @@ class NavigationBarScreen extends StatelessWidget {
       ),
     ];
 
-    // Adjust selected index when Add is hidden
     int adjustedIndex = viewModel.selectedNavBarItem;
     if (!viewModel.isAdminOrRoot && adjustedIndex >= 2) {
       adjustedIndex = adjustedIndex > 2 ? adjustedIndex - 1 : adjustedIndex;
     }
-    // Clamp to valid range
     adjustedIndex = adjustedIndex.clamp(0, destinations.length - 1);
 
     return NavigationBar(
       height: navBarHeight,
       selectedIndex: adjustedIndex,
       onDestinationSelected: (index) {
-        // Convert display index back to NavBarItem index
         int actualIndex = index;
         if (!viewModel.isAdminOrRoot && index >= 2) {
-          actualIndex = index + 1; // Skip 'add' index
+          actualIndex = index + 1;
         }
         viewModel.onNavigationBarItemTapped(context, actualIndex);
       },

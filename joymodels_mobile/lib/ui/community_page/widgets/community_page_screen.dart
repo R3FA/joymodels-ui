@@ -347,14 +347,17 @@ class _CommunityPageScreenState extends State<CommunityPageScreen> {
     ThemeData theme,
     CommunityPostResponseApiModel post,
   ) {
-    return Padding(
+    return Container(
+      height: 180,
+      width: double.infinity,
       padding: const EdgeInsets.all(12),
+      color: theme.colorScheme.surfaceContainerHighest,
       child: Text(
         post.description,
         style: theme.textTheme.bodyMedium?.copyWith(
           color: theme.colorScheme.onSurface,
         ),
-        maxLines: 5,
+        maxLines: 7,
         overflow: TextOverflow.ellipsis,
       ),
     );

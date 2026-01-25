@@ -28,7 +28,8 @@ class _SettingsPageScreenState extends State<SettingsPageScreen>
     _viewModel.onSessionExpired = _handleSessionExpired;
     _viewModel.onForbidden = _handleForbidden;
     _viewModel.onProfileSaved = _handleProfileSaved;
-    _tabController = TabController(length: 2, vsync: this);
+    _viewModel.onAccountDeleted = _handleAccountDeleted;
+    _tabController = TabController(length: 3, vsync: this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _viewModel.init();
@@ -68,6 +69,15 @@ class _SettingsPageScreenState extends State<SettingsPageScreen>
     );
   }
 
+  void _handleAccountDeleted() {
+    if (!mounted) return;
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const WelcomePageScreen()),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<SettingsPageViewModel>();
@@ -82,6 +92,7 @@ class _SettingsPageScreenState extends State<SettingsPageScreen>
           tabs: const [
             Tab(text: 'Edit Profile'),
             Tab(text: 'Change Password'),
+            Tab(text: 'Delete Account'),
           ],
         ),
       ),
@@ -92,6 +103,7 @@ class _SettingsPageScreenState extends State<SettingsPageScreen>
               children: [
                 _buildEditProfileTab(viewModel, theme),
                 _buildChangePasswordTab(viewModel, theme),
+                _buildDeleteAccountTab(viewModel, theme),
               ],
             ),
     );
@@ -226,6 +238,149 @@ class _SettingsPageScreenState extends State<SettingsPageScreen>
           const SizedBox(height: 16),
           _buildChangePasswordButton(viewModel, theme),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDeleteAccountTab(
+    SettingsPageViewModel viewModel,
+    ThemeData theme,
+  ) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 24),
+          Icon(
+            Icons.warning_amber_rounded,
+            size: 64,
+            color: theme.colorScheme.error,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Delete Your Account',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.error,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: theme.colorScheme.error),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Warning: This action is permanent!',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.error,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'By deleting your account, the following will be permanently removed:',
+                  style: theme.textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 8),
+                _buildWarningItem(theme, 'Your profile and personal data'),
+                _buildWarningItem(theme, 'All your uploaded models'),
+                _buildWarningItem(theme, 'Your purchase history and library'),
+                _buildWarningItem(theme, 'All your reviews and comments'),
+                _buildWarningItem(theme, 'Your followers and following list'),
+                _buildWarningItem(theme, 'All community posts you created'),
+                const SizedBox(height: 12),
+                Text(
+                  'This action cannot be undone. Once deleted, your data cannot be recovered.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Checkbox(
+                value: viewModel.isDeleteConfirmed,
+                onChanged: viewModel.toggleDeleteConfirmation,
+                activeColor: theme.colorScheme.error,
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => viewModel.toggleDeleteConfirmation(
+                    !viewModel.isDeleteConfirmed,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Text(
+                      'I understand that all my data will be permanently deleted and this action cannot be undone.',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          _buildMessageDisplay(viewModel, theme),
+          const SizedBox(height: 16),
+          _buildDeleteButton(viewModel, theme),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWarningItem(ThemeData theme, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, top: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('\u2022 ', style: TextStyle(color: theme.colorScheme.error)),
+          Expanded(child: Text(text, style: theme.textTheme.bodyMedium)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeleteButton(SettingsPageViewModel viewModel, ThemeData theme) {
+    final isDisabled =
+        viewModel.isDeletingAccount || !viewModel.isDeleteConfirmed;
+
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: isDisabled ? null : viewModel.deleteAccount,
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          backgroundColor: theme.colorScheme.error,
+          foregroundColor: theme.colorScheme.onError,
+          disabledBackgroundColor: theme.colorScheme.error.withValues(
+            alpha: 0.3,
+          ),
+        ),
+        child: viewModel.isDeletingAccount
+            ? SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    theme.colorScheme.onError,
+                  ),
+                ),
+              )
+            : const Text('Delete My Account'),
       ),
     );
   }
