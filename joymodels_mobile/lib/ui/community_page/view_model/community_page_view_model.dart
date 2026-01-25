@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_user_review_create_request_api_model.dart';
@@ -147,6 +148,11 @@ class CommunityPageViewModel extends ChangeNotifier
       arePostsLoading = false;
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      arePostsLoading = false;
+      notifyListeners();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -313,6 +319,9 @@ class CommunityPageViewModel extends ChangeNotifier
       onSessionExpired?.call();
     } on ForbiddenException {
       onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
       notifyListeners();
@@ -355,6 +364,9 @@ class CommunityPageViewModel extends ChangeNotifier
       onSessionExpired?.call();
     } on ForbiddenException {
       onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
       notifyListeners();

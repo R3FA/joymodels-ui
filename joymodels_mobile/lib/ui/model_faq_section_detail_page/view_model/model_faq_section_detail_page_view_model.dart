@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/request_types/model_faq_section_create_answer_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/request_types/model_faq_section_delete_request_api_model.dart';
@@ -100,6 +101,11 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
       notifyListeners();
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isSubmittingAnswer = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isSubmittingAnswer = false;
@@ -166,6 +172,11 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
       notifyListeners();
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isEditingFaq = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isEditingFaq = false;
@@ -220,6 +231,11 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
       isDeletingFaq = false;
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isDeletingFaq = false;
+      notifyListeners();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -280,6 +296,11 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
       isDeletingFaq = false;
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isDeletingFaq = false;
+      notifyListeners();
       return false;
     } catch (e) {
       errorMessage = e.toString();

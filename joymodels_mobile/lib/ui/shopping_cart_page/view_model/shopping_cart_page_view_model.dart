@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
@@ -84,6 +85,10 @@ class ShoppingCartPageViewModel extends ChangeNotifier
       isLoading = false;
       notifyListeners();
       onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isLoading = false;
+      notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
       isLoading = false;
@@ -107,6 +112,10 @@ class ShoppingCartPageViewModel extends ChangeNotifier
     } on ForbiddenException {
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      notifyListeners();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -175,6 +184,11 @@ class ShoppingCartPageViewModel extends ChangeNotifier
       isCheckoutLoading = false;
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isCheckoutLoading = false;
+      notifyListeners();
       return false;
     } catch (e) {
       isCheckoutLoading = false;

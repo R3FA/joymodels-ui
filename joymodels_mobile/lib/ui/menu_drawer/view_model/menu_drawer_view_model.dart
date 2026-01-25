@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_logout_request_api_model.dart';
@@ -88,6 +89,10 @@ class MenuDrawerViewModel extends ChangeNotifier
       isSearching = false;
       notifyListeners();
       onForbidden?.call();
+    } on NetworkException {
+      searchErrorMessage = NetworkException().toString();
+      isSearching = false;
+      notifyListeners();
     } catch (e) {
       searchErrorMessage = e.toString();
       isSearching = false;
@@ -123,6 +128,18 @@ class MenuDrawerViewModel extends ChangeNotifier
       notifyListeners();
 
       onLogoutSuccess?.call();
+    } on SessionExpiredException {
+      isLoggingOut = false;
+      notifyListeners();
+      onSessionExpired?.call();
+    } on ForbiddenException {
+      isLoggingOut = false;
+      notifyListeners();
+      onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isLoggingOut = false;
+      notifyListeners();
     } catch (e) {
       errorMessage = 'Logout failed. Please try again.';
       isLoggingOut = false;

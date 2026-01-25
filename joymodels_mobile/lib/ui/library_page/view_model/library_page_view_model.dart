@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/library/request_types/library_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/library/response_types/library_response_api_model.dart';
@@ -95,6 +96,11 @@ class LibraryPageViewModel extends ChangeNotifier
       notifyListeners();
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isLoading = false;
@@ -174,6 +180,12 @@ class LibraryPageViewModel extends ChangeNotifier
       downloadingModelUuid = null;
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isDownloading = false;
+      downloadingModelUuid = null;
+      notifyListeners();
       return false;
     } catch (e) {
       isDownloading = false;

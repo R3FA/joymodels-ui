@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/category/request_types/category_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
@@ -184,6 +185,11 @@ class HomePageScreenViewModel with ChangeNotifier {
       notifyListeners();
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isLoggedUserDataLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isLoggedUserDataLoading = false;
@@ -219,6 +225,11 @@ class HomePageScreenViewModel with ChangeNotifier {
       isCategoriesLoading = false;
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isCategoriesLoading = false;
+      notifyListeners();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -326,6 +337,11 @@ class HomePageScreenViewModel with ChangeNotifier {
       notifyListeners();
       onForbidden?.call();
       return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isTopArtistsLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       errorMessage = e.toString();
       isTopArtistsLoading = false;
@@ -359,6 +375,11 @@ class HomePageScreenViewModel with ChangeNotifier {
       isTopArtistsPictureLoading = false;
       notifyListeners();
       onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isTopArtistsPictureLoading = false;
+      notifyListeners();
       return false;
     } catch (e) {
       errorMessage = e.toString();
@@ -469,8 +490,16 @@ class HomePageScreenViewModel with ChangeNotifier {
     try {
       unreadNotificationCount = await notificationRepository.getUnreadCount();
       notifyListeners();
+    } on SessionExpiredException {
+      onSessionExpired?.call();
+    } on ForbiddenException {
+      onForbidden?.call();
+    } on NetworkException {
+      unreadNotificationCount = 0;
+      notifyListeners();
     } catch (e) {
       unreadNotificationCount = 0;
+      notifyListeners();
     }
   }
 
