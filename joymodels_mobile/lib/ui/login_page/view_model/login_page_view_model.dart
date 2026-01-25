@@ -7,8 +7,10 @@ import 'package:joymodels_mobile/data/model/enums/user_role_api_enum.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_user_login_request_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/sso_repository.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
+import 'package:joymodels_mobile/ui/core/ui/navigation_bar/view_model/navigation_bar_view_model.dart';
 import 'package:joymodels_mobile/ui/home_page/widgets/home_page_screen.dart';
 import 'package:joymodels_mobile/ui/verify_page/widgets/verify_page_screen.dart';
+import 'package:provider/provider.dart';
 
 class LoginPageScreenViewModel with ChangeNotifier {
   final ssoRepository = sl<SsoRepository>();
@@ -77,9 +79,12 @@ class LoginPageScreenViewModel with ChangeNotifier {
         }
       } else {
         if (context.mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => HomePageScreen()),
-          );
+          await context.read<NavigationBarViewModel>().refreshAdminStatus();
+          if (context.mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => HomePageScreen()),
+            );
+          }
         }
       }
       clearControllers();

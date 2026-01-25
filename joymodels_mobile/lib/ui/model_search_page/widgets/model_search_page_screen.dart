@@ -238,27 +238,25 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
         child: InkWell(
           onTap: () => viewModel.onModelTap(context, model),
           borderRadius: BorderRadius.circular(12),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildModelImage(theme, model, hasImage),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: _buildModelInfo(
-                      theme: theme,
-                      name: model.name,
-                      description: model.description,
-                      category: model.modelCategories.isNotEmpty
-                          ? model.modelCategories[0].categoryName
-                          : 'Unknown',
-                      price: model.price,
-                    ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildModelImage(theme, model, hasImage),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: _buildModelInfo(
+                    theme: theme,
+                    name: model.name,
+                    description: model.description,
+                    category: model.modelCategories.isNotEmpty
+                        ? model.modelCategories[0].categoryName
+                        : 'Unknown',
+                    price: model.price,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -274,6 +272,7 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
       borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
       child: SizedBox(
         width: 110,
+        height: 120,
         child: hasImage
             ? ModelImage(
                 imageUrl:

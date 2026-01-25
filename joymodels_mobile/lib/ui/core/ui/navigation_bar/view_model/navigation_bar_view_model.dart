@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/ui/community_page/widgets/community_page_screen.dart';
 import 'package:joymodels_mobile/ui/home_page/widgets/home_page_screen.dart';
 import 'package:joymodels_mobile/ui/model_create_page/widgets/model_create_page_screen.dart';
@@ -10,6 +11,16 @@ enum NavBarItem { home, community, add, cart, menu }
 
 class NavigationBarViewModel with ChangeNotifier {
   int selectedNavBarItem = 0;
+  bool isAdminOrRoot = false;
+
+  NavigationBarViewModel() {
+    refreshAdminStatus();
+  }
+
+  Future<void> refreshAdminStatus() async {
+    isAdminOrRoot = await TokenStorage.isAdminOrRoot();
+    notifyListeners();
+  }
 
   void _navigateToHome(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(

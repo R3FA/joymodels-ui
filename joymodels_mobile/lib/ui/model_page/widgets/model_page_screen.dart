@@ -105,7 +105,7 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
       endDrawer: const MenuDrawer(),
       appBar: AppBar(
         actions: [
-          if (viewModel.isModelOwner)
+          if (viewModel.isAdminOrRoot)
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert),
               onSelected: (value) {
@@ -472,7 +472,7 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
               ),
             ),
           ),
-          if (!vm.hasUserReviewed && !vm.isModelOwner)
+          if (!vm.hasUserReviewed && vm.isOwnedInLibrary)
             IconButton(
               onPressed: () => _showAddReviewDialog(vm, theme),
               icon: const Icon(Icons.add_circle_outline),
@@ -513,7 +513,7 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
               ),
             ),
           ),
-          if (!vm.hasUserReviewed && !vm.isModelOwner)
+          if (!vm.hasUserReviewed && vm.isOwnedInLibrary)
             TextButton.icon(
               onPressed: () => _showAddReviewDialog(vm, theme),
               icon: const Icon(Icons.add, size: 16),
@@ -769,7 +769,7 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
                 color: theme.colorScheme.secondary,
               ),
             ),
-            if (!vm.isModelOwner) ...[
+            if (!vm.isAdminOrRoot) ...[
               const SizedBox(width: 6),
               if (vm.isOwnedInLibrary)
                 InkWell(

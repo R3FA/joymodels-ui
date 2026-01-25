@@ -47,6 +47,8 @@ class SettingsPageViewModel with ChangeNotifier {
   bool isLoading = false;
   bool isSaving = false;
   bool isChangingPassword = false;
+  bool isDeletingAccount = false;
+  bool isDeleteConfirmed = false;
 
   String? userUuid;
   UsersResponseApiModel? currentUser;
@@ -62,6 +64,7 @@ class SettingsPageViewModel with ChangeNotifier {
   VoidCallback? onSessionExpired;
   VoidCallback? onForbidden;
   VoidCallback? onProfileSaved;
+  VoidCallback? onAccountDeleted;
 
   bool get hasProfileChanges {
     if (selectedImagePath != null) return true;
@@ -346,6 +349,57 @@ class SettingsPageViewModel with ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleDeleteConfirmation(bool? value) {
+    isDeleteConfirmed = value ?? false;
+    notifyListeners();
+  }
+
+  Future<void> deleteAccount() async {
+    if (userUuid == null) return;
+
+    errorMessage = null;
+    successMessage = null;
+
+    if (!isDeleteConfirmed) {
+      errorMessage =
+          'Please confirm that you understand by checking the checkbox.';
+      notifyListeners();
+      return;
+    }
+
+    isDeletingAccount = true;
+    notifyListeners();
+
+    try {
+      await _usersRepository.delete(userUuid!);
+
+      await TokenStorage.clearAuthToken();
+
+      isDeletingAccount = false;
+      isDeleteConfirmed = false;
+      notifyListeners();
+
+      onAccountDeleted?.call();
+    } on SessionExpiredException {
+      errorMessage = 'Session expired. Please login again.';
+      isDeletingAccount = false;
+      notifyListeners();
+      onSessionExpired?.call();
+    } on ForbiddenException {
+      isDeletingAccount = false;
+      notifyListeners();
+      onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isDeletingAccount = false;
+      notifyListeners();
+    } catch (e) {
+      errorMessage = e.toString();
+      isDeletingAccount = false;
+      notifyListeners();
+    }
+  }
+
   @override
   void dispose() {
     firstNameController.dispose();
@@ -356,6 +410,7 @@ class SettingsPageViewModel with ChangeNotifier {
     onSessionExpired = null;
     onForbidden = null;
     onProfileSaved = null;
+    onAccountDeleted = null;
     super.dispose();
   }
 }

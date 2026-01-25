@@ -56,9 +56,7 @@ class MenuDrawerViewModel extends ChangeNotifier
       return;
     }
 
-    final validationError = RegexValidationViewModel.validateNickname(
-      searchQuery,
-    );
+    final validationError = RegexValidationViewModel.validateText(searchQuery);
     if (validationError != null) {
       searchResults = null;
       searchErrorMessage = validationError;

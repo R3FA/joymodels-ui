@@ -94,7 +94,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
 
   Widget _buildContent(HomePageScreenViewModel viewModel, ThemeData theme) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(14, 32, 14, 0),
+      padding: const EdgeInsets.fromLTRB(14, 32, 14, 24),
       physics: const ClampingScrollPhysics(),
       children: [
         _buildHeader(viewModel, theme),
@@ -208,25 +208,55 @@ class _HomePageScreenState extends State<HomePageScreen> {
   }
 
   Widget _buildSearchBar(HomePageScreenViewModel viewModel, ThemeData theme) {
-    return TextField(
-      controller: viewModel.searchController,
-      autofocus: true,
-      decoration: InputDecoration(
-        hintText: 'Search models',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TextField(
+          controller: viewModel.searchController,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: 'Search models',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: viewModel.searchError != null
+                  ? BorderSide(color: theme.colorScheme.error)
+                  : BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: viewModel.searchError != null
+                  ? BorderSide(color: theme.colorScheme.error)
+                  : BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: viewModel.searchError != null
+                  ? BorderSide(color: theme.colorScheme.error, width: 2)
+                  : BorderSide(color: theme.colorScheme.primary),
+            ),
+            filled: true,
+            fillColor: theme.colorScheme.surfaceContainerHighest,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+            prefixIcon: const Icon(Icons.search),
+          ),
+          textInputAction: TextInputAction.search,
+          onSubmitted: (query) => viewModel.onSearchSubmitted(context, query),
         ),
-        filled: true,
-        fillColor: theme.colorScheme.surfaceContainerHighest,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
-        prefixIcon: const Icon(Icons.search),
-      ),
-      textInputAction: TextInputAction.search,
-      onSubmitted: (query) => viewModel.onSearchSubmitted(context, query),
+        if (viewModel.searchError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4, left: 12),
+            child: Text(
+              viewModel.searchError!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -503,11 +533,11 @@ class _HomePageScreenState extends State<HomePageScreen> {
     }
 
     return SizedBox(
-      height: 140,
+      height: 165,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: viewModel.recommendedModels?.data.length ?? 0,
-        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (_, i) {
           final model = viewModel.recommendedModels?.data[i];
           final hasPicture = model?.modelPictures.isNotEmpty ?? false;
@@ -518,7 +548,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
           return GestureDetector(
             onTap: () => viewModel.onModelTap(context, model),
             child: Container(
-              width: 130,
+              width: 180,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 color: theme.colorScheme.surfaceContainerHighest,
@@ -531,34 +561,39 @@ class _HomePageScreenState extends State<HomePageScreen> {
                       top: Radius.circular(10),
                     ),
                     child: SizedBox(
-                      height: 85,
+                      height: 110,
                       width: double.infinity,
                       child: hasPicture
                           ? ModelImage(imageUrl: imageUrl, fit: BoxFit.cover)
                           : Icon(
                               Icons.view_in_ar,
-                              size: 42,
+                              size: 48,
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    padding: const EdgeInsets.all(10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
-                          model?.name ?? '',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w500,
+                        Expanded(
+                          child: Text(
+                            model?.name ?? '',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
+                        const SizedBox(width: 8),
                         Text(
                           '\$${model?.price.toStringAsFixed(2) ?? '0.00'}',
-                          style: theme.textTheme.labelSmall?.copyWith(
+                          style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.secondary,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],

@@ -1,6 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'package:joymodels_mobile/data/model/enums/jwt_claim_key_api_enum.dart';
+import 'package:joymodels_mobile/data/model/enums/user_role_api_enum.dart';
 
 class TokenStorage {
   static const _storage = FlutterSecureStorage();
@@ -88,5 +89,12 @@ class TokenStorage {
 
   static Future<String?> getCurrentUserRole() async {
     return await getClaimFromToken(JwtClaimKeyApiEnum.role);
+  }
+
+  static Future<bool> isAdminOrRoot() async {
+    final role = await getCurrentUserRole();
+    if (role == null) return false;
+    return role == UserRoleApiEnum.Root.name ||
+        role == UserRoleApiEnum.Admin.name;
   }
 }

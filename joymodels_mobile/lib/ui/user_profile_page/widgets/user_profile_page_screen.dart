@@ -124,7 +124,14 @@ class _UserProfilePageScreenState extends State<UserProfilePageScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+            theme.colorScheme.surface,
+          ],
+        ),
       ),
       child: Column(
         children: [
@@ -179,9 +186,54 @@ class _UserProfilePageScreenState extends State<UserProfilePageScreen>
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
+          const SizedBox(height: 8),
+          _buildRoleBadge(user.userRole.roleName, theme),
           const SizedBox(height: 16),
           _buildStats(viewModel, theme),
         ],
+      ),
+    );
+  }
+
+  Widget _buildRoleBadge(String roleName, ThemeData theme) {
+    Color backgroundColor;
+    Color textColor;
+
+    switch (roleName) {
+      case 'Admin':
+      case 'Root':
+        backgroundColor = Colors.black;
+        textColor = Colors.white;
+        break;
+      case 'Helper':
+        backgroundColor = Colors.blue;
+        textColor = Colors.white;
+        break;
+      case 'User':
+        backgroundColor = Colors.amber;
+        textColor = Colors.black;
+        break;
+      case 'Unverified':
+        backgroundColor = Colors.red;
+        textColor = Colors.white;
+        break;
+      default:
+        backgroundColor = theme.colorScheme.surfaceContainerHighest;
+        textColor = theme.colorScheme.onSurface;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        roleName,
+        style: theme.textTheme.labelMedium?.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
