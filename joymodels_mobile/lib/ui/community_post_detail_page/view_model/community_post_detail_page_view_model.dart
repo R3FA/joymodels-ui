@@ -9,6 +9,7 @@ import 'package:joymodels_mobile/data/model/community_post/request_types/communi
 import 'package:joymodels_mobile/data/model/community_post/response_types/community_post_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post_question_section/request_types/community_post_question_section_create_answer_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post_question_section/request_types/community_post_question_section_create_request_api_model.dart';
+import 'package:joymodels_mobile/data/model/community_post_question_section/request_types/community_post_question_section_patch_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post_question_section/request_types/community_post_question_section_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post_question_section/response_types/community_post_question_section_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post_review_type/request_types/community_post_review_type_search_request_api_model.dart';
@@ -63,8 +64,10 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
 
   final TextEditingController questionController = TextEditingController();
   final TextEditingController replyController = TextEditingController();
+  final TextEditingController editController = TextEditingController();
   bool isSubmittingQuestion = false;
   bool isSubmittingReply = false;
+  bool isEditingQuestion = false;
   String? replyingToQuestionUuid;
 
   final Map<String, int> _visibleRepliesCount = {};
@@ -491,6 +494,51 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
     }
   }
 
+  Future<bool> editQuestion(String uuid, String newMessageText) async {
+    final validationError = validateQuestionText(newMessageText);
+    if (validationError != null) {
+      errorMessage = validationError;
+      notifyListeners();
+      return false;
+    }
+
+    isEditingQuestion = true;
+    notifyListeners();
+
+    try {
+      await communityPostQuestionSectionRepository.patch(
+        CommunityPostQuestionSectionPatchRequestApiModel(
+          communityPostQuestionSectionUuid: uuid,
+          messageText: newMessageText.trim(),
+        ),
+      );
+
+      isEditingQuestion = false;
+      await reloadCurrentPage();
+      return true;
+    } on SessionExpiredException {
+      isEditingQuestion = false;
+      notifyListeners();
+      onSessionExpired?.call();
+      return false;
+    } on ForbiddenException {
+      isEditingQuestion = false;
+      notifyListeners();
+      onForbidden?.call();
+      return false;
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isEditingQuestion = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      errorMessage = e.toString();
+      isEditingQuestion = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> deletePost() async {
     if (post == null) return;
 
@@ -530,6 +578,7 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
     galleryController.dispose();
     questionController.dispose();
     replyController.dispose();
+    editController.dispose();
     onSessionExpired = null;
     onForbidden = null;
     super.dispose();

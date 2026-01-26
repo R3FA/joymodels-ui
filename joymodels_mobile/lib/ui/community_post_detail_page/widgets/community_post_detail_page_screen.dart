@@ -799,15 +799,60 @@ class _CommunityPostDetailPageScreenState
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                   onSelected: (value) {
-                    if (value == 'delete') {
+                    if (value == 'edit') {
+                      _showEditDialog(
+                        viewModel,
+                        theme,
+                        question.uuid,
+                        question.messageText,
+                      );
+                    } else if (value == 'delete') {
                       _showDeleteConfirmation(viewModel, question.uuid);
                     } else if (value == 'report') {
                       _showReportDialog(question.uuid);
                     }
                   },
                   itemBuilder: (context) {
-                    if (viewModel.isOwner(question.user.uuid) ||
-                        viewModel.isAdminOrRoot) {
+                    if (viewModel.isOwner(question.user.uuid)) {
+                      return [
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.edit,
+                                color: theme.colorScheme.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Edit',
+                                style: TextStyle(
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.delete,
+                                color: theme.colorScheme.error,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Delete',
+                                style: TextStyle(
+                                  color: theme.colorScheme.error,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ];
+                    } else if (viewModel.isAdminOrRoot) {
                       return [
                         PopupMenuItem(
                           value: 'delete',
@@ -957,7 +1002,14 @@ class _CommunityPostDetailPageScreenState
                               ),
                               padding: EdgeInsets.zero,
                               onSelected: (value) {
-                                if (value == 'delete') {
+                                if (value == 'edit') {
+                                  _showEditDialog(
+                                    viewModel,
+                                    theme,
+                                    reply.uuid,
+                                    reply.messageText,
+                                  );
+                                } else if (value == 'delete') {
                                   _showDeleteConfirmation(
                                     viewModel,
                                     reply.uuid,
@@ -967,8 +1019,46 @@ class _CommunityPostDetailPageScreenState
                                 }
                               },
                               itemBuilder: (context) {
-                                if (viewModel.isOwner(reply.user.uuid) ||
-                                    viewModel.isAdminOrRoot) {
+                                if (viewModel.isOwner(reply.user.uuid)) {
+                                  return [
+                                    PopupMenuItem(
+                                      value: 'edit',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.edit,
+                                            color: theme.colorScheme.primary,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'Edit',
+                                            style: TextStyle(
+                                              color: theme.colorScheme.primary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    PopupMenuItem(
+                                      value: 'delete',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.delete,
+                                            color: theme.colorScheme.error,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'Delete',
+                                            style: TextStyle(
+                                              color: theme.colorScheme.error,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ];
+                                } else if (viewModel.isAdminOrRoot) {
                                   return [
                                     PopupMenuItem(
                                       value: 'delete',
@@ -1139,6 +1229,115 @@ class _CommunityPostDetailPageScreenState
           ),
         ],
       ),
+    );
+  }
+
+  void _showEditDialog(
+    CommunityPostDetailPageViewModel viewModel,
+    ThemeData theme,
+    String uuid,
+    String currentText,
+  ) {
+    final editController = TextEditingController(text: currentText);
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Row(
+                children: [
+                  Icon(Icons.edit, color: theme.colorScheme.primary),
+                  const SizedBox(width: 12),
+                  const Text('Edit'),
+                ],
+              ),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Form(
+                  key: formKey,
+                  child: TextFormField(
+                    controller: editController,
+                    maxLines: 4,
+                    maxLength: 5000,
+                    decoration: InputDecoration(
+                      hintText: 'Enter your message...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: theme.colorScheme.surfaceContainerHighest,
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter a message';
+                      }
+                      if (value.trim().length < 3) {
+                        return 'Message must be at least 3 characters';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ListenableBuilder(
+                  listenable: viewModel,
+                  builder: (context, _) {
+                    return ElevatedButton(
+                      onPressed: viewModel.isEditingQuestion
+                          ? null
+                          : () async {
+                              if (formKey.currentState!.validate()) {
+                                final success = await viewModel.editQuestion(
+                                  uuid,
+                                  editController.text.trim(),
+                                );
+                                if (success && dialogContext.mounted) {
+                                  Navigator.of(dialogContext).pop();
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(
+                                      this.context,
+                                    ).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Updated successfully'),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  }
+                                }
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primary,
+                        foregroundColor: theme.colorScheme.onPrimary,
+                      ),
+                      child: viewModel.isEditingQuestion
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : const Text('Save'),
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
