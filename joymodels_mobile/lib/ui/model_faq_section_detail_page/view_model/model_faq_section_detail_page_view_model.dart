@@ -19,6 +19,7 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
   bool isDeletingFaq = false;
   String? errorMessage;
   String? currentUserUuid;
+  bool isAdminOrRoot = false;
   VoidCallback? onSessionExpired;
   VoidCallback? onForbidden;
 
@@ -54,6 +55,7 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
     faqDetail = faq;
     _displayedRepliesCount = _repliesPerPage;
     currentUserUuid = await TokenStorage.getCurrentUserUuid();
+    isAdminOrRoot = await TokenStorage.isAdminOrRoot();
     notifyListeners();
   }
 
