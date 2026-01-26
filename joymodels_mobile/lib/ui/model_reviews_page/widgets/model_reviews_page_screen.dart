@@ -106,20 +106,31 @@ class _ModelReviewsPageScreenState extends State<ModelReviewsPageScreen> {
         children: [
           FilterChip(
             label: const Text('All'),
-            selected: viewModel.selectedReviewType == ModelReviewEnum.all,
+            selected:
+                viewModel.selectedReviewType == ModelReviewEnum.all &&
+                !viewModel.isMyReviewFiltered,
             onSelected: (_) => viewModel.onFilterChanged(ModelReviewEnum.all),
           ),
           FilterChip(
             label: const Text('Positive'),
-            selected: viewModel.selectedReviewType == ModelReviewEnum.positive,
+            selected:
+                viewModel.selectedReviewType == ModelReviewEnum.positive &&
+                !viewModel.isMyReviewFiltered,
             onSelected: (_) =>
                 viewModel.onFilterChanged(ModelReviewEnum.positive),
           ),
           FilterChip(
             label: const Text('Negative'),
-            selected: viewModel.selectedReviewType == ModelReviewEnum.negative,
+            selected:
+                viewModel.selectedReviewType == ModelReviewEnum.negative &&
+                !viewModel.isMyReviewFiltered,
             onSelected: (_) =>
                 viewModel.onFilterChanged(ModelReviewEnum.negative),
+          ),
+          FilterChip(
+            label: const Text('My Review'),
+            selected: viewModel.isMyReviewFiltered,
+            onSelected: (_) => viewModel.onMyReviewFilterChanged(),
           ),
         ],
       ),
