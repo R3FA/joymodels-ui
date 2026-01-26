@@ -378,7 +378,7 @@ class ModelCreatePageViewModel with ChangeNotifier {
 
   Future<void> onAddModelFilePressed() async {
     try {
-      final result = await FilePicker.pickFiles();
+      final result = await FilePicker.platform.pickFiles();
 
       if (result != null && result.files.isNotEmpty) {
         final file = result.files.first;
