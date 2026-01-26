@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
+import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
@@ -39,6 +40,9 @@ class CommunityPageViewModel extends ChangeNotifier
   String? errorMessage;
   String? searchError;
 
+  String? currentUserUuid;
+  int selectedTabIndex = 0;
+
   PaginationResponseApiModel<CommunityPostResponseApiModel>? posts;
 
   List<CommunityPostReviewTypeResponseApiModel> reviewTypes = [];
@@ -57,11 +61,15 @@ class CommunityPageViewModel extends ChangeNotifier
   @override
   bool get isLoadingPage => arePostsLoading;
 
+  String? get _currentUserUuidForSearch =>
+      selectedTabIndex == 1 ? currentUserUuid : null;
+
   @override
   Future<void> loadPage(int pageNumber) async {
     await searchPosts(
       CommunityPostSearchRequestApiModel(
         title: searchController.text.isNotEmpty ? searchController.text : null,
+        userUuid: _currentUserUuidForSearch,
         pageNumber: pageNumber,
         pageSize: 5,
       ),
@@ -73,6 +81,7 @@ class CommunityPageViewModel extends ChangeNotifier
     notifyListeners();
 
     try {
+      currentUserUuid = await TokenStorage.getCurrentUserUuid();
       await Future.wait([
         _loadReviewTypes(),
         searchPosts(
@@ -86,6 +95,15 @@ class CommunityPageViewModel extends ChangeNotifier
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  void onTabChanged(int index) {
+    if (selectedTabIndex == index) return;
+    selectedTabIndex = index;
+    searchController.clear();
+    searchError = null;
+    notifyListeners();
+    onRefresh();
   }
 
   Future<void> _loadReviewTypes() async {
@@ -204,6 +222,7 @@ class CommunityPageViewModel extends ChangeNotifier
       searchPosts(
         CommunityPostSearchRequestApiModel(
           title: query,
+          userUuid: _currentUserUuidForSearch,
           pageNumber: 1,
           pageSize: 5,
         ),
@@ -227,6 +246,7 @@ class CommunityPageViewModel extends ChangeNotifier
     searchPosts(
       CommunityPostSearchRequestApiModel(
         title: query.isNotEmpty ? query : null,
+        userUuid: _currentUserUuidForSearch,
         pageNumber: 1,
         pageSize: 5,
       ),
@@ -399,6 +419,7 @@ class CommunityPageViewModel extends ChangeNotifier
     await searchPosts(
       CommunityPostSearchRequestApiModel(
         title: searchController.text.isNotEmpty ? searchController.text : null,
+        userUuid: _currentUserUuidForSearch,
         pageNumber: 1,
         pageSize: 5,
       ),

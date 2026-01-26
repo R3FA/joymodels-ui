@@ -95,7 +95,7 @@ class LoginPageScreenViewModel with ChangeNotifier {
       notifyListeners();
       return false;
     } catch (e) {
-      errorMessage = e.toString();
+      errorMessage = 'Incorrect username or password!';
       isLoading = false;
       notifyListeners();
       return false;

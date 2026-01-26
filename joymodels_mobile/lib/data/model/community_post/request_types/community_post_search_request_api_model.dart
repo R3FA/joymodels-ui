@@ -2,11 +2,11 @@ import 'package:joymodels_mobile/data/model/pagination/request_types/pagination_
 
 class CommunityPostSearchRequestApiModel extends PaginationRequestApiModel {
   final String? title;
-  final String? postTypeUuid;
+  final String? userUuid;
 
   CommunityPostSearchRequestApiModel({
     this.title,
-    this.postTypeUuid,
+    this.userUuid,
     required super.pageNumber,
     required super.pageSize,
   });
@@ -16,7 +16,7 @@ class CommunityPostSearchRequestApiModel extends PaginationRequestApiModel {
     return {
       ...super.toQueryParameters(),
       if (title != null) 'title': title!,
-      if (postTypeUuid != null) 'postTypeUuid': postTypeUuid!,
+      if (userUuid != null) 'userUuid': userUuid!,
     };
   }
 }
