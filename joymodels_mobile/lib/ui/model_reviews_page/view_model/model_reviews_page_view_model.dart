@@ -30,6 +30,7 @@ class ModelReviewsPageViewModel extends ChangeNotifier
 
   String? currentUserUuid;
   late String modelUuid;
+  bool isModelPublic = true;
   ModelReviewEnum selectedReviewType = ModelReviewEnum.all;
   List<ModelReviewTypeResponseApiModel> reviewTypes = [];
 
@@ -49,8 +50,9 @@ class ModelReviewsPageViewModel extends ChangeNotifier
     await loadReviews(pageNumber: pageNumber);
   }
 
-  Future<void> init(String modelUuid) async {
+  Future<void> init(String modelUuid, {bool isModelPublic = true}) async {
     this.modelUuid = modelUuid;
+    this.isModelPublic = isModelPublic;
     currentUserUuid = await TokenStorage.getCurrentUserUuid();
     await loadReviews();
   }

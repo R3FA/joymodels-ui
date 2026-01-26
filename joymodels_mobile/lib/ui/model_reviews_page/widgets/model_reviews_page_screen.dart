@@ -17,8 +17,13 @@ import 'package:provider/provider.dart';
 
 class ModelReviewsPageScreen extends StatefulWidget {
   final String modelUuid;
+  final bool isModelPublic;
 
-  const ModelReviewsPageScreen({super.key, required this.modelUuid});
+  const ModelReviewsPageScreen({
+    super.key,
+    required this.modelUuid,
+    this.isModelPublic = true,
+  });
 
   @override
   State<ModelReviewsPageScreen> createState() => _ModelReviewsPageScreenState();
@@ -34,7 +39,7 @@ class _ModelReviewsPageScreenState extends State<ModelReviewsPageScreen> {
     _viewModel.onSessionExpired = _handleSessionExpired;
     _viewModel.onForbidden = _handleForbidden;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _viewModel.init(widget.modelUuid);
+      _viewModel.init(widget.modelUuid, isModelPublic: widget.isModelPublic);
     });
   }
 
@@ -252,63 +257,68 @@ class _ModelReviewsPageScreenState extends State<ModelReviewsPageScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 4),
-                PopupMenuButton<String>(
-                  icon: Icon(
-                    Icons.more_vert,
-                    color: theme.colorScheme.onSurfaceVariant,
-                    size: 20,
+                if (viewModel.isModelPublic) ...[
+                  const SizedBox(width: 4),
+                  PopupMenuButton<String>(
+                    icon: Icon(
+                      Icons.more_vert,
+                      color: theme.colorScheme.onSurfaceVariant,
+                      size: 20,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onSelected: (value) {
+                      switch (value) {
+                        case 'edit':
+                          _showEditReviewDialog(review, viewModel, theme);
+                          break;
+                        case 'delete':
+                          _showDeleteConfirmDialog(review, viewModel, theme);
+                          break;
+                        case 'report':
+                          _showReportDialog(review, theme);
+                          break;
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      if (isOwnReview) ...[
+                        const PopupMenuItem<String>(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit, size: 18),
+                              SizedBox(width: 8),
+                              Text('Edit'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, size: 18, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text(
+                                'Delete',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ] else
+                        const PopupMenuItem<String>(
+                          value: 'report',
+                          child: Row(
+                            children: [
+                              Icon(Icons.flag, size: 18),
+                              SizedBox(width: 8),
+                              Text('Report'),
+                            ],
+                          ),
+                        ),
+                    ],
                   ),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  onSelected: (value) {
-                    switch (value) {
-                      case 'edit':
-                        _showEditReviewDialog(review, viewModel, theme);
-                        break;
-                      case 'delete':
-                        _showDeleteConfirmDialog(review, viewModel, theme);
-                        break;
-                      case 'report':
-                        _showReportDialog(review, theme);
-                        break;
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    if (isOwnReview) ...[
-                      const PopupMenuItem<String>(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit, size: 18),
-                            SizedBox(width: 8),
-                            Text('Edit'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem<String>(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, size: 18, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('Delete', style: TextStyle(color: Colors.red)),
-                          ],
-                        ),
-                      ),
-                    ] else
-                      const PopupMenuItem<String>(
-                        value: 'report',
-                        child: Row(
-                          children: [
-                            Icon(Icons.flag, size: 18),
-                            SizedBox(width: 8),
-                            Text('Report'),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
+                ],
               ],
             ),
             if (review.modelReviewText.isNotEmpty) ...[

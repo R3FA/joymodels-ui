@@ -104,7 +104,8 @@ class _ModelFaqSectionDetailPageScreenState
                     ),
                   ),
                 ),
-                _buildAnswerInput(viewModel, theme),
+                if (viewModel.isModelPublic)
+                  _buildAnswerInput(viewModel, theme),
               ],
             ),
     );
@@ -164,25 +165,26 @@ class _ModelFaqSectionDetailPageScreenState
                   ],
                 ),
               ),
-              _buildPopupMenu(
-                theme: theme,
-                isOwner: isOwner,
-                isAdminOrRoot: viewModel.isAdminOrRoot,
-                onEdit: () => _showEditDialog(
-                  viewModel,
-                  theme,
-                  faq.uuid,
-                  faq.messageText,
-                  isQuestion: true,
+              if (viewModel.isModelPublic)
+                _buildPopupMenu(
+                  theme: theme,
+                  isOwner: isOwner,
+                  isAdminOrRoot: viewModel.isAdminOrRoot,
+                  onEdit: () => _showEditDialog(
+                    viewModel,
+                    theme,
+                    faq.uuid,
+                    faq.messageText,
+                    isQuestion: true,
+                  ),
+                  onDelete: () => _showDeleteDialog(
+                    viewModel,
+                    theme,
+                    faq.uuid,
+                    isQuestion: true,
+                  ),
+                  onReport: () => _showReportDialog(faq.uuid, faq.messageText),
                 ),
-                onDelete: () => _showDeleteDialog(
-                  viewModel,
-                  theme,
-                  faq.uuid,
-                  isQuestion: true,
-                ),
-                onReport: () => _showReportDialog(faq.uuid, faq.messageText),
-              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -359,26 +361,29 @@ class _ModelFaqSectionDetailPageScreenState
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
-                        _buildPopupMenu(
-                          theme: theme,
-                          isOwner: isOwner,
-                          isAdminOrRoot: viewModel.isAdminOrRoot,
-                          onEdit: () => _showEditDialog(
-                            viewModel,
-                            theme,
-                            reply.uuid,
-                            reply.messageText,
-                            isQuestion: false,
+                        if (viewModel.isModelPublic)
+                          _buildPopupMenu(
+                            theme: theme,
+                            isOwner: isOwner,
+                            isAdminOrRoot: viewModel.isAdminOrRoot,
+                            onEdit: () => _showEditDialog(
+                              viewModel,
+                              theme,
+                              reply.uuid,
+                              reply.messageText,
+                              isQuestion: false,
+                            ),
+                            onDelete: () => _showDeleteDialog(
+                              viewModel,
+                              theme,
+                              reply.uuid,
+                              isQuestion: false,
+                            ),
+                            onReport: () => _showReportDialog(
+                              reply.uuid,
+                              reply.messageText,
+                            ),
                           ),
-                          onDelete: () => _showDeleteDialog(
-                            viewModel,
-                            theme,
-                            reply.uuid,
-                            isQuestion: false,
-                          ),
-                          onReport: () =>
-                              _showReportDialog(reply.uuid, reply.messageText),
-                        ),
                       ],
                     ),
                     const SizedBox(height: 8),

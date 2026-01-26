@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
+import 'package:joymodels_mobile/data/model/enums/model_availability_enum.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/request_types/model_faq_section_create_request_api_model.dart';
@@ -420,7 +421,10 @@ class ModelPageViewModel extends ChangeNotifier {
       MaterialPageRoute(
         builder: (_) => ChangeNotifierProvider(
           create: (_) => ModelReviewsPageViewModel(),
-          child: ModelReviewsPageScreen(modelUuid: loadedModel!.uuid),
+          child: ModelReviewsPageScreen(
+            modelUuid: loadedModel!.uuid,
+            isModelPublic: isModelPublic,
+          ),
         ),
       ),
     );
@@ -579,6 +583,10 @@ class ModelPageViewModel extends ChangeNotifier {
   List<ModelFaqSectionResponseApiModel> faqList = [];
 
   bool get hasFAQ => faqList.isNotEmpty;
+
+  bool get isModelPublic =>
+      loadedModel?.modelAvailability.availabilityName !=
+      ModelAvailabilityEnum.hidden.name;
 
   void onViewAllFAQ(BuildContext context) {
     if (loadedModel == null) return;
