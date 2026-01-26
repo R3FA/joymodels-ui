@@ -767,38 +767,77 @@ class _HomePageScreenState extends State<HomePageScreen> {
     return Column(
       children: [
         Expanded(
-          child: ListView.separated(
+          child: ListView.builder(
             controller: scrollController,
+            padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: artists.length,
-            separatorBuilder: (_, _) => const Divider(height: 1),
             itemBuilder: (context, index) {
               final artist = artists[index];
               final avatar = viewModel.topArtistsAvatars[artist.uuid];
               final hasAvatar = avatar != null && avatar.isNotEmpty;
 
-              return ListTile(
-                leading: CircleAvatar(
-                  radius: 24,
-                  backgroundImage: hasAvatar ? MemoryImage(avatar) : null,
-                  child: hasAvatar ? null : const Icon(Icons.person),
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 6,
                 ),
-                title: Text(
-                  artist.nickName,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w500,
+                child: Material(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      viewModel.onArtistTap(context, artist);
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: CircleAvatar(
+                            radius: 32,
+                            backgroundImage: hasAvatar
+                                ? MemoryImage(avatar)
+                                : null,
+                            child: hasAvatar ? null : const Icon(Icons.person),
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  artist.nickName,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${artist.userModelsCount} models',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: Icon(
+                            Icons.chevron_right,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                subtitle: Text(
-                  '${artist.userModelsCount} models',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.secondary,
-                  ),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  viewModel.onArtistTap(context, artist);
-                },
               );
             },
           ),
@@ -973,10 +1012,10 @@ class _HomePageScreenState extends State<HomePageScreen> {
     return Column(
       children: [
         Expanded(
-          child: ListView.separated(
+          child: ListView.builder(
             controller: scrollController,
+            padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: models.length,
-            separatorBuilder: (_, _) => const Divider(height: 1),
             itemBuilder: (context, index) {
               final model = models[index];
               final hasPicture = model.modelPictures.isNotEmpty;
@@ -984,40 +1023,81 @@ class _HomePageScreenState extends State<HomePageScreen> {
                   ? '${ApiConstants.baseUrl}/models/get/${model.uuid}/images/${Uri.encodeComponent(model.modelPictures.first.pictureLocation)}'
                   : '';
 
-              return ListTile(
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: SizedBox(
-                    width: 56,
-                    height: 56,
-                    child: hasPicture
-                        ? ModelImage(imageUrl: imageUrl, fit: BoxFit.cover)
-                        : Container(
-                            color: theme.colorScheme.surfaceContainerHighest,
-                            child: Icon(
-                              Icons.view_in_ar,
-                              color: theme.colorScheme.onSurfaceVariant,
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 6,
+                ),
+                child: Material(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      viewModel.onModelTap(context, model);
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.horizontal(
+                            left: Radius.circular(12),
+                          ),
+                          child: SizedBox(
+                            width: 80,
+                            height: 80,
+                            child: hasPicture
+                                ? ModelImage(
+                                    imageUrl: imageUrl,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Container(
+                                    color: theme.colorScheme.primaryContainer,
+                                    child: Icon(
+                                      Icons.view_in_ar,
+                                      size: 32,
+                                      color:
+                                          theme.colorScheme.onPrimaryContainer,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  model.name,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '\$${model.price.toStringAsFixed(2)}',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: Icon(
+                            Icons.chevron_right,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                title: Text(
-                  model.name,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                subtitle: Text(
-                  '\$${model.price.toStringAsFixed(2)}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.secondary,
-                  ),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  viewModel.onModelTap(context, model);
-                },
               );
             },
           ),
