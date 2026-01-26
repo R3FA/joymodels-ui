@@ -7,6 +7,7 @@ class UsersSearchRequestApiModel extends PaginationRequestApiModel {
     this.nickname,
     required super.pageNumber,
     required super.pageSize,
+    super.orderBy,
   });
 
   @override

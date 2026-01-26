@@ -360,6 +360,7 @@ class HomePageScreenViewModel with ChangeNotifier {
         nickname: nickname,
         pageNumber: pageNumber,
         pageSize: pageSize,
+        orderBy: "UserModelsCount:desc",
       );
 
       topArtists = await usersRepository.searchTopArtists(artistSearch);
