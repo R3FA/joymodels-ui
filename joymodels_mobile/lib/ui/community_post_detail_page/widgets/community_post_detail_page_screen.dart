@@ -123,6 +123,22 @@ class _CommunityPostDetailPageScreenState
                       ),
                     ),
                   ];
+                } else if (viewModel.isAdminOrRoot) {
+                  return [
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, color: theme.colorScheme.error),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Delete',
+                            style: TextStyle(color: theme.colorScheme.error),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ];
                 } else {
                   return [
                     PopupMenuItem(
@@ -790,7 +806,8 @@ class _CommunityPostDetailPageScreenState
                     }
                   },
                   itemBuilder: (context) {
-                    if (viewModel.isOwner(question.user.uuid)) {
+                    if (viewModel.isOwner(question.user.uuid) ||
+                        viewModel.isAdminOrRoot) {
                       return [
                         PopupMenuItem(
                           value: 'delete',
@@ -950,7 +967,8 @@ class _CommunityPostDetailPageScreenState
                                 }
                               },
                               itemBuilder: (context) {
-                                if (viewModel.isOwner(reply.user.uuid)) {
+                                if (viewModel.isOwner(reply.user.uuid) ||
+                                    viewModel.isAdminOrRoot) {
                                   return [
                                     PopupMenuItem(
                                       value: 'delete',

@@ -101,6 +101,7 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
   VoidCallback? onPostDeleted;
 
   String? currentUserUuid;
+  bool isAdminOrRoot = false;
 
   bool isOwner(String userUuid) {
     return currentUserUuid != null && currentUserUuid == userUuid;
@@ -118,6 +119,7 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
     try {
       post = loadedPost;
       currentUserUuid = await TokenStorage.getCurrentUserUuid();
+      isAdminOrRoot = await TokenStorage.isAdminOrRoot();
       await Future.wait([
         _loadReviewTypes(),
         _loadUserReviewStatus(),
@@ -320,7 +322,7 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
         CommunityPostQuestionSectionSearchRequestApiModel(
           communityPostUuid: post!.uuid,
           pageNumber: pageNumber ?? currentPage,
-          pageSize: 10,
+          pageSize: 50,
         ),
       );
 

@@ -167,6 +167,7 @@ class _ModelFaqSectionDetailPageScreenState
               _buildPopupMenu(
                 theme: theme,
                 isOwner: isOwner,
+                isAdminOrRoot: viewModel.isAdminOrRoot,
                 onEdit: () => _showEditDialog(
                   viewModel,
                   theme,
@@ -361,6 +362,7 @@ class _ModelFaqSectionDetailPageScreenState
                         _buildPopupMenu(
                           theme: theme,
                           isOwner: isOwner,
+                          isAdminOrRoot: viewModel.isAdminOrRoot,
                           onEdit: () => _showEditDialog(
                             viewModel,
                             theme,
@@ -399,6 +401,7 @@ class _ModelFaqSectionDetailPageScreenState
   Widget _buildPopupMenu({
     required ThemeData theme,
     required bool isOwner,
+    required bool isAdminOrRoot,
     required VoidCallback onEdit,
     required VoidCallback onDelete,
     required VoidCallback onReport,
@@ -449,7 +452,21 @@ class _ModelFaqSectionDetailPageScreenState
               ],
             ),
           ),
-        ] else
+        ] else if (isAdminOrRoot)
+          PopupMenuItem<String>(
+            value: 'delete',
+            child: Row(
+              children: [
+                Icon(Icons.delete, size: 18, color: theme.colorScheme.error),
+                const SizedBox(width: 8),
+                Text(
+                  'Delete',
+                  style: TextStyle(color: theme.colorScheme.error),
+                ),
+              ],
+            ),
+          )
+        else
           PopupMenuItem<String>(
             value: 'report',
             child: Row(
