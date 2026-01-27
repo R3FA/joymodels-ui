@@ -707,6 +707,7 @@ class _CommunityPostDetailPageScreenState
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: TextField(
@@ -720,6 +721,7 @@ class _CommunityPostDetailPageScreenState
                   horizontal: 16,
                   vertical: 12,
                 ),
+                errorText: viewModel.questionInputError,
               ),
               maxLines: null,
               maxLength: 5000,
@@ -1140,6 +1142,7 @@ class _CommunityPostDetailPageScreenState
     return Padding(
       padding: const EdgeInsets.only(left: 24, top: 8),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: TextField(
@@ -1154,6 +1157,7 @@ class _CommunityPostDetailPageScreenState
                   vertical: 8,
                 ),
                 isDense: true,
+                errorText: viewModel.replyInputError,
               ),
               maxLines: null,
               maxLength: 5000,
@@ -1238,6 +1242,7 @@ class _CommunityPostDetailPageScreenState
     String uuid,
     String currentText,
   ) {
+    viewModel.editInputError = null;
     final editController = TextEditingController(text: currentText);
     final formKey = GlobalKey<FormState>();
 
@@ -1258,26 +1263,32 @@ class _CommunityPostDetailPageScreenState
                 width: double.maxFinite,
                 child: Form(
                   key: formKey,
-                  child: TextFormField(
-                    controller: editController,
-                    maxLines: 4,
-                    maxLength: 5000,
-                    decoration: InputDecoration(
-                      hintText: 'Enter your message...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      filled: true,
-                      fillColor: theme.colorScheme.surfaceContainerHighest,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter a message';
-                      }
-                      if (value.trim().length < 3) {
-                        return 'Message must be at least 3 characters';
-                      }
-                      return null;
+                  child: ListenableBuilder(
+                    listenable: viewModel,
+                    builder: (context, _) {
+                      return TextFormField(
+                        controller: editController,
+                        maxLines: 4,
+                        maxLength: 5000,
+                        decoration: InputDecoration(
+                          hintText: 'Enter your message...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: theme.colorScheme.surfaceContainerHighest,
+                          errorText: viewModel.editInputError,
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter a message';
+                          }
+                          if (value.trim().length < 3) {
+                            return 'Message must be at least 3 characters';
+                          }
+                          return null;
+                        },
+                      );
                     },
                   ),
                 ),

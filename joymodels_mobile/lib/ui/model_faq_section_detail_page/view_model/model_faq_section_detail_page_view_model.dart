@@ -10,6 +10,7 @@ import 'package:joymodels_mobile/data/model/model_faq_section/request_types/mode
 import 'package:joymodels_mobile/data/model/model_faq_section/request_types/model_faq_section_patch_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/response_types/model_faq_section_response_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/model_faq_section_repository.dart';
+import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 
 class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
   final modelFaqSectionRepository = sl<ModelFaqSectionRepository>();
@@ -19,6 +20,8 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
   bool isEditingFaq = false;
   bool isDeletingFaq = false;
   String? errorMessage;
+  String? answerInputError;
+  String? editInputError;
   String? currentUserUuid;
   bool isAdminOrRoot = false;
   VoidCallback? onSessionExpired;
@@ -67,7 +70,14 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
   Future<bool> submitAnswer(BuildContext context, String messageText) async {
     if (faqDetail == null) return false;
 
-    errorMessage = null;
+    final validationError = RegexValidationViewModel.validateText(messageText);
+    if (validationError != null) {
+      answerInputError = validationError;
+      notifyListeners();
+      return false;
+    }
+
+    answerInputError = null;
     isSubmittingAnswer = true;
     notifyListeners();
 
@@ -75,7 +85,7 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
       final request = ModelFaqSectionCreateAnswerRequestApiModel(
         modelUuid: faqDetail!.model.uuid,
         parentMessageUuid: faqDetail!.uuid,
-        messageText: messageText,
+        messageText: messageText.trim(),
       );
 
       await modelFaqSectionRepository.createAnswer(request);
@@ -138,7 +148,16 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
   ) async {
     if (faqDetail == null) return false;
 
-    errorMessage = null;
+    final validationError = RegexValidationViewModel.validateText(
+      newMessageText,
+    );
+    if (validationError != null) {
+      editInputError = validationError;
+      notifyListeners();
+      return false;
+    }
+
+    editInputError = null;
     isEditingFaq = true;
     notifyListeners();
 
@@ -146,7 +165,7 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
       final request = ModelFaqSectionPatchRequestApiModel(
         modelFaqSectionUuid: faqUuid,
         modelUuid: faqDetail!.model.uuid,
-        messageText: newMessageText,
+        messageText: newMessageText.trim(),
       );
 
       await modelFaqSectionRepository.patch(request);

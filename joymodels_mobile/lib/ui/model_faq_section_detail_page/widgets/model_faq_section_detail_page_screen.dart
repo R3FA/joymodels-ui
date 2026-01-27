@@ -511,28 +511,34 @@ class _ModelFaqSectionDetailPageScreenState
             width: double.maxFinite,
             child: Form(
               key: formKey,
-              child: TextFormField(
-                controller: editController,
-                maxLines: 4,
-                maxLength: 5000,
-                decoration: InputDecoration(
-                  hintText: isQuestion
-                      ? 'Edit your question...'
-                      : 'Edit your answer...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: theme.colorScheme.surfaceContainerHighest,
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter your ${isQuestion ? 'question' : 'answer'}';
-                  }
-                  if (value.trim().length < 5) {
-                    return '${isQuestion ? 'Question' : 'Answer'} must be at least 5 characters';
-                  }
-                  return null;
+              child: ListenableBuilder(
+                listenable: viewModel,
+                builder: (context, _) {
+                  return TextFormField(
+                    controller: editController,
+                    maxLines: 4,
+                    maxLength: 5000,
+                    decoration: InputDecoration(
+                      hintText: isQuestion
+                          ? 'Edit your question...'
+                          : 'Edit your answer...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: theme.colorScheme.surfaceContainerHighest,
+                      errorText: viewModel.editInputError,
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter your ${isQuestion ? 'question' : 'answer'}';
+                      }
+                      if (value.trim().length < 5) {
+                        return '${isQuestion ? 'Question' : 'Answer'} must be at least 5 characters';
+                      }
+                      return null;
+                    },
+                  );
                 },
               ),
             ),
@@ -705,6 +711,7 @@ class _ModelFaqSectionDetailPageScreenState
                       horizontal: 14,
                       vertical: 12,
                     ),
+                    errorText: viewModel.answerInputError,
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
