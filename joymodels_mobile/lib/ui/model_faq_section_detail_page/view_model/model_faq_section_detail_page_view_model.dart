@@ -4,6 +4,7 @@ import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
+import 'package:joymodels_mobile/data/model/enums/model_availability_enum.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/request_types/model_faq_section_create_answer_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/request_types/model_faq_section_delete_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/request_types/model_faq_section_patch_request_api_model.dart';
@@ -38,6 +39,10 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
       _displayedRepliesCount.clamp(0, allReplies.length);
 
   bool isOwner(String userUuid) => currentUserUuid == userUuid;
+
+  bool get isModelPublic =>
+      faqDetail?.model.modelAvailability.availabilityName !=
+      ModelAvailabilityEnum.hidden.name;
 
   void loadMoreReplies() {
     if (hasMoreReplies) {

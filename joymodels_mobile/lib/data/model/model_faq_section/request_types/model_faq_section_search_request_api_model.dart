@@ -3,10 +3,12 @@ import 'package:joymodels_mobile/data/model/pagination/request_types/pagination_
 class ModelFaqSectionSearchRequestApiModel extends PaginationRequestApiModel {
   final String modelUuid;
   final String? faqMessage;
+  final bool isMyFaqSectionFiltered;
 
   ModelFaqSectionSearchRequestApiModel({
     required this.modelUuid,
     this.faqMessage,
+    this.isMyFaqSectionFiltered = false,
     super.pageNumber,
     super.pageSize,
     super.orderBy,
@@ -18,6 +20,7 @@ class ModelFaqSectionSearchRequestApiModel extends PaginationRequestApiModel {
       ...super.toQueryParameters(),
       'modelUuid': modelUuid,
       if (faqMessage != null) 'faqMessage': faqMessage!,
+      'isMyFaqSectionFiltered': isMyFaqSectionFiltered.toString(),
     };
   }
 }

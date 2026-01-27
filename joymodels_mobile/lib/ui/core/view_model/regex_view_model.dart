@@ -60,9 +60,12 @@ class RegexValidationViewModel {
     if (text == null || text.trim().isEmpty) {
       return 'Text cannot be empty string.';
     }
-    final regex = RegExp(r"^[\p{L}\p{Nd}:.,\-'&?()*%$! ]+$", unicode: true);
+    final regex = RegExp(
+      r"^[\p{L}\p{Nd}!@#$%^&*()_+/\\<>.,?:;\-' ]+$",
+      unicode: true,
+    );
     if (!regex.hasMatch(text)) {
-      return "Invalid value: Must contain only letters (any language), digits, and the following characters: :.,-'&?()*%\$!";
+      return "Invalid value: Must contain only letters (any language), digits, and the following characters: !@#\$%^&*()_+/\\<>.,?:;-'";
     }
     return null;
   }

@@ -20,6 +20,7 @@ class ModelFaqSectionPageViewModel extends ChangeNotifier
 
   late String modelUuid;
   String? modelName;
+  bool isMyFaqSectionFiltered = false;
 
   PaginationResponseApiModel<ModelFaqSectionResponseApiModel>? faqPagination;
   List<ModelFaqSectionResponseApiModel> get faqList =>
@@ -43,6 +44,20 @@ class ModelFaqSectionPageViewModel extends ChangeNotifier
     await loadFAQ();
   }
 
+  Future<void> onAllFilterSelected() async {
+    if (!isMyFaqSectionFiltered) return;
+
+    isMyFaqSectionFiltered = false;
+    await loadFAQ(pageNumber: 1);
+  }
+
+  Future<void> onMyFaqFilterSelected() async {
+    if (isMyFaqSectionFiltered) return;
+
+    isMyFaqSectionFiltered = true;
+    await loadFAQ(pageNumber: 1);
+  }
+
   Future<bool> loadFAQ({int? pageNumber}) async {
     errorMessage = null;
     isLoading = true;
@@ -51,6 +66,7 @@ class ModelFaqSectionPageViewModel extends ChangeNotifier
     try {
       final request = ModelFaqSectionSearchRequestApiModel(
         modelUuid: modelUuid,
+        isMyFaqSectionFiltered: isMyFaqSectionFiltered,
         pageNumber: pageNumber ?? currentPage,
         pageSize: 10,
       );

@@ -30,7 +30,9 @@ class ModelReviewsPageViewModel extends ChangeNotifier
 
   String? currentUserUuid;
   late String modelUuid;
+  bool isModelPublic = true;
   ModelReviewEnum selectedReviewType = ModelReviewEnum.all;
+  bool isMyReviewFiltered = false;
   List<ModelReviewTypeResponseApiModel> reviewTypes = [];
 
   PaginationResponseApiModel<ModelReviewResponseApiModel>? reviewsPagination;
@@ -49,8 +51,9 @@ class ModelReviewsPageViewModel extends ChangeNotifier
     await loadReviews(pageNumber: pageNumber);
   }
 
-  Future<void> init(String modelUuid) async {
+  Future<void> init(String modelUuid, {bool isModelPublic = true}) async {
     this.modelUuid = modelUuid;
+    this.isModelPublic = isModelPublic;
     currentUserUuid = await TokenStorage.getCurrentUserUuid();
     await loadReviews();
   }
@@ -69,6 +72,7 @@ class ModelReviewsPageViewModel extends ChangeNotifier
       final request = ModelReviewSearchRequestApiModel(
         modelUuid: modelUuid,
         modelReviewType: selectedReviewType,
+        isMyReviewFiltered: isMyReviewFiltered,
         pageNumber: pageNumber ?? currentPage,
         pageSize: 10,
       );
@@ -103,9 +107,18 @@ class ModelReviewsPageViewModel extends ChangeNotifier
   }
 
   Future<void> onFilterChanged(ModelReviewEnum reviewType) async {
-    if (selectedReviewType == reviewType) return;
+    if (selectedReviewType == reviewType && !isMyReviewFiltered) return;
 
     selectedReviewType = reviewType;
+    isMyReviewFiltered = false;
+    await loadReviews(pageNumber: 1);
+  }
+
+  Future<void> onMyReviewFilterChanged() async {
+    if (isMyReviewFiltered) return;
+
+    isMyReviewFiltered = true;
+    selectedReviewType = ModelReviewEnum.all;
     await loadReviews(pageNumber: 1);
   }
 

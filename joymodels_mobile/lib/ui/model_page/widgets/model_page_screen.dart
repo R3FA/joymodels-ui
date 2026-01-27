@@ -472,7 +472,7 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
               ),
             ),
           ),
-          if (!vm.hasUserReviewed && vm.isOwnedInLibrary)
+          if (!vm.hasUserReviewed && vm.isOwnedInLibrary && vm.isModelPublic)
             IconButton(
               onPressed: () => _showAddReviewDialog(vm, theme),
               icon: const Icon(Icons.add_circle_outline),
@@ -513,7 +513,7 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
               ),
             ),
           ),
-          if (!vm.hasUserReviewed && vm.isOwnedInLibrary)
+          if (!vm.hasUserReviewed && vm.isOwnedInLibrary && vm.isModelPublic)
             TextButton.icon(
               onPressed: () => _showAddReviewDialog(vm, theme),
               icon: const Icon(Icons.add, size: 16),
@@ -913,15 +913,19 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
               ),
             ),
           ),
-          TextButton.icon(
-            onPressed: () => _showAskQuestionDialog(vm, theme),
-            icon: const Icon(Icons.add, size: 16),
-            label: const Text("Ask Question"),
-            style: TextButton.styleFrom(
-              foregroundColor: theme.colorScheme.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          if (vm.isModelPublic)
+            TextButton.icon(
+              onPressed: () => _showAskQuestionDialog(vm, theme),
+              icon: const Icon(Icons.add, size: 16),
+              label: const Text("Ask Question"),
+              style: TextButton.styleFrom(
+                foregroundColor: theme.colorScheme.primary,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -1036,15 +1040,16 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
                   ),
                 ),
                 const Spacer(),
-                IconButton(
-                  onPressed: () => _showAskQuestionDialog(vm, theme),
-                  icon: const Icon(Icons.add_circle_outline),
-                  tooltip: 'Ask Question',
-                  color: theme.colorScheme.secondary,
-                  constraints: const BoxConstraints(),
-                  padding: const EdgeInsets.all(4),
-                ),
-                const SizedBox(width: 4),
+                if (vm.isModelPublic)
+                  IconButton(
+                    onPressed: () => _showAskQuestionDialog(vm, theme),
+                    icon: const Icon(Icons.add_circle_outline),
+                    tooltip: 'Ask Question',
+                    color: theme.colorScheme.secondary,
+                    constraints: const BoxConstraints(),
+                    padding: const EdgeInsets.all(4),
+                  ),
+                if (vm.isModelPublic) const SizedBox(width: 4),
                 Icon(
                   Icons.chevron_right,
                   size: 18,

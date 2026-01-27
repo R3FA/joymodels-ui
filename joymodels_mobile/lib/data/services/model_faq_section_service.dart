@@ -98,17 +98,14 @@ class ModelFaqSectionService {
   Future<http.Response> delete(
     ModelFaqSectionDeleteRequestApiModel request,
   ) async {
-    final url = Uri.parse("$faqUrl/delete");
+    final url = Uri.parse("$faqUrl/delete").replace(
+      queryParameters: {'modelFaqSectionUuid': request.modelFaqSectionUuid},
+    );
     final token = await TokenStorage.getAccessToken();
 
     final response = await http.delete(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Accept': 'application/json',
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: request.toFormData(),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
     return response;

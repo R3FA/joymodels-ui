@@ -985,27 +985,59 @@ class _FollowModalContentState extends State<_FollowModalContent> {
   }
 
   Widget _buildUserTile(UsersResponseApiModel user, ThemeData theme) {
-    return ListTile(
-      onTap: () => widget.onUserTap(user.uuid),
-      leading: UserAvatar(
-        imageUrl: "${ApiConstants.baseUrl}/users/get/${user.uuid}/avatar",
-        radius: 24,
-      ),
-      title: Text(
-        user.nickName,
-        style: theme.textTheme.titleSmall?.copyWith(
-          fontWeight: FontWeight.w600,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Material(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: () => widget.onUserTap(user.uuid),
+          borderRadius: BorderRadius.circular(12),
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: UserAvatar(
+                  imageUrl:
+                      "${ApiConstants.baseUrl}/users/get/${user.uuid}/avatar",
+                  radius: 32,
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user.nickName,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${user.firstName} ${user.lastName ?? ''}'.trim(),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Icon(
+                  Icons.chevron_right,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-      subtitle: Text(
-        '${user.firstName} ${user.lastName ?? ''}'.trim(),
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
-      ),
-      trailing: Icon(
-        Icons.chevron_right,
-        color: theme.colorScheme.onSurfaceVariant,
       ),
     );
   }

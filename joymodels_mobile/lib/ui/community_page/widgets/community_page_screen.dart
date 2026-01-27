@@ -21,8 +21,10 @@ class CommunityPageScreen extends StatefulWidget {
   State<CommunityPageScreen> createState() => _CommunityPageScreenState();
 }
 
-class _CommunityPageScreenState extends State<CommunityPageScreen> {
+class _CommunityPageScreenState extends State<CommunityPageScreen>
+    with SingleTickerProviderStateMixin {
   late final CommunityPageViewModel _viewModel;
+  late final TabController _tabController;
 
   @override
   void initState() {
@@ -30,9 +32,24 @@ class _CommunityPageScreenState extends State<CommunityPageScreen> {
     _viewModel = context.read<CommunityPageViewModel>();
     _viewModel.onSessionExpired = _handleSessionExpired;
     _viewModel.onForbidden = _handleForbidden;
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(_onTabChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _viewModel.init();
     });
+  }
+
+  void _onTabChanged() {
+    if (!_tabController.indexIsChanging) {
+      _viewModel.onTabChanged(_tabController.index);
+    }
+  }
+
+  @override
+  void dispose() {
+    _tabController.removeListener(_onTabChanged);
+    _tabController.dispose();
+    super.dispose();
   }
 
   void _handleSessionExpired() {
@@ -94,16 +111,12 @@ class _CommunityPageScreenState extends State<CommunityPageScreen> {
             ),
           ),
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-              child: Text(
-                'COMMUNITY PAGE',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.secondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
+            child: TabBar(
+              controller: _tabController,
+              tabs: const [
+                Tab(text: 'All Posts'),
+                Tab(text: 'My Posts'),
+              ],
             ),
           ),
           _buildPostsList(viewModel, theme),

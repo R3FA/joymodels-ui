@@ -4,10 +4,12 @@ import 'package:joymodels_mobile/data/model/pagination/request_types/pagination_
 class ModelReviewSearchRequestApiModel extends PaginationRequestApiModel {
   final String modelUuid;
   final ModelReviewEnum modelReviewType;
+  final bool isMyReviewFiltered;
 
   ModelReviewSearchRequestApiModel({
     required this.modelUuid,
     this.modelReviewType = ModelReviewEnum.all,
+    this.isMyReviewFiltered = false,
     super.pageNumber = 1,
     super.pageSize = 10,
     super.orderBy,
@@ -18,6 +20,7 @@ class ModelReviewSearchRequestApiModel extends PaginationRequestApiModel {
     final json = super.toJson();
     json['modelUuid'] = modelUuid;
     json['modelReviewType'] = modelReviewType.value;
+    json['isMyReviewFiltered'] = isMyReviewFiltered;
     return json;
   }
 
@@ -26,6 +29,7 @@ class ModelReviewSearchRequestApiModel extends PaginationRequestApiModel {
     final params = super.toQueryParameters();
     params['modelUuid'] = modelUuid;
     params['modelReviewType'] = modelReviewType.value.toString();
+    params['isMyReviewFiltered'] = isMyReviewFiltered.toString();
     return params;
   }
 }

@@ -101,6 +101,42 @@ class _ModelFaqSectionPageScreenState extends State<ModelFaqSectionPageScreen> {
   }
 
   Widget _buildBody(ModelFaqSectionPageViewModel viewModel, ThemeData theme) {
+    return Column(
+      children: [
+        _buildFilterChips(viewModel, theme),
+        Expanded(child: _buildContent(viewModel, theme)),
+      ],
+    );
+  }
+
+  Widget _buildFilterChips(
+    ModelFaqSectionPageViewModel viewModel,
+    ThemeData theme,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Wrap(
+        spacing: 8,
+        children: [
+          FilterChip(
+            label: const Text('All'),
+            selected: !viewModel.isMyFaqSectionFiltered,
+            onSelected: (_) => viewModel.onAllFilterSelected(),
+          ),
+          FilterChip(
+            label: const Text('My FAQ'),
+            selected: viewModel.isMyFaqSectionFiltered,
+            onSelected: (_) => viewModel.onMyFaqFilterSelected(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent(
+    ModelFaqSectionPageViewModel viewModel,
+    ThemeData theme,
+  ) {
     if (viewModel.isLoading && viewModel.faqList.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -124,7 +160,9 @@ class _ModelFaqSectionPageScreenState extends State<ModelFaqSectionPageScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'No FAQ yet',
+              viewModel.isMyFaqSectionFiltered
+                  ? 'No FAQ from you yet'
+                  : 'No FAQ yet',
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
