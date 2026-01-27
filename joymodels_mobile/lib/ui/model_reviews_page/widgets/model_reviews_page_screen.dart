@@ -379,6 +379,7 @@ class _ModelReviewsPageScreenState extends State<ModelReviewsPageScreen> {
     ModelReviewsPageViewModel viewModel,
     ThemeData theme,
   ) async {
+    viewModel.editReviewError = null;
     await viewModel.loadReviewTypes();
 
     if (!mounted) return;
@@ -461,26 +462,33 @@ class _ModelReviewsPageScreenState extends State<ModelReviewsPageScreen> {
                           }).toList(),
                         ),
                       const SizedBox(height: 16),
-                      TextFormField(
-                        controller: reviewTextController,
-                        maxLines: 4,
-                        maxLength: 5000,
-                        decoration: InputDecoration(
-                          hintText: 'Write your review here...',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          filled: true,
-                          fillColor: theme.colorScheme.surfaceContainerHighest,
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter your review';
-                          }
-                          if (value.trim().length < 10) {
-                            return 'Review must be at least 10 characters';
-                          }
-                          return null;
+                      ListenableBuilder(
+                        listenable: viewModel,
+                        builder: (context, _) {
+                          return TextFormField(
+                            controller: reviewTextController,
+                            maxLines: 4,
+                            maxLength: 5000,
+                            decoration: InputDecoration(
+                              hintText: 'Write your review here...',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              filled: true,
+                              fillColor:
+                                  theme.colorScheme.surfaceContainerHighest,
+                              errorText: viewModel.editReviewError,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter your review';
+                              }
+                              if (value.trim().length < 10) {
+                                return 'Review must be at least 10 characters';
+                              }
+                              return null;
+                            },
+                          );
                         },
                       ),
                     ],

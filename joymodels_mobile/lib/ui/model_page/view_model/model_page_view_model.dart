@@ -28,6 +28,7 @@ import 'package:joymodels_mobile/ui/model_faq_section_page/view_model/model_faq_
 import 'package:joymodels_mobile/ui/model_faq_section_page/widgets/model_faq_section_page_screen.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/ui/model_reviews_page/view_model/model_reviews_page_view_model.dart';
+import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 import 'package:joymodels_mobile/ui/model_reviews_page/widgets/model_reviews_page_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -55,6 +56,8 @@ class ModelPageViewModel extends ChangeNotifier {
   List<ModelReviewTypeResponseApiModel> reviewTypes = [];
 
   String? errorMessage;
+  String? faqQuestionError;
+  String? reviewTextError;
   String? cartItemUuid;
 
   ModelResponseApiModel? loadedModel;
@@ -637,14 +640,21 @@ class ModelPageViewModel extends ChangeNotifier {
   ) async {
     if (loadedModel == null) return false;
 
-    errorMessage = null;
+    final validationError = RegexValidationViewModel.validateText(messageText);
+    if (validationError != null) {
+      faqQuestionError = validationError;
+      notifyListeners();
+      return false;
+    }
+
+    faqQuestionError = null;
     isCreatingFAQ = true;
     notifyListeners();
 
     try {
       final request = ModelFaqSectionCreateRequestApiModel(
         modelUuid: loadedModel!.uuid,
-        messageText: messageText,
+        messageText: messageText.trim(),
       );
       final result = await modelFaqSectionRepository.create(request);
       faqList.insert(0, result);
@@ -744,7 +754,14 @@ class ModelPageViewModel extends ChangeNotifier {
   ) async {
     if (loadedModel == null) return false;
 
-    errorMessage = null;
+    final validationError = RegexValidationViewModel.validateText(reviewText);
+    if (validationError != null) {
+      reviewTextError = validationError;
+      notifyListeners();
+      return false;
+    }
+
+    reviewTextError = null;
     isCreatingReview = true;
     notifyListeners();
 
@@ -752,7 +769,7 @@ class ModelPageViewModel extends ChangeNotifier {
       final request = ModelReviewCreateRequestApiModel(
         modelUuid: loadedModel!.uuid,
         modelReviewTypeUuid: reviewTypeUuid,
-        modelReviewText: reviewText,
+        modelReviewText: reviewText.trim(),
       );
       await modelReviewsRepository.create(request);
       await getModelReviews(loadedModel!);

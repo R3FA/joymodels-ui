@@ -635,26 +635,33 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
                           }).toList(),
                         ),
                       const SizedBox(height: 16),
-                      TextFormField(
-                        controller: reviewTextController,
-                        maxLines: 4,
-                        maxLength: 5000,
-                        decoration: InputDecoration(
-                          hintText: 'Write your review here...',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          filled: true,
-                          fillColor: theme.colorScheme.surfaceContainerHighest,
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter your review';
-                          }
-                          if (value.trim().length < 10) {
-                            return 'Review must be at least 10 characters';
-                          }
-                          return null;
+                      ListenableBuilder(
+                        listenable: vm,
+                        builder: (context, _) {
+                          return TextFormField(
+                            controller: reviewTextController,
+                            maxLines: 4,
+                            maxLength: 5000,
+                            decoration: InputDecoration(
+                              hintText: 'Write your review here...',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              filled: true,
+                              fillColor:
+                                  theme.colorScheme.surfaceContainerHighest,
+                              errorText: vm.reviewTextError,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter your review';
+                              }
+                              if (value.trim().length < 10) {
+                                return 'Review must be at least 10 characters';
+                              }
+                              return null;
+                            },
+                          );
                         },
                       ),
                     ],
@@ -1100,40 +1107,47 @@ class _ModelPageScreenState extends State<ModelPageScreen> {
                 width: double.maxFinite,
                 child: Form(
                   key: formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Ask about "${vm.loadedModel?.name}"',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: questionController,
-                        maxLines: 4,
-                        maxLength: 5000,
-                        decoration: InputDecoration(
-                          hintText: 'Type your question here...',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                  child: ListenableBuilder(
+                    listenable: vm,
+                    builder: (context, _) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Ask about "${vm.loadedModel?.name}"',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
                           ),
-                          filled: true,
-                          fillColor: theme.colorScheme.surfaceContainerHighest,
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter your question';
-                          }
-                          if (value.trim().length < 10) {
-                            return 'Question must be at least 10 characters';
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: questionController,
+                            maxLines: 4,
+                            maxLength: 5000,
+                            decoration: InputDecoration(
+                              hintText: 'Type your question here...',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              filled: true,
+                              fillColor:
+                                  theme.colorScheme.surfaceContainerHighest,
+                              errorText: vm.faqQuestionError,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter your question';
+                              }
+                              if (value.trim().length < 10) {
+                                return 'Question must be at least 10 characters';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),

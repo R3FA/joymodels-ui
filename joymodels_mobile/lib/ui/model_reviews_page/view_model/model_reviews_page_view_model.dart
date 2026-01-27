@@ -14,6 +14,7 @@ import 'package:joymodels_mobile/data/model/pagination/response_types/pagination
 import 'package:joymodels_mobile/data/repositories/model_review_type_repository.dart';
 import 'package:joymodels_mobile/data/repositories/model_reviews_repository.dart';
 import 'package:joymodels_mobile/ui/core/mixins/pagination_mixin.dart';
+import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 
 class ModelReviewsPageViewModel extends ChangeNotifier
     with PaginationMixin<ModelReviewResponseApiModel> {
@@ -25,6 +26,7 @@ class ModelReviewsPageViewModel extends ChangeNotifier
   bool isEditing = false;
   bool isLoadingReviewTypes = false;
   String? errorMessage;
+  String? editReviewError;
   VoidCallback? onSessionExpired;
   VoidCallback? onForbidden;
 
@@ -232,6 +234,18 @@ class ModelReviewsPageViewModel extends ChangeNotifier
     String? newReviewTypeUuid,
     String? newReviewText,
   ) async {
+    if (newReviewText != null) {
+      final validationError = RegexValidationViewModel.validateText(
+        newReviewText,
+      );
+      if (validationError != null) {
+        editReviewError = validationError;
+        notifyListeners();
+        return false;
+      }
+    }
+    editReviewError = null;
+
     isEditing = true;
     notifyListeners();
 
@@ -239,7 +253,7 @@ class ModelReviewsPageViewModel extends ChangeNotifier
       final request = ModelReviewPatchRequestApiModel(
         modelReviewUuid: reviewUuid,
         modelReviewTypeUuid: newReviewTypeUuid,
-        modelReviewText: newReviewText,
+        modelReviewText: newReviewText?.trim(),
       );
       await modelReviewsRepository.patch(request);
       await loadReviews(pageNumber: currentPage);

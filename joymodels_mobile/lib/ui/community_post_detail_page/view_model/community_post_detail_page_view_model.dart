@@ -32,6 +32,9 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
   CommunityPostResponseApiModel? post;
   bool isLoading = false;
   String? errorMessage;
+  String? questionInputError;
+  String? replyInputError;
+  String? editInputError;
 
   List<CommunityPostReviewTypeResponseApiModel> reviewTypes = [];
   CommunityPostReviewTypeResponseApiModel? likeReviewType;
@@ -377,11 +380,12 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
 
     final validationError = validateQuestionText(questionController.text);
     if (validationError != null) {
-      errorMessage = validationError;
+      questionInputError = validationError;
       notifyListeners();
       return;
     }
 
+    questionInputError = null;
     isSubmittingQuestion = true;
     notifyListeners();
 
@@ -420,12 +424,14 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
   void startReply(String questionUuid) {
     replyingToQuestionUuid = questionUuid;
     replyController.clear();
+    replyInputError = null;
     notifyListeners();
   }
 
   void cancelReply() {
     replyingToQuestionUuid = null;
     replyController.clear();
+    replyInputError = null;
     notifyListeners();
   }
 
@@ -434,11 +440,12 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
 
     final validationError = validateQuestionText(replyController.text);
     if (validationError != null) {
-      errorMessage = validationError;
+      replyInputError = validationError;
       notifyListeners();
       return;
     }
 
+    replyInputError = null;
     isSubmittingReply = true;
     notifyListeners();
 
@@ -497,11 +504,12 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
   Future<bool> editQuestion(String uuid, String newMessageText) async {
     final validationError = validateQuestionText(newMessageText);
     if (validationError != null) {
-      errorMessage = validationError;
+      editInputError = validationError;
       notifyListeners();
       return false;
     }
 
+    editInputError = null;
     isEditingQuestion = true;
     notifyListeners();
 
