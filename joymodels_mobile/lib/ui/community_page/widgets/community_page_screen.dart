@@ -279,6 +279,7 @@ class _CommunityPageScreenState extends State<CommunityPageScreen>
                 _buildPostTypeBadge(
                   theme,
                   post.communityPostType.communityPostName,
+                  post.title,
                 ),
                 if (hasImage)
                   _buildPostImage(theme, post)
@@ -376,7 +377,7 @@ class _CommunityPageScreenState extends State<CommunityPageScreen>
     );
   }
 
-  Widget _buildPostTypeBadge(ThemeData theme, String typeName) {
+  Widget _buildPostTypeBadge(ThemeData theme, String typeName, String title) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -384,12 +385,27 @@ class _CommunityPageScreenState extends State<CommunityPageScreen>
         color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
       ),
-      child: Text(
-        typeName.toUpperCase(),
-        style: theme.textTheme.labelLarge?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: theme.colorScheme.secondary,
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            typeName.toUpperCase(),
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.secondary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }
