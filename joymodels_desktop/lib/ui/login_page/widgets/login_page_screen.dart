@@ -13,7 +13,6 @@ class LoginPageScreen extends StatelessWidget {
     return Scaffold(
       body: Row(
         children: [
-          // Left panel - Branding
           Expanded(
             flex: 5,
             child: Container(
@@ -32,7 +31,6 @@ class LoginPageScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Logo
                     Row(
                       children: [
                         Container(
@@ -59,7 +57,6 @@ class LoginPageScreen extends StatelessWidget {
                       ],
                     ),
                     const Spacer(),
-                    // Headline
                     Text(
                       'Admin\nControl Panel',
                       style: TextStyle(
@@ -81,7 +78,6 @@ class LoginPageScreen extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
-                    // Features
                     _buildFeatureItem(
                       theme,
                       Icons.admin_panel_settings_outlined,
@@ -105,7 +101,6 @@ class LoginPageScreen extends StatelessWidget {
               ),
             ),
           ),
-          // Right panel - Login form
           Expanded(
             flex: 4,
             child: Container(
@@ -173,7 +168,6 @@ class _LoginFormState extends State<_LoginForm> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header
           Text(
             'Sign In',
             style: theme.textTheme.headlineLarge?.copyWith(
@@ -189,7 +183,6 @@ class _LoginFormState extends State<_LoginForm> {
           ),
           const SizedBox(height: 40),
 
-          // Error/Success messages
           if (viewModel.errorMessage != null) ...[
             Container(
               padding: const EdgeInsets.all(16),
@@ -238,7 +231,6 @@ class _LoginFormState extends State<_LoginForm> {
             const SizedBox(height: 24),
           ],
 
-          // Nickname field
           Text(
             'Nickname',
             style: theme.textTheme.titleSmall?.copyWith(
@@ -267,7 +259,6 @@ class _LoginFormState extends State<_LoginForm> {
           ),
           const SizedBox(height: 20),
 
-          // Password field
           Text(
             'Password',
             style: theme.textTheme.titleSmall?.copyWith(
@@ -308,7 +299,6 @@ class _LoginFormState extends State<_LoginForm> {
           ),
           const SizedBox(height: 32),
 
-          // Login button
           SizedBox(
             height: 52,
             child: FilledButton(

@@ -1,11 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_desktop/data/core/config/api_constants.dart';
 import 'package:joymodels_desktop/data/core/config/token_storage.dart';
+import 'package:joymodels_desktop/ui/categories_page/view_model/categories_page_view_model.dart';
+import 'package:joymodels_desktop/ui/categories_page/widgets/categories_page_screen.dart';
+import 'package:joymodels_desktop/ui/community_page/view_model/community_page_view_model.dart';
+import 'package:joymodels_desktop/ui/community_page/widgets/community_page_screen.dart';
 import 'package:joymodels_desktop/ui/core/ui/access_denied_screen.dart';
+import 'package:joymodels_desktop/ui/core/ui/error_display.dart';
 import 'package:joymodels_desktop/ui/core/ui/loading_screen.dart';
 import 'package:joymodels_desktop/ui/core/ui/user_avatar.dart';
+import 'package:joymodels_desktop/ui/dashboard_page/view_model/dashboard_page_view_model.dart';
+import 'package:joymodels_desktop/ui/dashboard_page/widgets/dashboard_page_screen.dart';
 import 'package:joymodels_desktop/ui/home_page/view_model/home_page_view_model.dart';
 import 'package:joymodels_desktop/ui/login_page/widgets/login_page_screen.dart';
+import 'package:joymodels_desktop/ui/models_page/view_model/models_page_view_model.dart';
+import 'package:joymodels_desktop/ui/models_page/widgets/models_page_screen.dart';
+import 'package:joymodels_desktop/ui/reports_page/view_model/reports_page_view_model.dart';
+import 'package:joymodels_desktop/ui/reports_page/widgets/reports_page_screen.dart';
+import 'package:joymodels_desktop/ui/settings_page/view_model/settings_page_view_model.dart';
+import 'package:joymodels_desktop/ui/settings_page/widgets/settings_page_screen.dart';
+import 'package:joymodels_desktop/ui/users_page/view_model/users_page_view_model.dart';
+import 'package:joymodels_desktop/ui/users_page/widgets/users_page_screen.dart';
 import 'package:provider/provider.dart';
 
 class HomePageScreen extends StatefulWidget {
@@ -52,7 +67,11 @@ class _HomePageScreenState extends State<HomePageScreen> {
     );
   }
 
-  void _handleForbidden() {
+  void _handleForbidden() async {
+    if (!mounted) return;
+
+    await TokenStorage.clearAuthToken();
+
     if (!mounted) return;
 
     Navigator.of(context).pushAndRemoveUntil(
@@ -73,16 +92,17 @@ class _HomePageScreenState extends State<HomePageScreen> {
     return Scaffold(
       body: Row(
         children: [
-          // Sidebar
           _buildSidebar(context, viewModel, theme),
-          // Main content
           Expanded(
             child: Column(
               children: [
                 _buildTopBar(context, viewModel, theme),
                 if (viewModel.errorMessage != null)
-                  _buildErrorBanner(context, viewModel, theme),
-                Expanded(child: _buildContent(viewModel, theme)),
+                  ErrorDisplay(
+                    message: viewModel.errorMessage!,
+                    onDismiss: () => viewModel.clearErrorMessage(),
+                  ),
+                Expanded(child: _buildContent(viewModel)),
               ],
             ),
           ),
@@ -106,7 +126,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
       ),
       child: Column(
         children: [
-          // Logo
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: Row(
@@ -134,7 +153,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          // Navigation items
           _buildNavItem(
             context,
             viewModel,
@@ -190,7 +208,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
             label: 'Reports',
           ),
           const Spacer(),
-          // Settings & Logout
           _buildNavItem(
             context,
             viewModel,
@@ -292,7 +309,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
             ),
           ),
           const Spacer(),
-          // User info
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
@@ -321,245 +337,76 @@ class _HomePageScreenState extends State<HomePageScreen> {
     );
   }
 
-  Widget _buildErrorBanner(
-    BuildContext context,
-    HomePageScreenViewModel viewModel,
-    ThemeData theme,
-  ) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      color: theme.colorScheme.errorContainer,
-      child: Row(
-        children: [
-          Icon(Icons.error_outline, color: theme.colorScheme.error),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              viewModel.errorMessage!,
-              style: TextStyle(color: theme.colorScheme.onErrorContainer),
-            ),
-          ),
-          IconButton(
-            icon: Icon(Icons.close, color: theme.colorScheme.onErrorContainer),
-            onPressed: () => viewModel.clearErrorMessage(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContent(HomePageScreenViewModel viewModel, ThemeData theme) {
+  Widget _buildContent(HomePageScreenViewModel viewModel) {
     switch (viewModel.selectedIndex) {
       case 0:
-        return _buildDashboardContent(theme);
+        return ChangeNotifierProvider(
+          create: (_) => DashboardPageViewModel(),
+          child: DashboardPageScreen(
+            onSessionExpired: _handleSessionExpired,
+            onForbidden: _handleForbidden,
+            onNavigateToUsers: (tabIndex) =>
+                viewModel.navigateToUsers(tabIndex: tabIndex),
+          ),
+        );
       case 1:
-        return _buildPlaceholderContent(theme, 'Users', Icons.people);
+        return ChangeNotifierProvider(
+          create: (_) => UsersPageViewModel(),
+          child: UsersPageScreen(
+            onSessionExpired: _handleSessionExpired,
+            onForbidden: _handleForbidden,
+            initialTabIndex: viewModel.usersInitialTabIndex,
+          ),
+        );
       case 2:
-        return _buildPlaceholderContent(theme, 'Models', Icons.view_in_ar);
+        return ChangeNotifierProvider(
+          create: (_) => ModelsPageViewModel(),
+          child: ModelsPageScreen(
+            onSessionExpired: _handleSessionExpired,
+            onForbidden: _handleForbidden,
+          ),
+        );
       case 3:
-        return _buildPlaceholderContent(theme, 'Categories', Icons.category);
+        return ChangeNotifierProvider(
+          create: (_) => CategoriesPageViewModel(),
+          child: CategoriesPageScreen(
+            onSessionExpired: _handleSessionExpired,
+            onForbidden: _handleForbidden,
+          ),
+        );
       case 4:
-        return _buildPlaceholderContent(theme, 'Community', Icons.forum);
+        return ChangeNotifierProvider(
+          create: (_) => CommunityPageViewModel(),
+          child: CommunityPageScreen(
+            onSessionExpired: _handleSessionExpired,
+            onForbidden: _handleForbidden,
+          ),
+        );
       case 5:
-        return _buildPlaceholderContent(theme, 'Reports', Icons.report);
+        return ChangeNotifierProvider(
+          create: (_) => ReportsPageViewModel(),
+          child: ReportsPageScreen(
+            onSessionExpired: _handleSessionExpired,
+            onForbidden: _handleForbidden,
+          ),
+        );
       case 6:
-        return _buildPlaceholderContent(theme, 'Settings', Icons.settings);
+        return ChangeNotifierProvider(
+          create: (_) => SettingsPageViewModel(),
+          child: SettingsPageScreen(
+            onSessionExpired: _handleSessionExpired,
+            onForbidden: _handleForbidden,
+          ),
+        );
       default:
-        return _buildDashboardContent(theme);
+        return ChangeNotifierProvider(
+          create: (_) => DashboardPageViewModel(),
+          child: DashboardPageScreen(
+            onSessionExpired: _handleSessionExpired,
+            onForbidden: _handleForbidden,
+          ),
+        );
     }
-  }
-
-  Widget _buildDashboardContent(ThemeData theme) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Stats cards
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatCard(
-                  theme,
-                  icon: Icons.people,
-                  label: 'Total Users',
-                  value: '0',
-                  color: Colors.blue,
-                ),
-              ),
-              const SizedBox(width: 24),
-              Expanded(
-                child: _buildStatCard(
-                  theme,
-                  icon: Icons.view_in_ar,
-                  label: 'Total Models',
-                  value: '0',
-                  color: Colors.purple,
-                ),
-              ),
-              const SizedBox(width: 24),
-              Expanded(
-                child: _buildStatCard(
-                  theme,
-                  icon: Icons.shopping_cart,
-                  label: 'Total Orders',
-                  value: '0',
-                  color: Colors.green,
-                ),
-              ),
-              const SizedBox(width: 24),
-              Expanded(
-                child: _buildStatCard(
-                  theme,
-                  icon: Icons.report,
-                  label: 'Pending Reports',
-                  value: '0',
-                  color: Colors.orange,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
-          Text(
-            'Quick Actions',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              _buildQuickAction(
-                theme,
-                icon: Icons.person_add,
-                label: 'Add User',
-                onTap: () {},
-              ),
-              const SizedBox(width: 16),
-              _buildQuickAction(
-                theme,
-                icon: Icons.add_box,
-                label: 'Add Category',
-                onTap: () {},
-              ),
-              const SizedBox(width: 16),
-              _buildQuickAction(
-                theme,
-                icon: Icons.flag,
-                label: 'Review Reports',
-                onTap: () {},
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard(
-    ThemeData theme, {
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.outlineVariant, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            value,
-            style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickAction(
-    ThemeData theme, {
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: theme.colorScheme.primaryContainer,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Row(
-            children: [
-              Icon(icon, color: theme.colorScheme.primary),
-              const SizedBox(width: 12),
-              Text(
-                label,
-                style: TextStyle(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPlaceholderContent(
-    ThemeData theme,
-    String title,
-    IconData icon,
-  ) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 80, color: theme.colorScheme.outlineVariant),
-          const SizedBox(height: 24),
-          Text(
-            '$title Management',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Coming soon...',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.outline,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   void _showLogoutDialog(

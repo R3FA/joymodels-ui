@@ -11,6 +11,7 @@ class HomePageScreenViewModel with ChangeNotifier {
   final _ssoRepository = sl<SsoRepository>();
 
   int selectedIndex = 0;
+  int usersInitialTabIndex = 0;
 
   String? currentUserName;
   String? userUuid;
@@ -34,7 +35,14 @@ class HomePageScreenViewModel with ChangeNotifier {
   }
 
   void setSelectedIndex(int index) {
+    if (index != 1) usersInitialTabIndex = 0;
     selectedIndex = index;
+    notifyListeners();
+  }
+
+  void navigateToUsers({int tabIndex = 0}) {
+    usersInitialTabIndex = tabIndex;
+    selectedIndex = 1;
     notifyListeners();
   }
 
