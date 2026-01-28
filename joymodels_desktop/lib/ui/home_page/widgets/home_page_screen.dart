@@ -80,6 +80,8 @@ class _HomePageScreenState extends State<HomePageScreen> {
             child: Column(
               children: [
                 _buildTopBar(context, viewModel, theme),
+                if (viewModel.errorMessage != null)
+                  _buildErrorBanner(context, viewModel, theme),
                 Expanded(child: _buildContent(viewModel, theme)),
               ],
             ),
@@ -314,6 +316,34 @@ class _HomePageScreenState extends State<HomePageScreen> {
                 ],
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorBanner(
+    BuildContext context,
+    HomePageScreenViewModel viewModel,
+    ThemeData theme,
+  ) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      color: theme.colorScheme.errorContainer,
+      child: Row(
+        children: [
+          Icon(Icons.error_outline, color: theme.colorScheme.error),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              viewModel.errorMessage!,
+              style: TextStyle(color: theme.colorScheme.onErrorContainer),
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.close, color: theme.colorScheme.onErrorContainer),
+            onPressed: () => viewModel.clearErrorMessage(),
+          ),
         ],
       ),
     );

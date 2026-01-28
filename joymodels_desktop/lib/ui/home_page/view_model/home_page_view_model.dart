@@ -38,6 +38,11 @@ class HomePageScreenViewModel with ChangeNotifier {
     notifyListeners();
   }
 
+  void clearErrorMessage() {
+    errorMessage = null;
+    notifyListeners();
+  }
+
   Future<void> logout() async {
     final refreshToken = await TokenStorage.getRefreshToken();
 
