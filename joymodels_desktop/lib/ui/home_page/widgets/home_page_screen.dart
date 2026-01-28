@@ -294,28 +294,28 @@ class _HomePageScreenState extends State<HomePageScreen> {
           const Spacer(),
           // User info
           Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Row(
-                children: [
-                  UserAvatar(
-                    imageUrl:
-                        "${ApiConstants.baseUrl}/users/get/${viewModel.userUuid}/avatar",
-                    radius: 16,
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    viewModel.currentUserName!,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(30),
             ),
+            child: Row(
+              children: [
+                UserAvatar(
+                  imageUrl:
+                      "${ApiConstants.baseUrl}/users/get/${viewModel.userUuid}/avatar",
+                  radius: 16,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  viewModel.currentUserName!,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

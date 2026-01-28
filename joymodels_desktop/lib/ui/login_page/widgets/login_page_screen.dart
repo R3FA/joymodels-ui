@@ -74,7 +74,9 @@ class LoginPageScreen extends StatelessWidget {
                       'Manage users, content, and platform\nsettings from one place.',
                       style: TextStyle(
                         fontSize: 18,
-                        color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
+                        color: theme.colorScheme.onPrimary.withValues(
+                          alpha: 0.8,
+                        ),
                         height: 1.5,
                       ),
                     ),
@@ -219,8 +221,10 @@ class _LoginFormState extends State<_LoginForm> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.check_circle_outline,
-                      color: theme.colorScheme.primary),
+                  Icon(
+                    Icons.check_circle_outline,
+                    color: theme.colorScheme.primary,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -251,7 +255,9 @@ class _LoginFormState extends State<_LoginForm> {
                 borderRadius: BorderRadius.circular(12),
               ),
               filled: true,
-              fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              fillColor: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.5,
+              ),
               errorMaxLines: 3,
             ),
             validator: viewModel.validateNickname,
@@ -288,7 +294,9 @@ class _LoginFormState extends State<_LoginForm> {
                 borderRadius: BorderRadius.circular(12),
               ),
               filled: true,
-              fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              fillColor: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.5,
+              ),
               errorMaxLines: 3,
             ),
             obscureText: _obscurePassword,
