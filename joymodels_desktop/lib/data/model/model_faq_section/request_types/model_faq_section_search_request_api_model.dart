@@ -1,0 +1,26 @@
+import 'package:joymodels_desktop/data/model/pagination/request_types/pagination_request_api_model.dart';
+
+class ModelFaqSectionSearchRequestApiModel extends PaginationRequestApiModel {
+  final String modelUuid;
+  final String? faqMessage;
+  final bool isMyFaqSectionFiltered;
+
+  ModelFaqSectionSearchRequestApiModel({
+    required this.modelUuid,
+    this.faqMessage,
+    this.isMyFaqSectionFiltered = false,
+    super.pageNumber,
+    super.pageSize,
+    super.orderBy,
+  });
+
+  @override
+  Map<String, String> toQueryParameters() {
+    return {
+      ...super.toQueryParameters(),
+      'modelUuid': modelUuid,
+      if (faqMessage != null) 'faqMessage': faqMessage!,
+      'isMyFaqSectionFiltered': isMyFaqSectionFiltered.toString(),
+    };
+  }
+}
