@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:joymodels_desktop/data/core/services/auth_service.dart';
+import 'package:joymodels_desktop/data/model/order/request_types/order_admin_search_request_api_model.dart';
 import 'package:joymodels_desktop/data/model/order/request_types/order_search_request_api_model.dart';
 import 'package:joymodels_desktop/data/model/order/response_types/order_checkout_response_api_model.dart';
 import 'package:joymodels_desktop/data/model/order/response_types/order_confirm_response_api_model.dart';
@@ -101,5 +102,25 @@ class OrderRepository {
 
     final jsonMap = jsonDecode(response.body) as Map<String, dynamic>;
     return OrderConfirmResponseApiModel.fromJson(jsonMap);
+  }
+
+  Future<PaginationResponseApiModel<OrderResponseApiModel>> adminSearch(
+    OrderAdminSearchRequestApiModel request,
+  ) async {
+    final response = await _authService.request(
+      () => _service.adminSearch(request),
+    );
+
+    if (response.statusCode == 200) {
+      final jsonMap = jsonDecode(response.body);
+      return PaginationResponseApiModel<OrderResponseApiModel>.fromJson(
+        jsonMap,
+        (item) => OrderResponseApiModel.fromJson(item),
+      );
+    } else {
+      throw Exception(
+        'Failed to admin search orders: ${response.statusCode} - ${response.body}',
+      );
+    }
   }
 }

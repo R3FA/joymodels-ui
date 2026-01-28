@@ -2,8 +2,42 @@ import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:joymodels_desktop/data/core/repositories/auth_repository.dart';
 import 'package:joymodels_desktop/data/core/services/auth_service.dart';
+import 'package:joymodels_desktop/data/repositories/category_repository.dart';
+import 'package:joymodels_desktop/data/repositories/community_post_repository.dart';
+import 'package:joymodels_desktop/data/repositories/community_post_question_section_repository.dart';
+import 'package:joymodels_desktop/data/repositories/community_post_review_type_repository.dart';
+import 'package:joymodels_desktop/data/repositories/community_post_type_repository.dart';
+import 'package:joymodels_desktop/data/repositories/library_repository.dart';
+import 'package:joymodels_desktop/data/repositories/model_availability_repository.dart';
+import 'package:joymodels_desktop/data/repositories/model_faq_section_repository.dart';
+import 'package:joymodels_desktop/data/repositories/model_repository.dart';
+import 'package:joymodels_desktop/data/repositories/model_review_type_repository.dart';
+import 'package:joymodels_desktop/data/repositories/model_reviews_repository.dart';
+import 'package:joymodels_desktop/data/repositories/notification_repository.dart';
+import 'package:joymodels_desktop/data/repositories/order_repository.dart';
+import 'package:joymodels_desktop/data/repositories/report_repository.dart';
+import 'package:joymodels_desktop/data/repositories/shopping_cart_repository.dart';
 import 'package:joymodels_desktop/data/repositories/sso_repository.dart';
+import 'package:joymodels_desktop/data/repositories/user_role_repository.dart';
+import 'package:joymodels_desktop/data/repositories/users_repository.dart';
+import 'package:joymodels_desktop/data/services/category_service.dart';
+import 'package:joymodels_desktop/data/services/community_post_service.dart';
+import 'package:joymodels_desktop/data/services/community_post_question_section_service.dart';
+import 'package:joymodels_desktop/data/services/community_post_review_type_service.dart';
+import 'package:joymodels_desktop/data/services/community_post_type_service.dart';
+import 'package:joymodels_desktop/data/services/library_service.dart';
+import 'package:joymodels_desktop/data/services/model_availability_service.dart';
+import 'package:joymodels_desktop/data/services/model_faq_section_service.dart';
+import 'package:joymodels_desktop/data/services/model_review_type_service.dart';
+import 'package:joymodels_desktop/data/services/model_reviews_service.dart';
+import 'package:joymodels_desktop/data/services/model_service.dart';
+import 'package:joymodels_desktop/data/services/notification_service.dart';
+import 'package:joymodels_desktop/data/services/order_service.dart';
+import 'package:joymodels_desktop/data/services/report_service.dart';
+import 'package:joymodels_desktop/data/services/shopping_cart_service.dart';
 import 'package:joymodels_desktop/data/services/sso_service.dart';
+import 'package:joymodels_desktop/data/services/user_role_service.dart';
+import 'package:joymodels_desktop/data/services/users_service.dart';
 
 final sl = GetIt.instance;
 
@@ -17,5 +51,109 @@ void dependencyInjectionSetup() {
 
   sl.registerLazySingleton(
     () => SsoRepository(sl<SsoService>(), sl<AuthService>()),
+  );
+
+  sl.registerLazySingleton(() => UsersService());
+  sl.registerLazySingleton(
+    () => UsersRepository(sl<UsersService>(), sl<AuthService>()),
+  );
+
+  sl.registerLazySingleton(() => CategoryService());
+  sl.registerLazySingleton(
+    () => CategoryRepository(sl<CategoryService>(), sl<AuthService>()),
+  );
+
+  sl.registerLazySingleton(() => ModelService());
+  sl.registerLazySingleton(
+    () => ModelRepository(sl<ModelService>(), sl<AuthService>()),
+  );
+
+  sl.registerLazySingleton(() => ModelAvailabilityService());
+  sl.registerLazySingleton(
+    () => ModelAvailabilityRepository(
+      sl<ModelAvailabilityService>(),
+      sl<AuthService>(),
+    ),
+  );
+
+  sl.registerLazySingleton(() => ModelReviewsService());
+  sl.registerLazySingleton(
+    () => ModelReviewsRepository(sl<ModelReviewsService>(), sl<AuthService>()),
+  );
+
+  sl.registerLazySingleton(() => ShoppingCartService());
+  sl.registerLazySingleton(
+    () => ShoppingCartRepository(sl<ShoppingCartService>(), sl<AuthService>()),
+  );
+
+  sl.registerLazySingleton(() => OrderService());
+  sl.registerLazySingleton(
+    () => OrderRepository(sl<OrderService>(), sl<AuthService>()),
+  );
+
+  sl.registerLazySingleton(() => LibraryService());
+  sl.registerLazySingleton(
+    () => LibraryRepository(sl<LibraryService>(), sl<AuthService>()),
+  );
+
+  sl.registerLazySingleton(() => ModelFaqSectionService());
+  sl.registerLazySingleton(
+    () => ModelFaqSectionRepository(
+      sl<ModelFaqSectionService>(),
+      sl<AuthService>(),
+    ),
+  );
+
+  sl.registerLazySingleton(() => ModelReviewTypeService());
+  sl.registerLazySingleton(
+    () => ModelReviewTypeRepository(
+      sl<ModelReviewTypeService>(),
+      sl<AuthService>(),
+    ),
+  );
+
+  sl.registerLazySingleton(() => CommunityPostService());
+  sl.registerLazySingleton(
+    () =>
+        CommunityPostRepository(sl<CommunityPostService>(), sl<AuthService>()),
+  );
+
+  sl.registerLazySingleton(() => CommunityPostTypeService());
+  sl.registerLazySingleton(
+    () => CommunityPostTypeRepository(
+      sl<CommunityPostTypeService>(),
+      sl<AuthService>(),
+    ),
+  );
+
+  sl.registerLazySingleton(() => CommunityPostReviewTypeService());
+  sl.registerLazySingleton(
+    () => CommunityPostReviewTypeRepository(
+      sl<CommunityPostReviewTypeService>(),
+      sl<AuthService>(),
+    ),
+  );
+
+  sl.registerLazySingleton(() => CommunityPostQuestionSectionService());
+  sl.registerLazySingleton(
+    () => CommunityPostQuestionSectionRepository(
+      sl<CommunityPostQuestionSectionService>(),
+      sl<AuthService>(),
+    ),
+  );
+
+  sl.registerLazySingleton(() => NotificationService());
+  sl.registerLazySingleton(
+    () => NotificationRepository(sl<NotificationService>(), sl<AuthService>()),
+  );
+
+  sl.registerLazySingleton(() => ReportService());
+  sl.registerLazySingleton(
+    () => ReportRepository(sl<ReportService>(), sl<AuthService>()),
+  );
+
+  sl.registerLazySingleton(() => UserRoleService());
+  sl.registerLazySingleton(
+    () => UserRoleRepository(sl<UserRoleService>(), sl<AuthService>()),
   );
 }

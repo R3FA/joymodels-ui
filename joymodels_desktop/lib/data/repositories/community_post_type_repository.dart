@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:joymodels_desktop/data/core/services/auth_service.dart';
+import 'package:joymodels_desktop/data/model/community_post_type/request_types/community_post_type_create_request_api_model.dart';
+import 'package:joymodels_desktop/data/model/community_post_type/request_types/community_post_type_patch_request_api_model.dart';
 import 'package:joymodels_desktop/data/model/community_post_type/request_types/community_post_type_search_request_api_model.dart';
 import 'package:joymodels_desktop/data/model/community_post_type/response_types/community_post_type_response_api_model.dart';
 import 'package:joymodels_desktop/data/model/pagination/response_types/pagination_response_api_model.dart';
@@ -44,6 +46,48 @@ class CommunityPostTypeRepository {
     } else {
       throw Exception(
         'Failed to fetch community post types: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  Future<CommunityPostTypeResponseApiModel> create(
+    CommunityPostTypeCreateRequestApiModel request,
+  ) async {
+    final response = await _authService.request(() => _service.create(request));
+
+    if (response.statusCode == 200) {
+      final jsonMap = jsonDecode(response.body);
+      return CommunityPostTypeResponseApiModel.fromJson(jsonMap);
+    } else {
+      throw Exception(
+        'Failed to create community post type: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  Future<CommunityPostTypeResponseApiModel> patch(
+    CommunityPostTypePatchRequestApiModel request,
+  ) async {
+    final response = await _authService.request(() => _service.patch(request));
+
+    if (response.statusCode == 200) {
+      final jsonMap = jsonDecode(response.body);
+      return CommunityPostTypeResponseApiModel.fromJson(jsonMap);
+    } else {
+      throw Exception(
+        'Failed to update community post type: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  Future<void> delete(String communityPostTypeUuid) async {
+    final response = await _authService.request(
+      () => _service.delete(communityPostTypeUuid),
+    );
+
+    if (response.statusCode != 204) {
+      throw Exception(
+        'Failed to delete community post type: ${response.statusCode} - ${response.body}',
       );
     }
   }

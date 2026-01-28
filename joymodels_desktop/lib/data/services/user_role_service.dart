@@ -1,16 +1,15 @@
 import 'package:http/http.dart' as http;
 import 'package:joymodels_desktop/data/core/config/api_constants.dart';
 import 'package:joymodels_desktop/data/core/config/token_storage.dart';
-import 'package:joymodels_desktop/data/model/model_availability/request_types/model_availability_create_request_api_model.dart';
-import 'package:joymodels_desktop/data/model/model_availability/request_types/model_availability_patch_request_api_model.dart';
-import 'package:joymodels_desktop/data/model/model_availability/request_types/model_availability_search_request_api_model.dart';
+import 'package:joymodels_desktop/data/model/user_role/request_types/user_role_create_request_api_model.dart';
+import 'package:joymodels_desktop/data/model/user_role/request_types/user_role_patch_request_api_model.dart';
+import 'package:joymodels_desktop/data/model/user_role/request_types/user_role_search_request_api_model.dart';
 
-class ModelAvailabilityService {
-  final String modelAvailabilityUrl =
-      "${ApiConstants.baseUrl}/model-availability";
+class UserRoleService {
+  final String userRoleUrl = "${ApiConstants.baseUrl}/user-roles";
 
-  Future<http.Response> getByUuid(String modelAvailabilityUuid) async {
-    final url = Uri.parse('$modelAvailabilityUrl/get/$modelAvailabilityUuid');
+  Future<http.Response> getByUuid(String userRoleUuid) async {
+    final url = Uri.parse('$userRoleUrl/get/$userRoleUuid');
     final token = await TokenStorage.getAccessToken();
 
     return await http.get(
@@ -19,17 +18,12 @@ class ModelAvailabilityService {
     );
   }
 
-  Future<http.Response> search(
-    ModelAvailabilitySearchRequestApiModel request,
-  ) async {
-    final fullPath = '$modelAvailabilityUrl/search';
-
+  Future<http.Response> search(UserRoleSearchRequestApiModel request) async {
+    final fullPath = '$userRoleUrl/search';
     final queryParams = request.toJson().map(
       (key, value) => MapEntry(key, value.toString()),
     );
-
     final uri = Uri.parse(fullPath).replace(queryParameters: queryParams);
-
     final token = await TokenStorage.getAccessToken();
 
     return await http.get(
@@ -38,10 +32,8 @@ class ModelAvailabilityService {
     );
   }
 
-  Future<http.Response> create(
-    ModelAvailabilityCreateRequestApiModel request,
-  ) async {
-    final url = Uri.parse('$modelAvailabilityUrl/create');
+  Future<http.Response> create(UserRoleCreateRequestApiModel request) async {
+    final url = Uri.parse('$userRoleUrl/create');
 
     final multiPartRequest = await request.toMultipartRequest(url);
 
@@ -53,10 +45,8 @@ class ModelAvailabilityService {
     return await http.Response.fromStream(streamedResponse);
   }
 
-  Future<http.Response> patch(
-    ModelAvailabilityPatchRequestApiModel request,
-  ) async {
-    final url = Uri.parse('$modelAvailabilityUrl/edit-model-availability');
+  Future<http.Response> patch(UserRolePatchRequestApiModel request) async {
+    final url = Uri.parse('$userRoleUrl/edit-user-role');
 
     final multiPartRequest = await request.toMultipartRequest(url);
 
@@ -68,10 +58,8 @@ class ModelAvailabilityService {
     return await http.Response.fromStream(streamedResponse);
   }
 
-  Future<http.Response> delete(String modelAvailabilityUuid) async {
-    final url = Uri.parse(
-      '$modelAvailabilityUrl/delete/$modelAvailabilityUuid',
-    );
+  Future<http.Response> delete(String userRoleUuid) async {
+    final url = Uri.parse('$userRoleUrl/delete/$userRoleUuid');
     final token = await TokenStorage.getAccessToken();
 
     return await http.delete(url, headers: {'Authorization': 'Bearer $token'});

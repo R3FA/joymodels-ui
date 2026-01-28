@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'package:joymodels_desktop/data/core/config/api_constants.dart';
 import 'package:joymodels_desktop/data/core/config/token_storage.dart';
+import 'package:joymodels_desktop/data/model/order/request_types/order_admin_search_request_api_model.dart';
 import 'package:joymodels_desktop/data/model/order/request_types/order_search_request_api_model.dart';
 
 class OrderService {
@@ -34,6 +35,23 @@ class OrderService {
     final queryParams = request.toQueryParameters();
     final uri = Uri.parse(
       "$orderUrl/search",
+    ).replace(queryParameters: queryParams);
+    final token = await TokenStorage.getAccessToken();
+
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    return response;
+  }
+
+  Future<http.Response> adminSearch(
+    OrderAdminSearchRequestApiModel request,
+  ) async {
+    final queryParams = request.toQueryParameters();
+    final uri = Uri.parse(
+      "$orderUrl/admin-search",
     ).replace(queryParameters: queryParams);
     final token = await TokenStorage.getAccessToken();
 
