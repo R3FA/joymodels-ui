@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:joymodels_desktop/data/core/config/api_constants.dart';
 import 'package:joymodels_desktop/data/model/enums/user_role_api_enum.dart';
-import 'package:joymodels_desktop/data/model/sso/response_types/sso_user_response_api_model.dart';
 import 'package:joymodels_desktop/data/model/user_role/response_types/user_role_response_api_model.dart';
 import 'package:joymodels_desktop/data/model/users/response_types/users_response_api_model.dart';
 import 'package:joymodels_desktop/ui/core/ui/pagination_controls.dart';
@@ -186,7 +185,8 @@ class _UsersPageScreenState extends State<UsersPageScreen>
         child: DataTable(
           columns: const [
             DataColumn(label: Text('Avatar')),
-            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('First Name')),
+            DataColumn(label: Text('Last Name')),
             DataColumn(label: Text('Nickname')),
             DataColumn(label: Text('Email')),
             DataColumn(label: Text('Role')),
@@ -216,7 +216,8 @@ class _UsersPageScreenState extends State<UsersPageScreen>
             radius: 16,
           ),
         ),
-        DataCell(Text('${user.firstName} ${user.lastName ?? ''}'.trim())),
+        DataCell(Text(user.firstName)),
+        DataCell(Text(user.lastName ?? '')),
         DataCell(Text(user.nickName)),
         DataCell(Text(user.email)),
         DataCell(
@@ -350,7 +351,7 @@ class _UsersPageScreenState extends State<UsersPageScreen>
   }
 
   Widget _buildUnverifiedDataTable(
-    List<SsoUserResponseApiModel> users,
+    List<UsersResponseApiModel> users,
     UsersPageViewModel viewModel,
     ThemeData theme,
   ) {
@@ -360,7 +361,8 @@ class _UsersPageScreenState extends State<UsersPageScreen>
         child: DataTable(
           columns: const [
             DataColumn(label: Text('Avatar')),
-            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('First Name')),
+            DataColumn(label: Text('Last Name')),
             DataColumn(label: Text('Nickname')),
             DataColumn(label: Text('Email')),
             DataColumn(label: Text('Role')),
@@ -376,7 +378,7 @@ class _UsersPageScreenState extends State<UsersPageScreen>
   }
 
   DataRow _buildUnverifiedUserRow(
-    SsoUserResponseApiModel user,
+    UsersResponseApiModel user,
     UsersPageViewModel viewModel,
     ThemeData theme,
   ) {
@@ -388,7 +390,8 @@ class _UsersPageScreenState extends State<UsersPageScreen>
             radius: 16,
           ),
         ),
-        DataCell(Text('${user.firstName} ${user.lastName ?? ''}'.trim())),
+        DataCell(Text(user.firstName)),
+        DataCell(Text(user.lastName ?? '')),
         DataCell(Text(user.nickName)),
         DataCell(Text(user.email)),
         DataCell(_buildRoleChip(user.userRole.roleName, theme)),
