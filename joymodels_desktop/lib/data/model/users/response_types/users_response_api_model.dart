@@ -7,7 +7,7 @@ class UsersResponseApiModel {
   final String nickName;
   final String email;
   final DateTime createdAt;
-  final String userPictureLocation;
+  final String? userPictureLocation;
   final int userFollowerCount;
   final int userFollowingCount;
   final int userLikedModelsCount;
@@ -21,7 +21,7 @@ class UsersResponseApiModel {
     required this.nickName,
     required this.email,
     required this.createdAt,
-    required this.userPictureLocation,
+    this.userPictureLocation,
     required this.userFollowerCount,
     required this.userFollowingCount,
     required this.userLikedModelsCount,
@@ -37,7 +37,7 @@ class UsersResponseApiModel {
       nickName: json['nickName'] as String,
       email: json['email'] as String,
       createdAt: DateTime.parse(json['createdAt']),
-      userPictureLocation: json['userPictureLocation'] as String,
+      userPictureLocation: json['userPictureLocation'] as String?,
       userFollowerCount: json['userFollowerCount'] as int,
       userFollowingCount: json['userFollowingCount'] as int,
       userLikedModelsCount: json['userLikedModelsCount'] as int,

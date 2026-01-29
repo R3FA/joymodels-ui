@@ -6,7 +6,6 @@ import 'package:joymodels_desktop/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_desktop/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_desktop/data/model/pagination/response_types/pagination_response_api_model.dart';
 import 'package:joymodels_desktop/data/model/sso/request_types/sso_search_request_api_model.dart';
-import 'package:joymodels_desktop/data/model/sso/response_types/sso_user_response_api_model.dart';
 import 'package:joymodels_desktop/data/model/users/request_types/user_search_request_api_model.dart';
 import 'package:joymodels_desktop/data/model/users/response_types/users_response_api_model.dart';
 import 'package:joymodels_desktop/data/model/sso/request_types/sso_set_role_request_api_model.dart';
@@ -34,7 +33,7 @@ class UsersPageViewModel with ChangeNotifier {
   bool isLoadingVerified = false;
   String verifiedSearchQuery = '';
 
-  PaginationResponseApiModel<SsoUserResponseApiModel>? unverifiedPagination;
+  PaginationResponseApiModel<UsersResponseApiModel>? unverifiedPagination;
   bool isLoadingUnverified = false;
   String unverifiedSearchNickname = '';
   String unverifiedSearchEmail = '';
