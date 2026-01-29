@@ -27,15 +27,6 @@ mixin PaginationMixin<T> on ChangeNotifier {
     }
   }
 
-  Future<void> goToPage(int pageNumber) async {
-    if (pageNumber >= 1 &&
-        pageNumber <= totalPages &&
-        pageNumber != currentPage &&
-        !isLoadingPage) {
-      await loadPage(pageNumber);
-    }
-  }
-
   Future<void> reloadCurrentPage() async {
     if (!isLoadingPage) {
       await loadPage(currentPage);

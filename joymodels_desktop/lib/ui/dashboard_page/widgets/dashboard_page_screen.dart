@@ -7,6 +7,8 @@ class DashboardPageScreen extends StatefulWidget {
   final VoidCallback? onForbidden;
   final VoidCallback? onNetworkError;
   final void Function(int tabIndex)? onNavigateToUsers;
+  final VoidCallback? onNavigateToCategories;
+  final VoidCallback? onNavigateToReports;
 
   const DashboardPageScreen({
     super.key,
@@ -14,6 +16,8 @@ class DashboardPageScreen extends StatefulWidget {
     this.onForbidden,
     this.onNetworkError,
     this.onNavigateToUsers,
+    this.onNavigateToCategories,
+    this.onNavigateToReports,
   });
 
   @override
@@ -42,85 +46,65 @@ class _DashboardPageScreenState extends State<DashboardPageScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        final int crossAxisCount;
-        if (width >= 1100) {
-          crossAxisCount = 4;
-        } else if (width >= 700) {
-          crossAxisCount = 2;
-        } else {
-          crossAxisCount = 1;
-        }
-
-        final cards = [
-          _buildStatCard(
-            theme,
-            icon: Icons.verified_user,
-            label: 'Verified Users',
-            value: viewModel.totalVerifiedUsers.toString(),
-            color: Colors.blue,
-            onTap: () => widget.onNavigateToUsers?.call(0),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Overview',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          _buildStatCard(
-            theme,
-            icon: Icons.person_outline,
-            label: 'Unverified Users',
-            value: viewModel.totalUnverifiedUsers.toString(),
-            color: Colors.orange,
-            onTap: () => widget.onNavigateToUsers?.call(1),
-          ),
-          _buildStatCard(
-            theme,
-            icon: Icons.category,
-            label: 'Categories',
-            value: viewModel.totalCategories.toString(),
-            color: Colors.teal,
-          ),
-          _buildStatCard(
-            theme,
-            icon: Icons.report,
-            label: 'Reports',
-            value: viewModel.totalReports.toString(),
-            color: Colors.red,
-          ),
-          _buildStatCard(
-            theme,
-            icon: Icons.shopping_cart,
-            label: 'Orders',
-            value: viewModel.totalOrders.toString(),
-            color: Colors.green,
-          ),
-        ];
-
-        final spacing = 20.0;
-        final cardWidth =
-            (width - spacing * (crossAxisCount - 1)) / crossAxisCount;
-
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 20),
+          Row(
+            spacing: 20,
             children: [
-              Text(
-                'Overview',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: _buildStatCard(
+                  theme,
+                  icon: Icons.verified_user,
+                  label: 'Verified Users',
+                  value: viewModel.totalVerifiedUsers.toString(),
+                  color: Colors.blue,
+                  onTap: () => widget.onNavigateToUsers?.call(0),
                 ),
               ),
-              const SizedBox(height: 20),
-              Wrap(
-                spacing: spacing,
-                runSpacing: spacing,
-                children: cards
-                    .map((card) => SizedBox(width: cardWidth, child: card))
-                    .toList(),
+              Expanded(
+                child: _buildStatCard(
+                  theme,
+                  icon: Icons.person_outline,
+                  label: 'Unverified Users',
+                  value: viewModel.totalUnverifiedUsers.toString(),
+                  color: Colors.orange,
+                  onTap: () => widget.onNavigateToUsers?.call(1),
+                ),
+              ),
+              Expanded(
+                child: _buildStatCard(
+                  theme,
+                  icon: Icons.category,
+                  label: 'Categories',
+                  value: viewModel.totalCategories.toString(),
+                  color: Colors.teal,
+                  onTap: () => widget.onNavigateToCategories?.call(),
+                ),
+              ),
+              Expanded(
+                child: _buildStatCard(
+                  theme,
+                  icon: Icons.report,
+                  label: 'Reports',
+                  value: viewModel.totalReports.toString(),
+                  color: Colors.red,
+                  onTap: () => widget.onNavigateToReports?.call(),
+                ),
               ),
             ],
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 

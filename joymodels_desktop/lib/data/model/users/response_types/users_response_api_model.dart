@@ -45,34 +45,4 @@ class UsersResponseApiModel {
       userRole: UserRoleResponseApiModel.fromJson(json['userRole']),
     );
   }
-
-  UsersResponseApiModel copyWith({
-    String? uuid,
-    String? firstName,
-    String? lastName,
-    String? nickName,
-    String? email,
-    DateTime? createdAt,
-    String? userPictureLocation,
-    int? userFollowerCount,
-    int? userFollowingCount,
-    int? userLikedModelsCount,
-    int? userModelsCount,
-    UserRoleResponseApiModel? userRole,
-  }) {
-    return UsersResponseApiModel(
-      uuid: uuid ?? this.uuid,
-      firstName: firstName ?? this.firstName,
-      lastName: lastName ?? this.lastName,
-      nickName: nickName ?? this.nickName,
-      email: email ?? this.email,
-      createdAt: createdAt ?? this.createdAt,
-      userPictureLocation: userPictureLocation ?? this.userPictureLocation,
-      userFollowerCount: userFollowerCount ?? this.userFollowerCount,
-      userFollowingCount: userFollowingCount ?? this.userFollowingCount,
-      userLikedModelsCount: userLikedModelsCount ?? this.userLikedModelsCount,
-      userModelsCount: userModelsCount ?? this.userModelsCount,
-      userRole: userRole ?? this.userRole,
-    );
-  }
 }

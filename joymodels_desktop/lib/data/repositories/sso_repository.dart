@@ -49,21 +49,6 @@ class SsoRepository {
     }
   }
 
-  Future<SsoUserResponseApiModel> getByUuid(String userUuid) async {
-    final response = await _authService.request(
-      () => _service.getByUuid(userUuid),
-    );
-
-    if (response.statusCode == 200) {
-      final jsonMap = jsonDecode(response.body);
-      return SsoUserResponseApiModel.fromJson(jsonMap);
-    } else {
-      throw Exception(
-        'Failed to fetch user: ${response.statusCode} - ${response.body}',
-      );
-    }
-  }
-
   Future<PaginationResponseApiModel<SsoUserResponseApiModel>> search(
     SsoSearchRequestApiModel request,
   ) async {

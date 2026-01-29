@@ -1,15 +1,4 @@
 class RegexValidationViewModel {
-  static String? validateEmail(String? email) {
-    if (email == null || email.trim().isEmpty) {
-      return 'Email cannot be empty string';
-    }
-    final regex = RegExp(r'^(?=.{1,255})[^@\s]+@[^@\s]+\.[^@\s]+$');
-    if (!regex.hasMatch(email)) {
-      return 'Invalid format. The value must be a valid email address without spaces.';
-    }
-    return null;
-  }
-
   static String? validatePassword(String? password) {
     if (password == null || password.trim().isEmpty) {
       return 'Password cannot be empty string';
@@ -34,28 +23,6 @@ class RegexValidationViewModel {
     return null;
   }
 
-  static String? validateName(String? name) {
-    if (name == null || name.trim().isEmpty) {
-      return 'Name cannot be empty string.';
-    }
-    final regex = RegExp(r'^[A-Z][a-z]{1,}$');
-    if (!regex.hasMatch(name)) {
-      return 'First or Last name must begin with a capital letter and contain only lowercase letters after.';
-    }
-    return null;
-  }
-
-  static String? validateOtpCode(String? otpCode) {
-    if (otpCode == null || otpCode.trim().isEmpty) {
-      return 'OTP Code cannot be empty string.';
-    }
-    final regex = RegExp(r'^[A-Z0-9]{12}$');
-    if (!regex.hasMatch(otpCode)) {
-      return 'The value must be exactly 12 characters long and contain only uppercase letters and numbers.';
-    }
-    return null;
-  }
-
   static String? validateText(String? text) {
     if (text == null || text.trim().isEmpty) {
       return 'Text cannot be empty string.';
@@ -67,19 +34,6 @@ class RegexValidationViewModel {
     if (!regex.hasMatch(text)) {
       return "Invalid value: Must contain only letters (any language), digits, and the following characters: !@#\$%^&*()_+/\\<>.,?:;-'";
     }
-    return null;
-  }
-
-  static String? validatePrice(String? price) {
-    if (price == null || price.trim().isEmpty) {
-      return 'Price cannot be empty string.';
-    }
-    final regex = RegExp(r'^\d*\. ?\d{0,2}');
-
-    if (!regex.hasMatch(price)) {
-      return 'Invalid price format. Please provide a valid price with up to two decimal places.';
-    }
-
     return null;
   }
 }

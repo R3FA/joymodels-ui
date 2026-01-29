@@ -52,8 +52,8 @@ static void my_application_activate(GApplication* application) {
     gtk_window_set_title(window, "joymodels_desktop");
   }
 
-  gtk_window_set_default_size(window, 1280, 720);
-  gtk_widget_set_size_request(GTK_WIDGET(window), 950, 600);
+  gtk_window_set_default_size(window, 1280, 1024);
+  gtk_widget_set_size_request(GTK_WIDGET(window), 1024, 1024);
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(

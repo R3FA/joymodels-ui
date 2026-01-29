@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_desktop/core/di/di.dart';
 import 'package:joymodels_desktop/data/core/config/token_storage.dart';
+import 'package:joymodels_desktop/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_desktop/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_desktop/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_desktop/data/core/exceptions/session_expired_exception.dart';
@@ -16,8 +17,6 @@ class HomePageScreenViewModel with ChangeNotifier {
   String? currentUserName;
   String? userUuid;
   bool isLoading = true;
-  bool isLoggingOut = false;
-  String? errorMessage;
 
   VoidCallback? onLogoutSuccess;
   VoidCallback? onSessionExpired;
@@ -47,8 +46,13 @@ class HomePageScreenViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  void clearErrorMessage() {
-    errorMessage = null;
+  void navigateToCategories() {
+    selectedIndex = 2;
+    notifyListeners();
+  }
+
+  void navigateToReports() {
+    selectedIndex = 3;
     notifyListeners();
   }
 
@@ -56,10 +60,6 @@ class HomePageScreenViewModel with ChangeNotifier {
     final refreshToken = await TokenStorage.getRefreshToken();
 
     if (userUuid == null || refreshToken == null) return;
-
-    isLoggingOut = true;
-    errorMessage = null;
-    notifyListeners();
 
     try {
       await _ssoRepository.logout(
@@ -70,26 +70,15 @@ class HomePageScreenViewModel with ChangeNotifier {
       );
 
       await TokenStorage.clearAuthToken();
-      isLoggingOut = false;
-      notifyListeners();
-
       onLogoutSuccess?.call();
     } on SessionExpiredException {
-      isLoggingOut = false;
-      notifyListeners();
       onSessionExpired?.call();
     } on ForbiddenException {
-      isLoggingOut = false;
-      notifyListeners();
       onForbidden?.call();
     } on NetworkException {
-      isLoggingOut = false;
-      notifyListeners();
       onNetworkError?.call();
-    } catch (e) {
-      isLoggingOut = false;
-      notifyListeners();
-      onNetworkError?.call();
+    } on ApiException {
+      // API error during logout — silently ignore
     }
   }
 

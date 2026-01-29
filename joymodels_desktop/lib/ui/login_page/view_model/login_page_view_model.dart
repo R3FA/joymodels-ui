@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_desktop/core/di/di.dart';
 import 'package:joymodels_desktop/data/core/config/token_storage.dart';
+import 'package:joymodels_desktop/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_desktop/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_desktop/data/model/sso/request_types/sso_user_login_request_api_model.dart';
 import 'package:joymodels_desktop/data/repositories/sso_repository.dart';
@@ -77,8 +78,8 @@ class LoginPageScreenViewModel with ChangeNotifier {
       isLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = 'Incorrect username or password!';
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isLoading = false;
       notifyListeners();
       return false;

@@ -10,9 +10,4 @@ class SsoLoginResponse {
       refreshToken: json['refreshToken'] as String,
     );
   }
-
-  Map<String, dynamic> toJson() => {
-    'accessToken': accessToken,
-    'refreshToken': refreshToken,
-  };
 }

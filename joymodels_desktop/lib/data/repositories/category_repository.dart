@@ -31,21 +31,6 @@ class CategoryRepository {
     }
   }
 
-  Future<CategoryResponseApiModel> getByUuid(String categoryUuid) async {
-    final response = await _authService.request(
-      () => _service.getByUuid(categoryUuid),
-    );
-
-    if (response.statusCode == 200) {
-      final jsonMap = jsonDecode(response.body);
-      return CategoryResponseApiModel.fromJson(jsonMap);
-    } else {
-      throw Exception(
-        'Failed to fetch category: ${response.statusCode} - ${response.body}',
-      );
-    }
-  }
-
   Future<CategoryResponseApiModel> create(
     CategoryCreateRequestApiModel request,
   ) async {

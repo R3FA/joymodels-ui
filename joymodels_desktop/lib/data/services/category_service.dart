@@ -8,16 +8,6 @@ import 'package:joymodels_desktop/data/model/category/request_types/category_req
 class CategoryService {
   final String categoryUrl = "${ApiConstants.baseUrl}/categories";
 
-  Future<http.Response> getByUuid(String categoryUuid) async {
-    final url = Uri.parse('$categoryUrl/get/$categoryUuid');
-    final token = await TokenStorage.getAccessToken();
-
-    return await http.get(
-      url,
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
-  }
-
   Future<http.Response> search(CategorySearchRequestApiModel request) async {
     final fullPath = '$categoryUrl/search';
 

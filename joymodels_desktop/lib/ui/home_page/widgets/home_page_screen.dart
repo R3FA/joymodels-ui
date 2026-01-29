@@ -13,8 +13,6 @@ import 'package:joymodels_desktop/ui/home_page/view_model/home_page_view_model.d
 import 'package:joymodels_desktop/ui/login_page/widgets/login_page_screen.dart';
 import 'package:joymodels_desktop/ui/reports_page/view_model/reports_page_view_model.dart';
 import 'package:joymodels_desktop/ui/reports_page/widgets/reports_page_screen.dart';
-import 'package:joymodels_desktop/ui/settings_page/view_model/settings_page_view_model.dart';
-import 'package:joymodels_desktop/ui/settings_page/widgets/settings_page_screen.dart';
 import 'package:joymodels_desktop/ui/users_page/view_model/users_page_view_model.dart';
 import 'package:joymodels_desktop/ui/users_page/widgets/users_page_screen.dart';
 import 'package:provider/provider.dart';
@@ -205,15 +203,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
             label: 'Reports',
           ),
           const Spacer(),
-          _buildNavItem(
-            context,
-            viewModel,
-            theme,
-            index: 4,
-            icon: Icons.settings_outlined,
-            selectedIcon: Icons.settings,
-            label: 'Settings',
-          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
             child: ListTile(
@@ -278,7 +267,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
     HomePageScreenViewModel viewModel,
     ThemeData theme,
   ) {
-    final titles = ['Dashboard', 'Users', 'Categories', 'Reports', 'Settings'];
+    final titles = ['Dashboard', 'Users', 'Categories', 'Reports'];
 
     return Container(
       height: 72,
@@ -337,6 +326,8 @@ class _HomePageScreenState extends State<HomePageScreen> {
             onNetworkError: _handleNetworkError,
             onNavigateToUsers: (tabIndex) =>
                 viewModel.navigateToUsers(tabIndex: tabIndex),
+            onNavigateToCategories: () => viewModel.navigateToCategories(),
+            onNavigateToReports: () => viewModel.navigateToReports(),
           ),
         );
       case 1:
@@ -362,15 +353,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
         return ChangeNotifierProvider(
           create: (_) => ReportsPageViewModel(),
           child: ReportsPageScreen(
-            onSessionExpired: _handleSessionExpired,
-            onForbidden: _handleForbidden,
-            onNetworkError: _handleNetworkError,
-          ),
-        );
-      case 4:
-        return ChangeNotifierProvider(
-          create: (_) => SettingsPageViewModel(),
-          child: SettingsPageScreen(
             onSessionExpired: _handleSessionExpired,
             onForbidden: _handleForbidden,
             onNetworkError: _handleNetworkError,

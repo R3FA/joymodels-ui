@@ -45,18 +45,6 @@ class SsoService {
     return await http.Response.fromStream(streamedResponse);
   }
 
-  Future<http.Response> getByUuid(String userUuid) async {
-    final url = Uri.parse('$ssoUrl/get/$userUuid');
-    final token = await TokenStorage.getAccessToken();
-
-    final response = await http.get(
-      url,
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-    );
-
-    return response;
-  }
-
   Future<http.Response> search(SsoSearchRequestApiModel request) async {
     final url = Uri.parse(
       '$ssoUrl/search',

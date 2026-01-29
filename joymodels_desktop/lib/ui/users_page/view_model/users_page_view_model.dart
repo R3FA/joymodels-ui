@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_desktop/core/di/di.dart';
+import 'package:joymodels_desktop/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_desktop/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_desktop/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_desktop/data/core/exceptions/session_expired_exception.dart';
@@ -53,11 +54,6 @@ class UsersPageViewModel with ChangeNotifier {
     await Future.wait([searchVerifiedUsers(), searchUnverifiedUsers()]);
   }
 
-  void clearErrorMessage() {
-    errorMessage = null;
-    notifyListeners();
-  }
-
   void setVerifiedSearchQuery(String query) {
     verifiedSearchQuery = query;
     verifiedSearchError = query.isEmpty
@@ -93,10 +89,10 @@ class UsersPageViewModel with ChangeNotifier {
       isLoadingVerified = false;
       notifyListeners();
       onNetworkError?.call();
-    } catch (e) {
+    } on ApiException catch (e) {
       isLoadingVerified = false;
+      errorMessage = e.message;
       notifyListeners();
-      onNetworkError?.call();
     }
   }
 
@@ -146,10 +142,10 @@ class UsersPageViewModel with ChangeNotifier {
       isLoadingUnverified = false;
       notifyListeners();
       onNetworkError?.call();
-    } catch (e) {
+    } on ApiException catch (e) {
       isLoadingUnverified = false;
+      errorMessage = e.message;
       notifyListeners();
-      onNetworkError?.call();
     }
   }
 
@@ -163,8 +159,9 @@ class UsersPageViewModel with ChangeNotifier {
       onForbidden?.call();
     } on NetworkException {
       onNetworkError?.call();
-    } catch (e) {
-      onNetworkError?.call();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+      notifyListeners();
     }
   }
 
@@ -178,8 +175,9 @@ class UsersPageViewModel with ChangeNotifier {
       onForbidden?.call();
     } on NetworkException {
       onNetworkError?.call();
-    } catch (e) {
-      onNetworkError?.call();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+      notifyListeners();
     }
   }
 
@@ -197,8 +195,9 @@ class UsersPageViewModel with ChangeNotifier {
     } on NetworkException {
       onNetworkError?.call();
       return [];
-    } catch (e) {
-      onNetworkError?.call();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+      notifyListeners();
       return [];
     }
   }
@@ -217,8 +216,9 @@ class UsersPageViewModel with ChangeNotifier {
       onForbidden?.call();
     } on NetworkException {
       onNetworkError?.call();
-    } catch (e) {
-      onNetworkError?.call();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+      notifyListeners();
     }
   }
 

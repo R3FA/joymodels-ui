@@ -9,13 +9,6 @@ class CommunityPostPictureResponseApiModel {
     required this.createdAt,
   });
 
-  String get pictureFileName {
-    if (pictureLocation.contains('/')) {
-      return pictureLocation.split('/').last;
-    }
-    return pictureLocation;
-  }
-
   factory CommunityPostPictureResponseApiModel.fromJson(
     Map<String, dynamic> json,
   ) {
