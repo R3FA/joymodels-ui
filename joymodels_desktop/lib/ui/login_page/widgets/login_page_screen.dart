@@ -71,7 +71,7 @@ class LoginPageScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'Manage users, content, and platform\nsettings from one place.',
+                        'Manage users and platform settings\nfrom one place.',
                         style: TextStyle(
                           fontSize: 18,
                           color: theme.colorScheme.onPrimary.withValues(
@@ -90,13 +90,13 @@ class LoginPageScreen extends StatelessWidget {
                       _buildFeatureItem(
                         theme,
                         Icons.manage_accounts_outlined,
-                        'User & content moderation',
+                        'User moderation',
                       ),
                       const SizedBox(height: 16),
                       _buildFeatureItem(
                         theme,
                         Icons.analytics_outlined,
-                        'Analytics & reporting tools',
+                        'Reporting tools',
                       ),
                       const Spacer(),
                     ],
