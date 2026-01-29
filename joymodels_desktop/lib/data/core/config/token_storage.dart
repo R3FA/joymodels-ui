@@ -97,4 +97,10 @@ class TokenStorage {
     return role == UserRoleApiEnum.Root.name ||
         role == UserRoleApiEnum.Admin.name;
   }
+
+  static Future<bool> isRoot() async {
+    final role = await getCurrentUserRole();
+    if (role == null) return false;
+    return role == UserRoleApiEnum.Root.name;
+  }
 }

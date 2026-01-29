@@ -10,99 +10,102 @@ class LoginPageScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
 
+    final isWide = size.width >= 900;
+
     return Scaffold(
       body: Row(
         children: [
-          Expanded(
-            flex: 5,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    theme.colorScheme.primary,
-                    theme.colorScheme.primaryContainer,
-                  ],
+          if (isWide)
+            Expanded(
+              flex: 5,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      theme.colorScheme.primary,
+                      theme.colorScheme.primaryContainer,
+                    ],
+                  ),
                 ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(48.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.all(48.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.view_in_ar,
+                              size: 32,
+                              color: theme.colorScheme.onPrimary,
+                            ),
                           ),
-                          child: Icon(
-                            Icons.view_in_ar,
-                            size: 32,
-                            color: theme.colorScheme.onPrimary,
+                          const SizedBox(width: 16),
+                          Text(
+                            'JoyModels',
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onPrimary,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 16),
-                        Text(
-                          'JoyModels',
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.onPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    Text(
-                      'Admin\nControl Panel',
-                      style: TextStyle(
-                        fontSize: size.width > 1200 ? 48 : 36,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onPrimary,
-                        height: 1.2,
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Manage users, content, and platform\nsettings from one place.',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: theme.colorScheme.onPrimary.withValues(
-                          alpha: 0.8,
+                      const Spacer(),
+                      Text(
+                        'Admin\nControl Panel',
+                        style: TextStyle(
+                          fontSize: size.width > 1200 ? 48 : 36,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onPrimary,
+                          height: 1.2,
                         ),
-                        height: 1.5,
                       ),
-                    ),
-                    const Spacer(),
-                    _buildFeatureItem(
-                      theme,
-                      Icons.admin_panel_settings_outlined,
-                      'Full platform administration',
-                    ),
-                    const SizedBox(height: 16),
-                    _buildFeatureItem(
-                      theme,
-                      Icons.manage_accounts_outlined,
-                      'User & content moderation',
-                    ),
-                    const SizedBox(height: 16),
-                    _buildFeatureItem(
-                      theme,
-                      Icons.analytics_outlined,
-                      'Analytics & reporting tools',
-                    ),
-                    const Spacer(),
-                  ],
+                      const SizedBox(height: 24),
+                      Text(
+                        'Manage users, content, and platform\nsettings from one place.',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: theme.colorScheme.onPrimary.withValues(
+                            alpha: 0.8,
+                          ),
+                          height: 1.5,
+                        ),
+                      ),
+                      const Spacer(),
+                      _buildFeatureItem(
+                        theme,
+                        Icons.admin_panel_settings_outlined,
+                        'Full platform administration',
+                      ),
+                      const SizedBox(height: 16),
+                      _buildFeatureItem(
+                        theme,
+                        Icons.manage_accounts_outlined,
+                        'User & content moderation',
+                      ),
+                      const SizedBox(height: 16),
+                      _buildFeatureItem(
+                        theme,
+                        Icons.analytics_outlined,
+                        'Analytics & reporting tools',
+                      ),
+                      const Spacer(),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
           Expanded(
-            flex: 4,
+            flex: isWide ? 4 : 1,
             child: Container(
               color: theme.colorScheme.surface,
               child: Center(

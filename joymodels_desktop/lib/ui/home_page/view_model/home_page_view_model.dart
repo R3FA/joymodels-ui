@@ -22,6 +22,7 @@ class HomePageScreenViewModel with ChangeNotifier {
   VoidCallback? onLogoutSuccess;
   VoidCallback? onSessionExpired;
   VoidCallback? onForbidden;
+  VoidCallback? onNetworkError;
 
   Future<void> init() async {
     isLoading = true;
@@ -82,13 +83,13 @@ class HomePageScreenViewModel with ChangeNotifier {
       notifyListeners();
       onForbidden?.call();
     } on NetworkException {
-      errorMessage = NetworkException().toString();
       isLoggingOut = false;
       notifyListeners();
+      onNetworkError?.call();
     } catch (e) {
-      errorMessage = 'Logout failed. Please try again.';
       isLoggingOut = false;
       notifyListeners();
+      onNetworkError?.call();
     }
   }
 
@@ -97,6 +98,7 @@ class HomePageScreenViewModel with ChangeNotifier {
     onLogoutSuccess = null;
     onSessionExpired = null;
     onForbidden = null;
+    onNetworkError = null;
     super.dispose();
   }
 }

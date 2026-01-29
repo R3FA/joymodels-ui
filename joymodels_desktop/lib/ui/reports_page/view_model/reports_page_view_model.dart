@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class ReportsPageViewModel with ChangeNotifier {
   VoidCallback? onSessionExpired;
   VoidCallback? onForbidden;
+  VoidCallback? onNetworkError;
 
   bool _isInitialized = false;
   bool isLoading = false;
@@ -22,6 +23,7 @@ class ReportsPageViewModel with ChangeNotifier {
   void dispose() {
     onSessionExpired = null;
     onForbidden = null;
+    onNetworkError = null;
     super.dispose();
   }
 }

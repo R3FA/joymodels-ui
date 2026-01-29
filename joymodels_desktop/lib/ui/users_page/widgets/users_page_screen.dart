@@ -2,9 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:joymodels_desktop/data/core/config/api_constants.dart';
+import 'package:joymodels_desktop/data/model/enums/user_role_api_enum.dart';
 import 'package:joymodels_desktop/data/model/sso/response_types/sso_user_response_api_model.dart';
+import 'package:joymodels_desktop/data/model/user_role/response_types/user_role_response_api_model.dart';
 import 'package:joymodels_desktop/data/model/users/response_types/users_response_api_model.dart';
-import 'package:joymodels_desktop/ui/core/ui/error_display.dart';
 import 'package:joymodels_desktop/ui/core/ui/pagination_controls.dart';
 import 'package:joymodels_desktop/ui/core/ui/user_avatar.dart';
 import 'package:joymodels_desktop/ui/users_page/view_model/users_page_view_model.dart';
@@ -13,12 +14,14 @@ import 'package:provider/provider.dart';
 class UsersPageScreen extends StatefulWidget {
   final VoidCallback? onSessionExpired;
   final VoidCallback? onForbidden;
+  final VoidCallback? onNetworkError;
   final int initialTabIndex;
 
   const UsersPageScreen({
     super.key,
     this.onSessionExpired,
     this.onForbidden,
+    this.onNetworkError,
     this.initialTabIndex = 0,
   });
 
@@ -57,6 +60,7 @@ class _UsersPageScreenState extends State<UsersPageScreen>
 
     viewModel.onSessionExpired = widget.onSessionExpired;
     viewModel.onForbidden = widget.onForbidden;
+    viewModel.onNetworkError = widget.onNetworkError;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       viewModel.init();
@@ -100,11 +104,6 @@ class _UsersPageScreenState extends State<UsersPageScreen>
             ],
           ),
         ),
-        if (viewModel.errorMessage != null)
-          ErrorDisplay(
-            message: viewModel.errorMessage!,
-            onDismiss: () => viewModel.clearErrorMessage(),
-          ),
         Expanded(
           child: TabBarView(
             controller: _tabController,
@@ -220,22 +219,36 @@ class _UsersPageScreenState extends State<UsersPageScreen>
         DataCell(Text('${user.firstName} ${user.lastName ?? ''}'.trim())),
         DataCell(Text(user.nickName)),
         DataCell(Text(user.email)),
-        DataCell(_buildRoleChip(user.userRole.roleName, theme)),
+        DataCell(
+          viewModel.isRoot &&
+                  user.userRole.roleName != UserRoleApiEnum.Root.name
+              ? InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () => _showChangeRoleDialog(context, viewModel, user),
+                  child: _buildRoleChip(user.userRole.roleName, theme),
+                )
+              : _buildRoleChip(user.userRole.roleName, theme),
+        ),
         DataCell(Text(user.userModelsCount.toString())),
         DataCell(Text(user.userFollowerCount.toString())),
         DataCell(Text(_formatDate(user.createdAt))),
         DataCell(
-          IconButton(
-            icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
-            tooltip: 'Delete',
-            onPressed: () => _showDeleteDialog(
-              context,
-              viewModel,
-              user.uuid,
-              user.nickName,
-              isSso: false,
-            ),
-          ),
+          _isAdminOrRoot(user.userRole.roleName)
+              ? const SizedBox.shrink()
+              : IconButton(
+                  icon: Icon(
+                    Icons.delete_outline,
+                    color: theme.colorScheme.error,
+                  ),
+                  tooltip: 'Delete',
+                  onPressed: () => _showDeleteDialog(
+                    context,
+                    viewModel,
+                    user.uuid,
+                    user.nickName,
+                    isSso: false,
+                  ),
+                ),
         ),
       ],
     );
@@ -268,7 +281,8 @@ class _UsersPageScreenState extends State<UsersPageScreen>
                   onChanged: (value) {
                     viewModel.setUnverifiedSearchNickname(value);
                     _debounce?.cancel();
-                    if (viewModel.unverifiedNicknameError == null) {
+                    if (viewModel.unverifiedNicknameError == null &&
+                        viewModel.unverifiedEmailError == null) {
                       _debounce = Timer(const Duration(milliseconds: 400), () {
                         viewModel.searchUnverifiedUsers();
                       });
@@ -292,7 +306,8 @@ class _UsersPageScreenState extends State<UsersPageScreen>
                   onChanged: (value) {
                     viewModel.setUnverifiedSearchEmail(value);
                     _debounce?.cancel();
-                    if (viewModel.unverifiedEmailError == null) {
+                    if (viewModel.unverifiedEmailError == null &&
+                        viewModel.unverifiedNicknameError == null) {
                       _debounce = Timer(const Duration(milliseconds: 400), () {
                         viewModel.searchUnverifiedUsers();
                       });
@@ -379,17 +394,22 @@ class _UsersPageScreenState extends State<UsersPageScreen>
         DataCell(_buildRoleChip(user.userRole.roleName, theme)),
         DataCell(Text(_formatDate(user.createdAt))),
         DataCell(
-          IconButton(
-            icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
-            tooltip: 'Delete',
-            onPressed: () => _showDeleteDialog(
-              context,
-              viewModel,
-              user.uuid,
-              user.nickName,
-              isSso: true,
-            ),
-          ),
+          _isAdminOrRoot(user.userRole.roleName)
+              ? const SizedBox.shrink()
+              : IconButton(
+                  icon: Icon(
+                    Icons.delete_outline,
+                    color: theme.colorScheme.error,
+                  ),
+                  tooltip: 'Delete',
+                  onPressed: () => _showDeleteDialog(
+                    context,
+                    viewModel,
+                    user.uuid,
+                    user.nickName,
+                    isSso: true,
+                  ),
+                ),
         ),
       ],
     );
@@ -397,13 +417,14 @@ class _UsersPageScreenState extends State<UsersPageScreen>
 
   Widget _buildRoleChip(String roleName, ThemeData theme) {
     final Color chipColor;
-    switch (roleName.toLowerCase()) {
-      case 'root':
-        chipColor = Colors.red;
-      case 'headstaff':
-        chipColor = Colors.orange;
-      case 'staff':
-        chipColor = Colors.blue;
+    switch (roleName) {
+      case 'Root':
+      case 'Admin':
+        chipColor = Colors.black;
+      case 'User':
+        chipColor = const Color(0xFF41658A);
+      case 'Unverified':
+        chipColor = const Color(0xFF6B8DB2);
       default:
         chipColor = Colors.grey;
     }
@@ -420,10 +441,127 @@ class _UsersPageScreenState extends State<UsersPageScreen>
     );
   }
 
+  bool _isAdminOrRoot(String roleName) {
+    return roleName == UserRoleApiEnum.Admin.name ||
+        roleName == UserRoleApiEnum.Root.name;
+  }
+
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}.'
         '${date.month.toString().padLeft(2, '0')}.'
         '${date.year}';
+  }
+
+  void _showChangeRoleDialog(
+    BuildContext ctx,
+    UsersPageViewModel viewModel,
+    UsersResponseApiModel user,
+  ) {
+    showDialog(
+      context: ctx,
+      builder: (context) {
+        List<UserRoleResponseApiModel>? roles;
+        String? selectedRoleUuid;
+        bool isLoading = true;
+        bool isSaving = false;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            if (isLoading && roles == null) {
+              viewModel.fetchRoles().then((fetchedRoles) {
+                setState(() {
+                  roles = fetchedRoles;
+                  selectedRoleUuid = fetchedRoles
+                      .where((r) => r.roleName == user.userRole.roleName)
+                      .map((r) => r.uuid)
+                      .firstOrNull;
+                  isLoading = false;
+                });
+              });
+            }
+
+            return AlertDialog(
+              title: const Text('Change Role'),
+              content: isLoading
+                  ? const SizedBox(
+                      height: 100,
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  : (roles == null || roles!.isEmpty)
+                  ? const Text('No roles available.')
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Select a new role for "${user.nickName}":'),
+                        const SizedBox(height: 8),
+                        RadioGroup<String>(
+                          groupValue: selectedRoleUuid ?? '',
+                          onChanged: (value) {
+                            if (!isSaving) {
+                              setState(() {
+                                selectedRoleUuid = value;
+                              });
+                            }
+                          },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: roles!
+                                .map(
+                                  (role) => RadioListTile<String>(
+                                    title: Text(role.roleName),
+                                    value: role.uuid,
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                      ],
+                    ),
+              actions: [
+                TextButton(
+                  onPressed: isSaving
+                      ? null
+                      : () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                if (!isLoading && roles != null && roles!.isNotEmpty)
+                  FilledButton(
+                    onPressed:
+                        isSaving ||
+                            selectedRoleUuid == null ||
+                            roles!
+                                .where(
+                                  (r) =>
+                                      r.uuid == selectedRoleUuid &&
+                                      r.roleName == user.userRole.roleName,
+                                )
+                                .isNotEmpty
+                        ? null
+                        : () async {
+                            setState(() => isSaving = true);
+                            await viewModel.setVerifiedUserRole(
+                              user.uuid,
+                              selectedRoleUuid!,
+                            );
+                            if (context.mounted) {
+                              Navigator.of(context).pop();
+                            }
+                          },
+                    child: isSaving
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Save'),
+                  ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   void _showDeleteDialog(

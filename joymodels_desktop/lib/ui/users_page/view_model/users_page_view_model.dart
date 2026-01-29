@@ -8,18 +8,26 @@ import 'package:joymodels_desktop/data/model/sso/request_types/sso_search_reques
 import 'package:joymodels_desktop/data/model/sso/response_types/sso_user_response_api_model.dart';
 import 'package:joymodels_desktop/data/model/users/request_types/user_search_request_api_model.dart';
 import 'package:joymodels_desktop/data/model/users/response_types/users_response_api_model.dart';
+import 'package:joymodels_desktop/data/model/sso/request_types/sso_set_role_request_api_model.dart';
+import 'package:joymodels_desktop/data/model/user_role/request_types/user_role_search_request_api_model.dart';
+import 'package:joymodels_desktop/data/model/user_role/response_types/user_role_response_api_model.dart';
+import 'package:joymodels_desktop/data/core/config/token_storage.dart';
 import 'package:joymodels_desktop/data/repositories/sso_repository.dart';
+import 'package:joymodels_desktop/data/repositories/user_role_repository.dart';
 import 'package:joymodels_desktop/data/repositories/users_repository.dart';
 import 'package:joymodels_desktop/ui/core/view_model/regex_view_model.dart';
 
 class UsersPageViewModel with ChangeNotifier {
   final _usersRepository = sl<UsersRepository>();
   final _ssoRepository = sl<SsoRepository>();
+  final _userRoleRepository = sl<UserRoleRepository>();
 
   VoidCallback? onSessionExpired;
   VoidCallback? onForbidden;
+  VoidCallback? onNetworkError;
 
   bool _isInitialized = false;
+  bool isRoot = false;
 
   PaginationResponseApiModel<UsersResponseApiModel>? verifiedPagination;
   bool isLoadingVerified = false;
@@ -41,6 +49,7 @@ class UsersPageViewModel with ChangeNotifier {
   Future<void> init() async {
     if (_isInitialized) return;
     _isInitialized = true;
+    isRoot = await TokenStorage.isRoot();
     await Future.wait([searchVerifiedUsers(), searchUnverifiedUsers()]);
   }
 
@@ -81,13 +90,13 @@ class UsersPageViewModel with ChangeNotifier {
       notifyListeners();
       onForbidden?.call();
     } on NetworkException {
-      errorMessage = NetworkException().toString();
       isLoadingVerified = false;
       notifyListeners();
+      onNetworkError?.call();
     } catch (e) {
-      errorMessage = 'Failed to load verified users.';
       isLoadingVerified = false;
       notifyListeners();
+      onNetworkError?.call();
     }
   }
 
@@ -134,13 +143,13 @@ class UsersPageViewModel with ChangeNotifier {
       notifyListeners();
       onForbidden?.call();
     } on NetworkException {
-      errorMessage = NetworkException().toString();
       isLoadingUnverified = false;
       notifyListeners();
+      onNetworkError?.call();
     } catch (e) {
-      errorMessage = 'Failed to load unverified users.';
       isLoadingUnverified = false;
       notifyListeners();
+      onNetworkError?.call();
     }
   }
 
@@ -153,11 +162,9 @@ class UsersPageViewModel with ChangeNotifier {
     } on ForbiddenException {
       onForbidden?.call();
     } on NetworkException {
-      errorMessage = NetworkException().toString();
-      notifyListeners();
+      onNetworkError?.call();
     } catch (e) {
-      errorMessage = 'Failed to delete user.';
-      notifyListeners();
+      onNetworkError?.call();
     }
   }
 
@@ -170,11 +177,48 @@ class UsersPageViewModel with ChangeNotifier {
     } on ForbiddenException {
       onForbidden?.call();
     } on NetworkException {
-      errorMessage = NetworkException().toString();
-      notifyListeners();
+      onNetworkError?.call();
     } catch (e) {
-      errorMessage = 'Failed to delete user.';
-      notifyListeners();
+      onNetworkError?.call();
+    }
+  }
+
+  Future<List<UserRoleResponseApiModel>> fetchRoles() async {
+    try {
+      final request = UserRoleSearchRequestApiModel(pageSize: 100);
+      final result = await _userRoleRepository.search(request);
+      return result.data;
+    } on SessionExpiredException {
+      onSessionExpired?.call();
+      return [];
+    } on ForbiddenException {
+      onForbidden?.call();
+      return [];
+    } on NetworkException {
+      onNetworkError?.call();
+      return [];
+    } catch (e) {
+      onNetworkError?.call();
+      return [];
+    }
+  }
+
+  Future<void> setVerifiedUserRole(String userUuid, String roleUuid) async {
+    try {
+      final request = SsoSetRoleRequestApiModel(
+        userUuid: userUuid,
+        designatedUserRoleUuid: roleUuid,
+      );
+      await _ssoRepository.setRole(request);
+      await searchVerifiedUsers(page: verifiedPagination?.pageNumber ?? 1);
+    } on SessionExpiredException {
+      onSessionExpired?.call();
+    } on ForbiddenException {
+      onForbidden?.call();
+    } on NetworkException {
+      onNetworkError?.call();
+    } catch (e) {
+      onNetworkError?.call();
     }
   }
 
@@ -182,6 +226,7 @@ class UsersPageViewModel with ChangeNotifier {
   void dispose() {
     onSessionExpired = null;
     onForbidden = null;
+    onNetworkError = null;
     super.dispose();
   }
 }

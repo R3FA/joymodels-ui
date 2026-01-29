@@ -5,11 +5,13 @@ import 'package:provider/provider.dart';
 class CategoriesPageScreen extends StatefulWidget {
   final VoidCallback? onSessionExpired;
   final VoidCallback? onForbidden;
+  final VoidCallback? onNetworkError;
 
   const CategoriesPageScreen({
     super.key,
     this.onSessionExpired,
     this.onForbidden,
+    this.onNetworkError,
   });
 
   @override
@@ -23,6 +25,7 @@ class _CategoriesPageScreenState extends State<CategoriesPageScreen> {
     final viewModel = context.read<CategoriesPageViewModel>();
     viewModel.onSessionExpired = widget.onSessionExpired;
     viewModel.onForbidden = widget.onForbidden;
+    viewModel.onNetworkError = widget.onNetworkError;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       viewModel.init();
     });
