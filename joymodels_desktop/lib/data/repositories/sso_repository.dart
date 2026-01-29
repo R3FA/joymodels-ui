@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:joymodels_desktop/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_desktop/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_desktop/data/core/services/auth_service.dart';
+import 'package:joymodels_desktop/data/model/core/response_types/problem_details_response_api_model.dart';
 import 'package:joymodels_desktop/data/model/pagination/response_types/pagination_response_api_model.dart';
 import 'package:joymodels_desktop/data/model/sso/request_types/sso_logout_request_api_model.dart';
 import 'package:joymodels_desktop/data/model/sso/request_types/sso_search_request_api_model.dart';
@@ -33,9 +35,7 @@ class SsoRepository {
       final jsonMap = jsonDecode(response.body);
       return SsoLoginResponse.fromJson(jsonMap);
     } else {
-      throw Exception(
-        'Failed to login admin: ${response.statusCode} - ${response.body}',
-      );
+      throw _parseApiException(response.body, response.statusCode);
     }
   }
 
@@ -87,6 +87,20 @@ class SsoRepository {
     if (response.statusCode != 204) {
       throw Exception(
         'Failed to delete user: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  ApiException _parseApiException(String body, int statusCode) {
+    try {
+      final json = jsonDecode(body) as Map<String, dynamic>;
+      return ApiException(ProblemDetailsResponseApiModel.fromJson(json));
+    } catch (_) {
+      return ApiException(
+        ProblemDetailsResponseApiModel(
+          status: statusCode,
+          detail: 'An unexpected error occurred.',
+        ),
       );
     }
   }

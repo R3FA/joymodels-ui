@@ -94,6 +94,18 @@ class _HomePageScreenState extends State<HomePageScreen> {
     final viewModel = context.watch<HomePageScreenViewModel>();
     final theme = Theme.of(context);
 
+    if (viewModel.errorMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(viewModel.errorMessage!),
+            backgroundColor: theme.colorScheme.error,
+          ),
+        );
+        viewModel.clearErrorMessage();
+      });
+    }
+
     if (viewModel.isLoading) {
       return const LoadingScreen(message: 'Loading...');
     }

@@ -17,6 +17,7 @@ class HomePageScreenViewModel with ChangeNotifier {
   String? currentUserName;
   String? userUuid;
   bool isLoading = true;
+  String? errorMessage;
 
   VoidCallback? onLogoutSuccess;
   VoidCallback? onSessionExpired;
@@ -56,6 +57,11 @@ class HomePageScreenViewModel with ChangeNotifier {
     notifyListeners();
   }
 
+  void clearErrorMessage() {
+    errorMessage = null;
+    notifyListeners();
+  }
+
   Future<void> logout() async {
     final refreshToken = await TokenStorage.getRefreshToken();
 
@@ -77,8 +83,9 @@ class HomePageScreenViewModel with ChangeNotifier {
       onForbidden?.call();
     } on NetworkException {
       onNetworkError?.call();
-    } on ApiException {
-      // API error during logout — silently ignore
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+      notifyListeners();
     }
   }
 
