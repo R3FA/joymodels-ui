@@ -103,6 +103,11 @@ class RegexValidationViewModel {
       return 'Invalid price format. Please provide a valid price with up to two decimal places.';
     }
 
+    final parsed = double.tryParse(price) ?? 0;
+    if (parsed <= 0) {
+      return 'Price must be greater than 0.';
+    }
+
     return null;
   }
 }

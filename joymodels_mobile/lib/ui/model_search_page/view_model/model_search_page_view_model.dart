@@ -349,9 +349,12 @@ class ModelSearchPageViewModel
     }
   }
 
-  void onModelTap(BuildContext context, ModelResponseApiModel model) {
+  Future<void> onModelTap(
+    BuildContext context,
+    ModelResponseApiModel model,
+  ) async {
     if (context.mounted) {
-      Navigator.of(context).push(
+      await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => ChangeNotifierProvider(
             create: (_) => ModelPageViewModel(),
@@ -359,6 +362,7 @@ class ModelSearchPageViewModel
           ),
         ),
       );
+      await loadPage(currentPage);
     }
   }
 
