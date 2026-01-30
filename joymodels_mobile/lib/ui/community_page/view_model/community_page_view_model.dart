@@ -297,7 +297,7 @@ class CommunityPageViewModel extends ChangeNotifier
     BuildContext context,
     CommunityPostResponseApiModel post,
   ) async {
-    final result = await Navigator.of(context).push<bool>(
+    await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (_) => ChangeNotifierProvider(
           create: (_) => CommunityPostDetailPageViewModel()..init(post),
@@ -306,9 +306,7 @@ class CommunityPageViewModel extends ChangeNotifier
       ),
     );
 
-    if (result == true) {
-      await reloadCurrentPage();
-    }
+    await reloadCurrentPage();
   }
 
   bool isPostLiked(String postUuid) {

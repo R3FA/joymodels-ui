@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/data/model/community_post_type/response_types/community_post_type_response_api_model.dart';
 import 'package:joymodels_mobile/ui/community_post_edit_page/view_model/community_post_edit_page_view_model.dart';
 import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
+import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/ui/core/ui/form_input_decoration.dart';
 import 'package:joymodels_mobile/ui/core/ui/model_image.dart';
 import 'package:joymodels_mobile/ui/welcome_page/widgets/welcome_page_screen.dart';
@@ -20,12 +21,43 @@ class _CommunityPostEditPageScreenState
     extends State<CommunityPostEditPageScreen> {
   late final CommunityPostEditPageViewModel _viewModel;
 
+  final _titleKey = GlobalKey();
+  final _descriptionKey = GlobalKey();
+  final _postTypeKey = GlobalKey();
+  final _youtubeKey = GlobalKey();
+  final _photosKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
     _viewModel = context.read<CommunityPostEditPageViewModel>();
     _viewModel.onSessionExpired = _handleSessionExpired;
     _viewModel.onForbidden = _handleForbidden;
+  }
+
+  void _scrollToFirstError() {
+    final vm = _viewModel;
+    GlobalKey? targetKey;
+
+    if (vm.titleError != null) {
+      targetKey = _titleKey;
+    } else if (vm.descriptionError != null) {
+      targetKey = _descriptionKey;
+    } else if (vm.postTypeError != null) {
+      targetKey = _postTypeKey;
+    } else if (vm.youtubeError != null) {
+      targetKey = _youtubeKey;
+    } else if (vm.photosError != null) {
+      targetKey = _photosKey;
+    }
+
+    if (targetKey?.currentContext != null) {
+      Scrollable.ensureVisible(
+        targetKey!.currentContext!,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   void _handleSessionExpired() {
@@ -62,7 +94,10 @@ class _CommunityPostEditPageScreenState
               height: 36,
               child: ElevatedButton(
                 onPressed: viewModel.canSave
-                    ? () => viewModel.onSubmit(context)
+                    ? () async {
+                        final success = await viewModel.onSubmit(context);
+                        if (!success) _scrollToFirstError();
+                      }
                     : null,
                 child: const Text(
                   'Save',
@@ -90,60 +125,46 @@ class _CommunityPostEditPageScreenState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (viewModel.errorMessage != null)
-                _buildErrorMessage(viewModel, theme),
+                ErrorDisplay(
+                  message: viewModel.errorMessage!,
+                  onRetry: viewModel.clearError,
+                  retryButtonText: 'Retry',
+                ),
 
-              _buildTitleField(viewModel, theme),
+              KeyedSubtree(
+                key: _titleKey,
+                child: _buildTitleField(viewModel, theme),
+              ),
               const SizedBox(height: 20),
 
-              _buildDescriptionField(viewModel, theme),
+              KeyedSubtree(
+                key: _descriptionKey,
+                child: _buildDescriptionField(viewModel, theme),
+              ),
               const SizedBox(height: 20),
 
-              _buildPostTypeSection(viewModel, theme),
+              KeyedSubtree(
+                key: _postTypeKey,
+                child: _buildPostTypeSection(viewModel, theme),
+              ),
               const SizedBox(height: 20),
 
-              _buildYoutubeVideoLinkField(viewModel, theme),
+              KeyedSubtree(
+                key: _youtubeKey,
+                child: _buildYoutubeVideoLinkField(viewModel, theme),
+              ),
               const SizedBox(height: 20),
 
-              _buildPhotosSection(viewModel, theme),
+              KeyedSubtree(
+                key: _photosKey,
+                child: _buildPhotosSection(viewModel, theme),
+              ),
             ],
           ),
         ),
 
         if (viewModel.isSubmitting) _buildLoadingOverlay(theme),
       ],
-    );
-  }
-
-  Widget _buildErrorMessage(
-    CommunityPostEditPageViewModel viewModel,
-    ThemeData theme,
-  ) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.error_outline, color: theme.colorScheme.error),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              viewModel.errorMessage!,
-              style: TextStyle(color: theme.colorScheme.onErrorContainer),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.close, size: 18),
-            onPressed: viewModel.clearError,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
-        ],
-      ),
     );
   }
 
@@ -157,7 +178,10 @@ class _CommunityPostEditPageScreenState
         const SizedBox(height: 8),
         TextField(
           controller: viewModel.titleController,
-          decoration: formInputDecoration("Title", Icons.title),
+          decoration: formInputDecoration(
+            "Title",
+            Icons.title,
+          ).copyWith(errorText: viewModel.titleError),
           maxLength: 100,
         ),
       ],
@@ -174,7 +198,10 @@ class _CommunityPostEditPageScreenState
         const SizedBox(height: 8),
         TextField(
           controller: viewModel.descriptionController,
-          decoration: formInputDecoration("Description", Icons.description),
+          decoration: formInputDecoration(
+            "Description",
+            Icons.description,
+          ).copyWith(errorText: viewModel.descriptionError),
           maxLines: 10,
           maxLength: 5000,
         ),
@@ -213,6 +240,14 @@ class _CommunityPostEditPageScreenState
                   );
                 }).toList() ??
                 [],
+          ),
+        if (viewModel.postTypeError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              viewModel.postTypeError!,
+              style: TextStyle(color: theme.colorScheme.error, fontSize: 12),
+            ),
           ),
       ],
     );
@@ -276,7 +311,7 @@ class _CommunityPostEditPageScreenState
           decoration: formInputDecoration(
             "YouTube Video Link (Optional)",
             Icons.video_library,
-          ),
+          ).copyWith(errorText: viewModel.youtubeError),
           maxLength: 2048,
         ),
       ],
@@ -328,6 +363,14 @@ class _CommunityPostEditPageScreenState
               _buildAddPhotoButton(viewModel, theme),
           ],
         ),
+        if (viewModel.photosError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              viewModel.photosError!,
+              style: TextStyle(color: theme.colorScheme.error, fontSize: 12),
+            ),
+          ),
       ],
     );
   }

@@ -54,6 +54,12 @@ class CommunityPostEditPageViewModel with ChangeNotifier {
 
   String? errorMessage;
 
+  String? titleError;
+  String? descriptionError;
+  String? postTypeError;
+  String? youtubeError;
+  String? photosError;
+
   int get totalPhotosCount =>
       existingPictureLocations.length + newPhotos.length;
   bool get canAddMorePhotos => totalPhotosCount < maxPhotos;
@@ -117,62 +123,75 @@ class CommunityPostEditPageViewModel with ChangeNotifier {
   }
 
   void _onFormChanged() {
+    clearFieldErrors();
     notifyListeners();
   }
 
+  void clearFieldErrors() {
+    titleError = null;
+    descriptionError = null;
+    postTypeError = null;
+    youtubeError = null;
+    photosError = null;
+  }
+
   bool isFormValid() {
-    final titleError = RegexValidationViewModel.validateText(
+    clearFieldErrors();
+    bool valid = true;
+
+    final titleValidation = RegexValidationViewModel.validateText(
       titleController.text,
     );
-    if (titleError != null) {
-      errorMessage = 'Title: $titleError';
-      return false;
+    if (titleValidation != null) {
+      titleError = titleValidation;
+      valid = false;
     }
 
     if (titleController.text.length > 100) {
-      errorMessage = 'Title cannot exceed 100 characters';
-      return false;
+      titleError = 'Title cannot exceed 100 characters';
+      valid = false;
     }
 
-    final descriptionError = RegexValidationViewModel.validateText(
+    final descriptionValidation = RegexValidationViewModel.validateText(
       descriptionController.text,
     );
-    if (descriptionError != null) {
-      errorMessage = 'Description: $descriptionError';
-      return false;
+    if (descriptionValidation != null) {
+      descriptionError = descriptionValidation;
+      valid = false;
     }
 
     if (descriptionController.text.length > 5000) {
-      errorMessage = 'Description cannot exceed 5000 characters';
-      return false;
+      descriptionError = 'Description cannot exceed 5000 characters';
+      valid = false;
     }
 
     if (selectedPostType == null) {
-      errorMessage = 'Post type is required';
-      return false;
+      postTypeError = 'Post type is required';
+      valid = false;
     }
 
     if (youtubeVideoLinkController.text.isNotEmpty) {
       if (youtubeVideoLinkController.text.length > 2048) {
-        errorMessage = 'YouTube video link cannot exceed 2048 characters';
-        return false;
+        youtubeError = 'YouTube video link cannot exceed 2048 characters';
+        valid = false;
       }
 
-      final youtubeError = RegexValidationViewModel.validateYoutubeVideoLink(
-        youtubeVideoLinkController.text,
-      );
-      if (youtubeError != null) {
-        errorMessage = 'YouTube Link: $youtubeError';
-        return false;
+      final youtubeValidation =
+          RegexValidationViewModel.validateYoutubeVideoLink(
+            youtubeVideoLinkController.text,
+          );
+      if (youtubeValidation != null) {
+        youtubeError = youtubeValidation;
+        valid = false;
       }
     }
 
-    return true;
+    return valid;
   }
 
   Future<void> onAddPhotoPressed() async {
     if (!canAddMorePhotos) {
-      errorMessage = 'Maximum $maxPhotos photos allowed';
+      photosError = 'Maximum $maxPhotos photos allowed';
       notifyListeners();
       return;
     }
@@ -194,25 +213,25 @@ class CommunityPostEditPageViewModel with ChangeNotifier {
             );
 
         if (error != null) {
-          errorMessage = error;
+          photosError = error;
           notifyListeners();
           return;
         }
 
         newPhotos.add(bytes);
         newPhotoNames.add(image.name);
-        errorMessage = null;
+        photosError = null;
         notifyListeners();
       }
     } catch (e) {
-      errorMessage = 'Failed to pick image';
+      photosError = 'Failed to pick image';
       notifyListeners();
     }
   }
 
   Future<void> onAddMultiplePhotosPressed() async {
     if (!canAddMorePhotos) {
-      errorMessage = 'Maximum $maxPhotos photos allowed';
+      photosError = 'Maximum $maxPhotos photos allowed';
       notifyListeners();
       return;
     }
@@ -232,7 +251,7 @@ class CommunityPostEditPageViewModel with ChangeNotifier {
               image.name,
             );
         if (error != null) {
-          errorMessage = error;
+          photosError = error;
           continue;
         }
         newPhotos.add(bytes);
@@ -241,15 +260,15 @@ class CommunityPostEditPageViewModel with ChangeNotifier {
       }
 
       if (images.length > availableSlots || addedCount != imagesToAdd.length) {
-        errorMessage =
+        photosError =
             'Some photos were not added due to limit or validation error. Max is $maxPhotos';
       } else {
-        errorMessage = null;
+        photosError = null;
       }
 
       notifyListeners();
     } catch (e) {
-      errorMessage = 'Failed to pick images';
+      photosError = 'Failed to pick images';
       notifyListeners();
     }
   }
@@ -259,7 +278,7 @@ class CommunityPostEditPageViewModel with ChangeNotifier {
       final pictureLocation = existingPictureLocations[index];
       picturesToRemove.add(pictureLocation);
       existingPictureLocations.removeAt(index);
-      errorMessage = null;
+      photosError = null;
       notifyListeners();
     }
   }
@@ -270,7 +289,7 @@ class CommunityPostEditPageViewModel with ChangeNotifier {
       if (index < newPhotoNames.length) {
         newPhotoNames.removeAt(index);
       }
-      errorMessage = null;
+      photosError = null;
       notifyListeners();
     }
   }
@@ -408,6 +427,7 @@ class CommunityPostEditPageViewModel with ChangeNotifier {
 
   void clearError() {
     errorMessage = null;
+    clearFieldErrors();
     notifyListeners();
   }
 
