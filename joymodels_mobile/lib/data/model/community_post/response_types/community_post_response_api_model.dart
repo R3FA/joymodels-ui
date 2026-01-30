@@ -11,6 +11,7 @@ class CommunityPostResponseApiModel {
   final int communityPostLikes;
   final int communityPostDislikes;
   final int communityPostCommentCount;
+  final DateTime createdAt;
   final CommunityPostTypeResponseApiModel communityPostType;
   final List<CommunityPostPictureResponseApiModel> pictureLocations;
 
@@ -23,6 +24,7 @@ class CommunityPostResponseApiModel {
     required this.communityPostLikes,
     required this.communityPostDislikes,
     required this.communityPostCommentCount,
+    required this.createdAt,
     required this.communityPostType,
     required this.pictureLocations,
   });
@@ -37,6 +39,7 @@ class CommunityPostResponseApiModel {
       communityPostLikes: json['communityPostLikes'] as int,
       communityPostDislikes: json['communityPostDislikes'] as int,
       communityPostCommentCount: json['communityPostCommentCount'] as int,
+      createdAt: DateTime.parse(json['createdAt']),
       communityPostType: CommunityPostTypeResponseApiModel.fromJson(
         json['communityPostType'],
       ),

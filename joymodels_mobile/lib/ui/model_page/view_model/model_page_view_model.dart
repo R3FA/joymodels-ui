@@ -4,6 +4,7 @@ import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/model/enums/model_availability_enum.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/request_types/model_faq_section_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/request_types/model_faq_section_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/response_types/model_faq_section_response_api_model.dart';
@@ -83,13 +84,18 @@ class ModelPageViewModel extends ChangeNotifier {
       await checkIfModelInCart(this.loadedModel!);
       await loadFAQ(this.loadedModel!);
       await checkIfUserReviewed(this.loadedModel!);
-      isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
-      isLoading = false;
-      notifyListeners();
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      onSessionExpired?.call();
+    } on ForbiddenException {
+      onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
     }
+    isLoading = false;
+    notifyListeners();
   }
 
   Future<void> checkAdminStatus() async {
@@ -112,7 +118,8 @@ class ModelPageViewModel extends ChangeNotifier {
       errorMessage = NetworkException().toString();
       notifyListeners();
       return false;
-    } catch (e) {
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isOwnedInLibrary = false;
       notifyListeners();
       return false;
@@ -137,8 +144,8 @@ class ModelPageViewModel extends ChangeNotifier {
       errorMessage = NetworkException().toString();
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       notifyListeners();
       return false;
     }
@@ -150,6 +157,7 @@ class ModelPageViewModel extends ChangeNotifier {
         modelUuid: model.uuid,
         pageNumber: 1,
         pageSize: 5,
+        orderBy: 'CreatedAt:desc',
       );
       final result = await modelFaqSectionRepository.search(request);
       faqList = result.data;
@@ -166,8 +174,8 @@ class ModelPageViewModel extends ChangeNotifier {
       errorMessage = NetworkException().toString();
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       notifyListeners();
       return false;
     }
@@ -175,9 +183,7 @@ class ModelPageViewModel extends ChangeNotifier {
 
   Future<bool> checkIfModelInCart(ModelResponseApiModel model) async {
     try {
-      final cartItem = await shoppingCartRepository.getByUuid(model.uuid);
-      isInCart = cartItem != null;
-      cartItemUuid = cartItem?.uuid;
+      isInCart = await shoppingCartRepository.isModelInCart(model.uuid);
       notifyListeners();
       return true;
     } on SessionExpiredException {
@@ -193,8 +199,8 @@ class ModelPageViewModel extends ChangeNotifier {
       errorMessage = NetworkException().toString();
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       notifyListeners();
       return false;
     }
@@ -221,8 +227,8 @@ class ModelPageViewModel extends ChangeNotifier {
       errorMessage = NetworkException().toString();
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       notifyListeners();
       return false;
     }
@@ -257,8 +263,8 @@ class ModelPageViewModel extends ChangeNotifier {
       areReviewsLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       areReviewsLoading = false;
       notifyListeners();
       return false;
@@ -301,8 +307,8 @@ class ModelPageViewModel extends ChangeNotifier {
         errorMessage = NetworkException().toString();
         notifyListeners();
         return false;
-      } catch (e) {
-        errorMessage = e.toString();
+      } on ApiException catch (e) {
+        errorMessage = e.message;
         notifyListeners();
         return false;
       }
@@ -324,8 +330,8 @@ class ModelPageViewModel extends ChangeNotifier {
         errorMessage = NetworkException().toString();
         notifyListeners();
         return false;
-      } catch (e) {
-        errorMessage = e.toString();
+      } on ApiException catch (e) {
+        errorMessage = e.message;
         notifyListeners();
         return false;
       }
@@ -387,8 +393,8 @@ class ModelPageViewModel extends ChangeNotifier {
       isModelBeingDeleted = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isModelBeingDeleted = false;
       notifyListeners();
       return false;
@@ -504,15 +510,34 @@ class ModelPageViewModel extends ChangeNotifier {
       isAddingToCart = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
       isAddingToCart = false;
+
+      await checkIfModelInCart(loadedModel!);
+
+      if (isInCart) {
+        errorMessage = null;
+        notifyListeners();
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${loadedModel!.name} added to cart'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+        return true;
+      }
+
+      errorMessage = e.message;
       notifyListeners();
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to add to cart: ${e.toString()}'),
+            content: Text('Failed to add to cart: ${e.message}'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),
@@ -541,7 +566,7 @@ class ModelPageViewModel extends ChangeNotifier {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${loadedModel!.name} removed from cart'),
-            backgroundColor: Colors.orange,
+            backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),
         );
@@ -564,15 +589,15 @@ class ModelPageViewModel extends ChangeNotifier {
       isAddingToCart = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isAddingToCart = false;
       notifyListeners();
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to remove from cart: ${e.toString()}'),
+            content: Text('Failed to remove from cart: ${e.message}'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),
@@ -612,7 +637,7 @@ class ModelPageViewModel extends ChangeNotifier {
     BuildContext context,
     ModelFaqSectionResponseApiModel faq,
   ) async {
-    final result = await Navigator.push<ModelFaqSectionResponseApiModel?>(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => ChangeNotifierProvider(
@@ -622,15 +647,8 @@ class ModelPageViewModel extends ChangeNotifier {
       ),
     );
 
-    if (result != null) {
-      final index = faqList.indexWhere((f) => f.uuid == result.uuid);
-      if (index != -1) {
-        faqList[index] = result;
-        notifyListeners();
-      }
-    } else {
-      faqList.removeWhere((f) => f.uuid == faq.uuid);
-      notifyListeners();
+    if (loadedModel != null) {
+      await loadFAQ(loadedModel!);
     }
   }
 
@@ -687,15 +705,15 @@ class ModelPageViewModel extends ChangeNotifier {
       isCreatingFAQ = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isCreatingFAQ = false;
       notifyListeners();
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to submit question: ${e.toString()}'),
+            content: Text('Failed to submit question: ${e.message}'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),
@@ -739,8 +757,8 @@ class ModelPageViewModel extends ChangeNotifier {
       isLoadingReviewTypes = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isLoadingReviewTypes = false;
       notifyListeners();
       return false;
@@ -803,15 +821,15 @@ class ModelPageViewModel extends ChangeNotifier {
       isCreatingReview = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isCreatingReview = false;
       notifyListeners();
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to submit review: ${e.toString()}'),
+            content: Text('Failed to submit review: ${e.message}'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),

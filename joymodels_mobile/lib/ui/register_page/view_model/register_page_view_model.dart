@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_user_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/sso_repository.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
@@ -19,10 +20,23 @@ class RegisterPageScreenViewModel with ChangeNotifier {
   final nicknameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
 
   File? userProfilePicture;
 
   bool isLoading = false;
+  bool obscurePassword = true;
+  bool obscureConfirmPassword = true;
+
+  void togglePasswordVisibility() {
+    obscurePassword = !obscurePassword;
+    notifyListeners();
+  }
+
+  void toggleConfirmPasswordVisibility() {
+    obscureConfirmPassword = !obscureConfirmPassword;
+    notifyListeners();
+  }
 
   String? profilePictureErrorMessage;
   String? responseErrorMessage;
@@ -41,7 +55,24 @@ class RegisterPageScreenViewModel with ChangeNotifier {
   }
 
   String? validatePassword(String? password) {
-    return RegexValidationViewModel.validatePassword(password);
+    final regexError = RegexValidationViewModel.validatePassword(password);
+    if (regexError != null) return regexError;
+    if (confirmPasswordController.text.isNotEmpty &&
+        password != confirmPasswordController.text) {
+      return 'Passwords do not match';
+    }
+    return null;
+  }
+
+  String? validateConfirmPassword(String? confirmPassword) {
+    final regexError = RegexValidationViewModel.validatePassword(
+      confirmPassword,
+    );
+    if (regexError != null) return regexError;
+    if (confirmPassword != passwordController.text) {
+      return 'Passwords do not match';
+    }
+    return null;
   }
 
   Future<String?> validateUserPicture(File? file) async {
@@ -66,6 +97,7 @@ class RegisterPageScreenViewModel with ChangeNotifier {
     nicknameController.clear();
     emailController.clear();
     passwordController.clear();
+    confirmPasswordController.clear();
     userProfilePicture = null;
     profilePictureErrorMessage = null;
     responseErrorMessage = null;
@@ -120,8 +152,8 @@ class RegisterPageScreenViewModel with ChangeNotifier {
       isLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      responseErrorMessage = e.toString();
+    } on ApiException catch (e) {
+      responseErrorMessage = e.message;
       isLoading = false;
       notifyListeners();
       return false;
@@ -135,6 +167,7 @@ class RegisterPageScreenViewModel with ChangeNotifier {
     nicknameController.dispose();
     emailController.dispose();
     passwordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
   }
 }

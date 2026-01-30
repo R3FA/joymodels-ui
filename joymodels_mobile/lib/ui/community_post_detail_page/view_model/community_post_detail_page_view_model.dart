@@ -4,6 +4,7 @@ import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_user_review_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_user_review_delete_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post/response_types/community_post_response_api_model.dart';
@@ -133,8 +134,21 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
       ]);
       isLoading = false;
       notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      isLoading = false;
+      notifyListeners();
+      onSessionExpired?.call();
+    } on ForbiddenException {
+      isLoading = false;
+      notifyListeners();
+      onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isLoading = false;
+      notifyListeners();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isLoading = false;
       notifyListeners();
     }
@@ -166,7 +180,16 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
 
       isLiked = results[0];
       isDisliked = results[1];
-    } catch (_) {}
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      onSessionExpired?.call();
+    } on ForbiddenException {
+      onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+    }
   }
 
   Future<void> onLikePressed() async {
@@ -210,8 +233,8 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
     } on NetworkException {
       errorMessage = NetworkException().toString();
       notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       notifyListeners();
     }
   }
@@ -257,8 +280,8 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
     } on NetworkException {
       errorMessage = NetworkException().toString();
       notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       notifyListeners();
     }
   }
@@ -275,6 +298,7 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
       communityPostLikes: post!.communityPostLikes + likeDelta,
       communityPostDislikes: post!.communityPostDislikes + dislikeDelta,
       communityPostCommentCount: post!.communityPostCommentCount,
+      createdAt: post!.createdAt,
       communityPostType: post!.communityPostType,
       pictureLocations: post!.pictureLocations,
     );
@@ -329,12 +353,17 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
           communityPostUuid: post!.uuid,
           pageNumber: pageNumber ?? currentPage,
           pageSize: 50,
+          orderBy: 'CreatedAt:desc',
         ),
       );
 
       final parentQuestions = response.data
           .where((q) => q.parentMessage == null)
           .toList();
+
+      for (final question in parentQuestions) {
+        question.replies?.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      }
 
       questionsPagination =
           PaginationResponseApiModel<
@@ -364,9 +393,9 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
       errorMessage = NetworkException().toString();
       isLoadingQuestions = false;
       notifyListeners();
-    } catch (e) {
+    } on ApiException catch (e) {
       isLoadingQuestions = false;
-      errorMessage = 'Failed to load questions: $e';
+      errorMessage = e.message;
       notifyListeners();
     }
   }
@@ -414,9 +443,9 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
       errorMessage = NetworkException().toString();
       isSubmittingQuestion = false;
       notifyListeners();
-    } catch (e) {
+    } on ApiException catch (e) {
       isSubmittingQuestion = false;
-      errorMessage = e.toString();
+      errorMessage = e.message;
       notifyListeners();
     }
   }
@@ -476,9 +505,9 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
       errorMessage = NetworkException().toString();
       isSubmittingReply = false;
       notifyListeners();
-    } catch (e) {
+    } on ApiException catch (e) {
       isSubmittingReply = false;
-      errorMessage = e.toString();
+      errorMessage = e.message;
       notifyListeners();
     }
   }
@@ -495,8 +524,8 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
     } on NetworkException {
       errorMessage = NetworkException().toString();
       notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       notifyListeners();
     }
   }
@@ -539,8 +568,8 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
       isEditingQuestion = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isEditingQuestion = false;
       notifyListeners();
       return false;
@@ -560,8 +589,8 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
     } on NetworkException {
       errorMessage = NetworkException().toString();
       notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       notifyListeners();
     }
   }
@@ -572,7 +601,16 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
     try {
       post = await communityPostRepository.getByUuid(post!.uuid);
       notifyListeners();
-    } catch (_) {}
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      onSessionExpired?.call();
+    } on ForbiddenException {
+      onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+    }
   }
 
   void updatePost(CommunityPostResponseApiModel updatedPost) {

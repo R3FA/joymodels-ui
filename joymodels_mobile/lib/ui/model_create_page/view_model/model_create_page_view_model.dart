@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/category/request_types/category_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
@@ -57,6 +58,14 @@ class ModelCreatePageViewModel with ChangeNotifier {
 
   String? errorMessage;
 
+  String? nameError;
+  String? descriptionError;
+  String? priceError;
+  String? photosError;
+  String? categoriesError;
+  String? availabilityError;
+  String? modelFileError;
+
   bool get canAddMorePhotos => selectedPhotos.length < maxPhotos;
 
   int get remainingPhotos => maxPhotos - selectedPhotos.length;
@@ -77,6 +86,8 @@ class ModelCreatePageViewModel with ChangeNotifier {
     await getCategories();
     await getModelAvailabilities();
 
+    modelPriceController.text = '0.00';
+
     isLoading = false;
     notifyListeners();
 
@@ -87,60 +98,74 @@ class ModelCreatePageViewModel with ChangeNotifier {
   }
 
   void _onFormChanged() {
+    clearFieldErrors();
     notifyListeners();
   }
 
+  void clearFieldErrors() {
+    nameError = null;
+    descriptionError = null;
+    priceError = null;
+    photosError = null;
+    categoriesError = null;
+    availabilityError = null;
+    modelFileError = null;
+  }
+
   bool isFormValid() {
-    final nameError = RegexValidationViewModel.validateText(
+    clearFieldErrors();
+    bool valid = true;
+
+    final nameValidation = RegexValidationViewModel.validateText(
       modelNameController.text,
     );
-    if (nameError != null) {
-      errorMessage = 'Name: $nameError';
-      return false;
+    if (nameValidation != null) {
+      nameError = nameValidation;
+      valid = false;
     }
 
-    final descriptionError = RegexValidationViewModel.validateText(
+    final descriptionValidation = RegexValidationViewModel.validateText(
       modelDescriptionController.text,
     );
-    if (descriptionError != null) {
-      errorMessage = 'Description: $descriptionError';
-      return false;
+    if (descriptionValidation != null) {
+      descriptionError = descriptionValidation;
+      valid = false;
     }
 
     if (selectedPhotos.isEmpty) {
-      errorMessage = 'At least one photo is required';
-      return false;
+      photosError = 'At least one photo is required';
+      valid = false;
     }
 
     if (selectedCategories.isEmpty) {
-      errorMessage = 'At least one category is required';
-      return false;
+      categoriesError = 'At least one category is required';
+      valid = false;
     }
 
     if (selectedAvailability == null) {
-      errorMessage = 'Availability is required';
-      return false;
+      availabilityError = 'Availability is required';
+      valid = false;
     }
 
-    final priceError = RegexValidationViewModel.validatePrice(
+    final priceValidation = RegexValidationViewModel.validatePrice(
       modelPriceController.text,
     );
-    if (priceError != null) {
-      errorMessage = 'Price: $priceError';
-      return false;
+    if (priceValidation != null) {
+      priceError = priceValidation;
+      valid = false;
     }
 
     if (selectedModelFile == null) {
-      errorMessage = 'Model file is required';
-      return false;
+      modelFileError = 'Model file is required';
+      valid = false;
     }
 
-    return true;
+    return valid;
   }
 
   Future<void> onAddPhotoPressed() async {
     if (!canAddMorePhotos) {
-      errorMessage = 'Maximum $maxPhotos photos allowed';
+      photosError = 'Maximum $maxPhotos photos allowed';
       notifyListeners();
       return;
     }
@@ -162,25 +187,25 @@ class ModelCreatePageViewModel with ChangeNotifier {
             );
 
         if (error != null) {
-          errorMessage = error;
+          photosError = error;
           notifyListeners();
           return;
         }
 
         selectedPhotos.add(bytes);
         selectedPhotoNames.add(image.name);
-        errorMessage = null;
+        photosError = null;
         notifyListeners();
       }
     } catch (e) {
-      errorMessage = 'Failed to pick image';
+      photosError = 'Failed to pick image';
       notifyListeners();
     }
   }
 
   Future<void> onAddMultiplePhotosPressed() async {
     if (!canAddMorePhotos) {
-      errorMessage = 'Maximum $maxPhotos photos allowed';
+      photosError = 'Maximum $maxPhotos photos allowed';
       notifyListeners();
       return;
     }
@@ -200,7 +225,7 @@ class ModelCreatePageViewModel with ChangeNotifier {
               image.name,
             );
         if (error != null) {
-          errorMessage = error;
+          photosError = error;
           continue;
         }
         selectedPhotos.add(bytes);
@@ -209,15 +234,15 @@ class ModelCreatePageViewModel with ChangeNotifier {
       }
 
       if (images.length > availableSlots || addedCount != imagesToAdd.length) {
-        errorMessage =
+        photosError =
             'Some photos were not added due to limit or validation error. Max is $maxPhotos';
       } else {
-        errorMessage = null;
+        photosError = null;
       }
 
       notifyListeners();
     } catch (e) {
-      errorMessage = 'Failed to pick images';
+      photosError = 'Failed to pick images';
       notifyListeners();
     }
   }
@@ -228,7 +253,7 @@ class ModelCreatePageViewModel with ChangeNotifier {
       if (index < selectedPhotoNames.length) {
         selectedPhotoNames.removeAt(index);
       }
-      errorMessage = null;
+      photosError = null;
       notifyListeners();
     }
   }
@@ -266,8 +291,8 @@ class ModelCreatePageViewModel with ChangeNotifier {
       isCategoriesLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isCategoriesLoading = false;
       notifyListeners();
       return false;
@@ -291,6 +316,7 @@ class ModelCreatePageViewModel with ChangeNotifier {
       selectedCategories.add({'uuid': uuid, 'name': name});
     }
 
+    categoriesError = null;
     notifyListeners();
   }
 
@@ -358,8 +384,8 @@ class ModelCreatePageViewModel with ChangeNotifier {
       isModelAvailabilitiesLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isModelAvailabilitiesLoading = false;
       notifyListeners();
       return false;
@@ -373,6 +399,7 @@ class ModelCreatePageViewModel with ChangeNotifier {
       selectedAvailability = availability;
     }
 
+    availabilityError = null;
     notifyListeners();
   }
 
@@ -387,7 +414,7 @@ class ModelCreatePageViewModel with ChangeNotifier {
         if (validationError != null) {
           selectedModelFile = null;
           selectedModelFileName = null;
-          errorMessage = validationError;
+          modelFileError = validationError;
           notifyListeners();
           return;
         }
@@ -396,15 +423,12 @@ class ModelCreatePageViewModel with ChangeNotifier {
           final fileData = await _readFileFromPath(file.path!);
           selectedModelFile = fileData;
           selectedModelFileName = file.name;
-          errorMessage = null;
+          modelFileError = null;
           notifyListeners();
         }
       }
-
-      errorMessage = null;
-      notifyListeners();
     } catch (e) {
-      errorMessage = 'Failed to pick file: ${e.toString()}';
+      modelFileError = 'Failed to pick file: ${e.toString()}';
       selectedModelFile = null;
       selectedModelFileName = null;
       notifyListeners();
@@ -423,7 +447,7 @@ class ModelCreatePageViewModel with ChangeNotifier {
   void onRemoveModelFile() {
     selectedModelFile = null;
     selectedModelFileName = null;
-    errorMessage = null;
+    modelFileError = null;
     notifyListeners();
   }
 
@@ -493,8 +517,8 @@ class ModelCreatePageViewModel with ChangeNotifier {
       isSubmitting = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isSubmitting = false;
       notifyListeners();
       return false;
@@ -503,6 +527,7 @@ class ModelCreatePageViewModel with ChangeNotifier {
 
   void clearError() {
     errorMessage = null;
+    clearFieldErrors();
     notifyListeners();
   }
 
@@ -510,7 +535,7 @@ class ModelCreatePageViewModel with ChangeNotifier {
     modelNameController.clear();
     modelDescriptionController.clear();
     modelCategorySearchController.clear();
-    modelPriceController.clear();
+    modelPriceController.text = '0.00';
 
     selectedPhotos.clear();
     selectedPhotoNames.clear();
@@ -524,6 +549,7 @@ class ModelCreatePageViewModel with ChangeNotifier {
     isModelAvailabilitiesLoading = false;
     isSubmitting = false;
     errorMessage = null;
+    clearFieldErrors();
 
     notifyListeners();
   }

@@ -5,6 +5,7 @@ import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/model/category/request_types/category_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/enums/jwt_claim_key_api_enum.dart';
@@ -97,14 +98,18 @@ class HomePageScreenViewModel with ChangeNotifier {
       await getTopArtistsProfilePicture();
       await getRecommendedModels();
       await fetchUnreadNotificationCount();
-
-      isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
-      isLoading = false;
-      notifyListeners();
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      onSessionExpired?.call();
+    } on ForbiddenException {
+      onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
     }
+    isLoading = false;
+    notifyListeners();
   }
 
   void onSearchPressed() {
@@ -230,8 +235,8 @@ class HomePageScreenViewModel with ChangeNotifier {
       isLoggedUserDataLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isLoggedUserDataLoading = false;
       notifyListeners();
       return false;
@@ -271,8 +276,8 @@ class HomePageScreenViewModel with ChangeNotifier {
       isCategoriesLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isCategoriesLoading = false;
       notifyListeners();
       return false;
@@ -383,8 +388,8 @@ class HomePageScreenViewModel with ChangeNotifier {
       isTopArtistsLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isTopArtistsLoading = false;
       notifyListeners();
       return false;
@@ -397,6 +402,12 @@ class HomePageScreenViewModel with ChangeNotifier {
     notifyListeners();
 
     try {
+      if (topArtists == null || topArtists!.data.isEmpty) {
+        isTopArtistsPictureLoading = false;
+        notifyListeners();
+        return false;
+      }
+
       for (int i = 0; i < (topArtists!.data.length); i++) {
         final artist = topArtists!.data[i];
         final avatar = await usersRepository.getUserAvatar(artist.uuid);
@@ -422,8 +433,8 @@ class HomePageScreenViewModel with ChangeNotifier {
       isTopArtistsPictureLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isTopArtistsPictureLoading = false;
       notifyListeners();
       return false;
@@ -466,8 +477,8 @@ class HomePageScreenViewModel with ChangeNotifier {
       isRecommendedModelsLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isRecommendedModelsLoading = false;
       notifyListeners();
       return false;
@@ -659,7 +670,7 @@ class HomePageScreenViewModel with ChangeNotifier {
     } on NetworkException {
       unreadNotificationCount = 0;
       notifyListeners();
-    } catch (e) {
+    } on ApiException catch (_) {
       unreadNotificationCount = 0;
       notifyListeners();
     }

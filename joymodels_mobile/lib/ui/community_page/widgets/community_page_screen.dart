@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/model/community_post/response_types/community_post_response_api_model.dart';
 import 'package:joymodels_mobile/ui/community_page/view_model/community_page_view_model.dart';
@@ -280,6 +281,7 @@ class _CommunityPageScreenState extends State<CommunityPageScreen>
                   theme,
                   post.communityPostType.communityPostName,
                   post.title,
+                  post.createdAt,
                 ),
                 if (hasImage)
                   _buildPostImage(theme, post)
@@ -377,7 +379,12 @@ class _CommunityPageScreenState extends State<CommunityPageScreen>
     );
   }
 
-  Widget _buildPostTypeBadge(ThemeData theme, String typeName, String title) {
+  Widget _buildPostTypeBadge(
+    ThemeData theme,
+    String typeName,
+    String title,
+    DateTime createdAt,
+  ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -388,12 +395,23 @@ class _CommunityPageScreenState extends State<CommunityPageScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            typeName.toUpperCase(),
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.secondary,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                typeName.toUpperCase(),
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.secondary,
+                ),
+              ),
+              Text(
+                _formatTimeAgo(createdAt),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
@@ -482,16 +500,22 @@ class _CommunityPageScreenState extends State<CommunityPageScreen>
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: GestureDetector(
-              onTap: () => _navigateToUserProfile(post.user.uuid),
-              child: Text(
-                post.user.nickName,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.secondary,
-                  fontWeight: FontWeight.w500,
+            child: Row(
+              children: [
+                Flexible(
+                  child: GestureDetector(
+                    onTap: () => _navigateToUserProfile(post.user.uuid),
+                    child: Text(
+                      post.user.nickName,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.secondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ),
-                overflow: TextOverflow.ellipsis,
-              ),
+              ],
             ),
           ),
           _buildStatItem(
@@ -589,6 +613,10 @@ class _CommunityPageScreenState extends State<CommunityPageScreen>
         ),
       ],
     );
+  }
+
+  String _formatTimeAgo(DateTime dateTime) {
+    return DateFormat('dd. MMM yyyy. HH:mm').format(dateTime);
   }
 
   void _navigateToUserProfile(String userUuid) {

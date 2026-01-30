@@ -221,14 +221,12 @@ class _UsersPageScreenState extends State<UsersPageScreen>
         DataCell(Text(user.nickName)),
         DataCell(Text(user.email)),
         DataCell(
-          viewModel.isRoot &&
+          _buildRoleChip(user.userRole.roleName, theme),
+          onTap:
+              viewModel.isRoot &&
                   user.userRole.roleName != UserRoleApiEnum.Root.name
-              ? InkWell(
-                  borderRadius: BorderRadius.circular(8),
-                  onTap: () => _showChangeRoleDialog(context, viewModel, user),
-                  child: _buildRoleChip(user.userRole.roleName, theme),
-                )
-              : _buildRoleChip(user.userRole.roleName, theme),
+              ? () => _showChangeRoleDialog(context, viewModel, user)
+              : null,
         ),
         DataCell(Text(user.userModelsCount.toString())),
         DataCell(Text(user.userFollowerCount.toString())),

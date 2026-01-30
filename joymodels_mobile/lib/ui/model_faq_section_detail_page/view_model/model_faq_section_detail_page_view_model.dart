@@ -4,6 +4,7 @@ import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/model/enums/model_availability_enum.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/request_types/model_faq_section_create_answer_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_faq_section/request_types/model_faq_section_delete_request_api_model.dart';
@@ -61,10 +62,15 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
 
   Future<void> init(ModelFaqSectionResponseApiModel faq) async {
     faqDetail = faq;
+    _sortReplies();
     _displayedRepliesCount = _repliesPerPage;
     currentUserUuid = await TokenStorage.getCurrentUserUuid();
     isAdminOrRoot = await TokenStorage.isAdminOrRoot();
     notifyListeners();
+  }
+
+  void _sortReplies() {
+    faqDetail?.replies?.sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
   Future<bool> submitAnswer(BuildContext context, String messageText) async {
@@ -94,6 +100,7 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
         faqDetail!.uuid,
       );
       faqDetail = updatedFaq;
+      _sortReplies();
       isSubmittingAnswer = false;
       notifyListeners();
 
@@ -123,15 +130,15 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
       isSubmittingAnswer = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isSubmittingAnswer = false;
       notifyListeners();
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to submit answer: ${e.toString()}'),
+            content: Text('Failed to submit answer: ${e.message}'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),
@@ -174,6 +181,7 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
         faqDetail!.uuid,
       );
       faqDetail = updatedFaq;
+      _sortReplies();
       isEditingFaq = false;
       notifyListeners();
 
@@ -203,15 +211,15 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
       isEditingFaq = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isEditingFaq = false;
       notifyListeners();
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update: ${e.toString()}'),
+            content: Text('Failed to update: ${e.message}'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),
@@ -263,15 +271,15 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
       isDeletingFaq = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isDeletingFaq = false;
       notifyListeners();
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to delete: ${e.toString()}'),
+            content: Text('Failed to delete: ${e.message}'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),
@@ -299,6 +307,7 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
         faqDetail!.uuid,
       );
       faqDetail = updatedFaq;
+      _sortReplies();
       isDeletingFaq = false;
       notifyListeners();
 
@@ -328,15 +337,15 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
       isDeletingFaq = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isDeletingFaq = false;
       notifyListeners();
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to delete answer: ${e.toString()}'),
+            content: Text('Failed to delete answer: ${e.message}'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),

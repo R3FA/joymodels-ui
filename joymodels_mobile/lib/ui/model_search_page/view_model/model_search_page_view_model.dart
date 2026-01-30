@@ -5,6 +5,7 @@ import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/model/category/request_types/category_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/request_types/model_best_selling_request_api_model.dart';
@@ -116,8 +117,21 @@ class ModelSearchPageViewModel
       );
       isLoading = false;
       notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      isLoading = false;
+      notifyListeners();
+      onSessionExpired?.call();
+    } on ForbiddenException {
+      isLoading = false;
+      notifyListeners();
+      onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isLoading = false;
+      notifyListeners();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isLoading = false;
       notifyListeners();
     }
@@ -200,8 +214,8 @@ class ModelSearchPageViewModel
       isCategoriesLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isCategoriesLoading = false;
       notifyListeners();
       return false;
@@ -220,7 +234,7 @@ class ModelSearchPageViewModel
         arePrivateUserModelsSearched: req.arePrivateUserModelsSearched,
         pageNumber: req.pageNumber,
         pageSize: 10,
-        orderBy: req.orderBy,
+        orderBy: req.orderBy ?? 'CreatedAt:desc',
       );
 
       models = await modelRepository.search(modelRequest);
@@ -244,8 +258,8 @@ class ModelSearchPageViewModel
       areModelsLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       areModelsLoading = false;
       notifyListeners();
       return false;
@@ -284,8 +298,8 @@ class ModelSearchPageViewModel
       areModelsLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       areModelsLoading = false;
       notifyListeners();
       return false;
@@ -335,9 +349,12 @@ class ModelSearchPageViewModel
     }
   }
 
-  void onModelTap(BuildContext context, ModelResponseApiModel model) {
+  Future<void> onModelTap(
+    BuildContext context,
+    ModelResponseApiModel model,
+  ) async {
     if (context.mounted) {
-      Navigator.of(context).push(
+      await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => ChangeNotifierProvider(
             create: (_) => ModelPageViewModel(),
@@ -345,6 +362,7 @@ class ModelSearchPageViewModel
           ),
         ),
       );
+      await loadPage(currentPage);
     }
   }
 

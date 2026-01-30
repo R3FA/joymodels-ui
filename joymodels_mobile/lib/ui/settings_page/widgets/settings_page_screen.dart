@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
 import 'package:joymodels_mobile/ui/core/ui/user_avatar.dart';
@@ -20,6 +21,8 @@ class _SettingsPageScreenState extends State<SettingsPageScreen>
     with SingleTickerProviderStateMixin {
   late final SettingsPageViewModel _viewModel;
   late final TabController _tabController;
+  bool _obscureNewPassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void initState() {
@@ -98,6 +101,12 @@ class _SettingsPageScreenState extends State<SettingsPageScreen>
       ),
       body: viewModel.isLoading
           ? const Center(child: CircularProgressIndicator())
+          : viewModel.errorMessage != null
+          ? ErrorDisplay(
+              message: viewModel.errorMessage!,
+              onRetry: viewModel.clearMessages,
+              retryButtonText: 'Retry',
+            )
           : TabBarView(
               controller: _tabController,
               children: [
@@ -124,18 +133,21 @@ class _SettingsPageScreenState extends State<SettingsPageScreen>
             controller: viewModel.firstNameController,
             label: 'First Name',
             maxLength: 100,
+            errorText: viewModel.firstNameError,
           ),
           const SizedBox(height: 16),
           _buildTextField(
             controller: viewModel.lastNameController,
             label: 'Last Name',
             maxLength: 100,
+            errorText: viewModel.lastNameError,
           ),
           const SizedBox(height: 16),
           _buildTextField(
             controller: viewModel.nicknameController,
             label: 'Nickname',
             maxLength: 50,
+            errorText: viewModel.nicknameError,
           ),
           const SizedBox(height: 24),
           _buildMessageDisplay(viewModel, theme),
@@ -227,11 +239,23 @@ class _SettingsPageScreenState extends State<SettingsPageScreen>
           _buildPasswordField(
             controller: viewModel.newPasswordController,
             label: 'New Password',
+            errorText: viewModel.newPasswordError,
+            obscureText: _obscureNewPassword,
+            onToggleVisibility: () {
+              setState(() => _obscureNewPassword = !_obscureNewPassword);
+            },
           ),
           const SizedBox(height: 16),
           _buildPasswordField(
             controller: viewModel.confirmPasswordController,
             label: 'Confirm New Password',
+            errorText: viewModel.confirmPasswordError,
+            obscureText: _obscureConfirmPassword,
+            onToggleVisibility: () {
+              setState(
+                () => _obscureConfirmPassword = !_obscureConfirmPassword,
+              );
+            },
           ),
           const SizedBox(height: 24),
           _buildMessageDisplay(viewModel, theme),
@@ -331,6 +355,14 @@ class _SettingsPageScreenState extends State<SettingsPageScreen>
               ),
             ],
           ),
+          if (viewModel.deleteConfirmError != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                viewModel.deleteConfirmError!,
+                style: TextStyle(color: theme.colorScheme.error, fontSize: 12),
+              ),
+            ),
           const SizedBox(height: 24),
           _buildMessageDisplay(viewModel, theme),
           const SizedBox(height: 16),
@@ -389,6 +421,7 @@ class _SettingsPageScreenState extends State<SettingsPageScreen>
     required TextEditingController controller,
     required String label,
     int? maxLength,
+    String? errorText,
   }) {
     return TextField(
       controller: controller,
@@ -397,6 +430,7 @@ class _SettingsPageScreenState extends State<SettingsPageScreen>
         labelText: label,
         border: const OutlineInputBorder(),
         counterText: '',
+        errorText: errorText,
       ),
     );
   }
@@ -404,15 +438,23 @@ class _SettingsPageScreenState extends State<SettingsPageScreen>
   Widget _buildPasswordField({
     required TextEditingController controller,
     required String label,
+    String? errorText,
+    required bool obscureText,
+    required VoidCallback onToggleVisibility,
   }) {
     return TextField(
       controller: controller,
-      obscureText: true,
+      obscureText: obscureText,
       maxLength: 50,
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
         counterText: '',
+        errorText: errorText,
+        suffixIcon: IconButton(
+          icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility),
+          onPressed: onToggleVisibility,
+        ),
       ),
     );
   }
@@ -421,33 +463,6 @@ class _SettingsPageScreenState extends State<SettingsPageScreen>
     SettingsPageViewModel viewModel,
     ThemeData theme,
   ) {
-    if (viewModel.errorMessage != null) {
-      return Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.errorContainer,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.error_outline, color: theme.colorScheme.error),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                viewModel.errorMessage!,
-                style: TextStyle(color: theme.colorScheme.error),
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: viewModel.clearMessages,
-              iconSize: 18,
-            ),
-          ],
-        ),
-      );
-    }
-
     if (viewModel.successMessage != null) {
       return Container(
         padding: const EdgeInsets.all(12),

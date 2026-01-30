@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/category/request_types/category_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/category/response_types/category_response_api_model.dart';
@@ -57,7 +58,9 @@ class ModelEditPageViewModel extends ChangeNotifier {
   bool get hasChanges {
     if (nameController.text != originalModel.name) return true;
     if (descriptionController.text != originalModel.description) return true;
-    if (priceController.text != originalModel.price.toString()) return true;
+    if (priceController.text != originalModel.price.toStringAsFixed(2)) {
+      return true;
+    }
 
     if (selectedAvailability?.uuid != originalModel.modelAvailability.uuid) {
       return true;
@@ -73,6 +76,14 @@ class ModelEditPageViewModel extends ChangeNotifier {
   }
 
   String? errorMessage;
+
+  String? nameError;
+  String? descriptionError;
+  String? priceError;
+  String? photosError;
+  String? categoriesError;
+  String? availabilityError;
+
   VoidCallback? onSessionExpired;
   VoidCallback? onForbidden;
 
@@ -106,7 +117,7 @@ class ModelEditPageViewModel extends ChangeNotifier {
 
     nameController.text = model.name;
     descriptionController.text = model.description;
-    priceController.text = model.price.toString();
+    priceController.text = model.price.toStringAsFixed(2);
     modelPictures = List.from(model.modelPictures);
 
     nameController.addListener(_onFormChanged);
@@ -119,12 +130,22 @@ class ModelEditPageViewModel extends ChangeNotifier {
   }
 
   void _onFormChanged() {
+    clearFieldErrors();
     notifyListeners();
+  }
+
+  void clearFieldErrors() {
+    nameError = null;
+    descriptionError = null;
+    priceError = null;
+    photosError = null;
+    categoriesError = null;
+    availabilityError = null;
   }
 
   Future<void> onAddPhotoPressed() async {
     if (!canAddMorePhotos) {
-      errorMessage = 'Maximum $maxPhotos photos allowed';
+      photosError = 'Maximum $maxPhotos photos allowed';
       notifyListeners();
       return;
     }
@@ -145,23 +166,23 @@ class ModelEditPageViewModel extends ChangeNotifier {
               image.name,
             );
         if (error != null) {
-          errorMessage = error;
+          photosError = error;
           notifyListeners();
           return;
         }
         modelPicturesToInsert.add(ModelFile(bytes: bytes, name: image.name));
-        errorMessage = null;
+        photosError = null;
         notifyListeners();
       }
     } catch (e) {
-      errorMessage = 'Failed to pick image';
+      photosError = 'Failed to pick image';
       notifyListeners();
     }
   }
 
   Future<void> onAddMultiplePhotosPressed() async {
     if (!canAddMorePhotos) {
-      errorMessage = 'Maximum $maxPhotos photos allowed';
+      photosError = 'Maximum $maxPhotos photos allowed';
       notifyListeners();
       return;
     }
@@ -186,7 +207,7 @@ class ModelEditPageViewModel extends ChangeNotifier {
               image.name,
             );
         if (error != null) {
-          errorMessage = error;
+          photosError = error;
           continue;
         }
         modelPicturesToInsert.add(ModelFile(bytes: bytes, name: image.name));
@@ -194,22 +215,22 @@ class ModelEditPageViewModel extends ChangeNotifier {
       }
 
       if (images.length > availableSlots || addedCount != imagesToAdd.length) {
-        errorMessage =
+        photosError =
             'Some photos were not added due to limit or validation error. Max is $maxPhotos.';
       } else {
-        errorMessage = null;
+        photosError = null;
       }
 
       notifyListeners();
     } catch (e) {
-      errorMessage = 'Failed to pick images';
+      photosError = 'Failed to pick images';
       notifyListeners();
     }
   }
 
   void onRemovePhoto(ModelFile photo) {
     modelPicturesToInsert.remove(photo);
-    errorMessage = null;
+    photosError = null;
     notifyListeners();
   }
 
@@ -283,8 +304,8 @@ class ModelEditPageViewModel extends ChangeNotifier {
       isCategoriesLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isCategoriesLoading = false;
       notifyListeners();
       return false;
@@ -318,6 +339,7 @@ class ModelEditPageViewModel extends ChangeNotifier {
 
       modelCategoriesToDelete.remove(uuid);
     }
+    categoriesError = null;
     notifyListeners();
   }
 
@@ -379,8 +401,8 @@ class ModelEditPageViewModel extends ChangeNotifier {
       isModelAvailabilitiesLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isModelAvailabilitiesLoading = false;
       notifyListeners();
       return false;
@@ -389,46 +411,50 @@ class ModelEditPageViewModel extends ChangeNotifier {
 
   void onAvailabilityChanged(ModelAvailabilityResponseApiModel availability) {
     selectedAvailability = availability;
+    availabilityError = null;
     notifyListeners();
   }
 
   bool isFormValid() {
+    clearFieldErrors();
+    bool valid = true;
+
     if (nameController.text != originalModel.name) {
-      final nameError = RegexValidationViewModel.validateText(
+      final nameValidation = RegexValidationViewModel.validateText(
         nameController.text,
       );
-      if (nameError != null) {
-        errorMessage = 'Name: $nameError';
-        return false;
+      if (nameValidation != null) {
+        nameError = nameValidation;
+        valid = false;
       }
     }
 
     if (descriptionController.text != originalModel.description) {
-      final descError = RegexValidationViewModel.validateText(
+      final descValidation = RegexValidationViewModel.validateText(
         descriptionController.text,
       );
-      if (descError != null) {
-        errorMessage = 'Description: $descError';
-        return false;
+      if (descValidation != null) {
+        descriptionError = descValidation;
+        valid = false;
       }
     }
 
-    final priceError = RegexValidationViewModel.validatePrice(
+    final priceValidation = RegexValidationViewModel.validatePrice(
       priceController.text,
     );
-    if (priceError != null) {
-      errorMessage = 'Price: $priceError';
-      return false;
+    if (priceValidation != null) {
+      priceError = priceValidation;
+      valid = false;
     }
 
     if (modelsCategories.isEmpty) {
-      errorMessage = 'At least one category is required';
-      return false;
+      categoriesError = 'At least one category is required';
+      valid = false;
     }
 
     if (selectedAvailability == null) {
-      errorMessage = 'Availability is required';
-      return false;
+      availabilityError = 'Availability is required';
+      valid = false;
     }
 
     final totalPhotos =
@@ -436,12 +462,11 @@ class ModelEditPageViewModel extends ChangeNotifier {
         modelPicturesToDelete.length +
         modelPicturesToInsert.length;
     if (totalPhotos < 1) {
-      errorMessage = 'At least one photo is required';
-      return false;
+      photosError = 'At least one photo is required';
+      valid = false;
     }
 
-    errorMessage = null;
-    return true;
+    return valid;
   }
 
   Future<bool> onSubmit(BuildContext context) async {
@@ -503,8 +528,8 @@ class ModelEditPageViewModel extends ChangeNotifier {
       isSaving = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isSaving = false;
       notifyListeners();
       return false;
@@ -513,6 +538,7 @@ class ModelEditPageViewModel extends ChangeNotifier {
 
   void clearError() {
     errorMessage = null;
+    clearFieldErrors();
     notifyListeners();
   }
 

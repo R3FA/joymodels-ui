@@ -4,6 +4,7 @@ import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/shopping_cart/request_types/shopping_cart_search_request_api_model.dart';
@@ -84,6 +85,7 @@ class ShoppingCartPageViewModel extends ChangeNotifier
         modelName: searchQuery.isEmpty ? null : searchQuery,
         pageNumber: pageNumber,
         pageSize: pageSize,
+        orderBy: 'CreatedAt:desc',
       );
 
       _paginationData = await shoppingCartRepository.search(request);
@@ -102,8 +104,8 @@ class ShoppingCartPageViewModel extends ChangeNotifier
       errorMessage = NetworkException().toString();
       isLoading = false;
       notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isLoading = false;
       notifyListeners();
     }
@@ -130,8 +132,8 @@ class ShoppingCartPageViewModel extends ChangeNotifier
       errorMessage = NetworkException().toString();
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       notifyListeners();
       return false;
     }
@@ -203,9 +205,9 @@ class ShoppingCartPageViewModel extends ChangeNotifier
       isCheckoutLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
+    } on ApiException catch (e) {
       isCheckoutLoading = false;
-      errorMessage = e.toString();
+      errorMessage = e.message;
       notifyListeners();
       return false;
     }

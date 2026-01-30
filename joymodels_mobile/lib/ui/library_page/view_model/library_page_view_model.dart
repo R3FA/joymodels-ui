@@ -6,6 +6,7 @@ import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/model/library/request_types/library_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/library/response_types/library_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
@@ -78,6 +79,7 @@ class LibraryPageViewModel extends ChangeNotifier
         modelName: searchQuery.isNotEmpty ? searchQuery : null,
         pageNumber: pageNumber ?? currentPage,
         pageSize: _pageSize,
+        orderBy: 'AcquiredAt:desc',
       );
 
       libraryPagination = await _libraryRepository.search(request);
@@ -101,8 +103,8 @@ class LibraryPageViewModel extends ChangeNotifier
       isLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isLoading = false;
       notifyListeners();
       return false;
@@ -187,7 +189,7 @@ class LibraryPageViewModel extends ChangeNotifier
       downloadingModelUuid = null;
       notifyListeners();
       return false;
-    } catch (e) {
+    } on ApiException catch (e) {
       isDownloading = false;
       downloadingModelUuid = null;
       notifyListeners();
@@ -199,7 +201,7 @@ class LibraryPageViewModel extends ChangeNotifier
               children: [
                 const Icon(Icons.error, color: Colors.white),
                 const SizedBox(width: 12),
-                Expanded(child: Text('Download failed: ${e.toString()}')),
+                Expanded(child: Text('Download failed: ${e.message}')),
               ],
             ),
             backgroundColor: Colors.red,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/report/request_types/report_search_request_api_model.dart';
@@ -71,8 +72,8 @@ class MyReportsViewModel extends ChangeNotifier
       isLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = 'Failed to load reports';
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isLoading = false;
       notifyListeners();
       return false;
@@ -114,16 +115,16 @@ class MyReportsViewModel extends ChangeNotifier
       isDeleting = false;
       notifyListeners();
       return false;
-    } catch (e) {
+    } on ApiException catch (e) {
       isDeleting = false;
       notifyListeners();
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to delete report'),
+          SnackBar(
+            content: Text('Failed to delete report: ${e.message}'),
             backgroundColor: Colors.red,
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 2),
           ),
         );
       }

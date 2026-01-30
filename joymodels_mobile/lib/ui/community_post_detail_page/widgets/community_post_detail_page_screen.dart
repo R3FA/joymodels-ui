@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/model/community_post/response_types/community_post_response_api_model.dart';
 import 'package:joymodels_mobile/ui/community_post_detail_page/view_model/community_post_detail_page_view_model.dart';
@@ -220,15 +221,25 @@ class _CommunityPostDetailPageScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                GestureDetector(
-                  onTap: () => _navigateToUserProfile(post.user.uuid),
-                  child: Text(
-                    post.user.nickName,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => _navigateToUserProfile(post.user.uuid),
+                      child: Text(
+                        post.user.nickName,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
                     ),
-                  ),
+                    Text(
+                      '  ·  ${_formatDate(post.createdAt)}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
                 Text(
                   post.communityPostType.communityPostName,
@@ -1193,18 +1204,7 @@ class _CommunityPostDetailPageScreenState
   }
 
   String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else {
-      return 'Just now';
-    }
+    return DateFormat('dd. MMM yyyy. HH:mm').format(date);
   }
 
   void _showDeleteConfirmation(

@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/services/auth_service.dart';
+import 'package:joymodels_mobile/data/model/core/response_types/problem_details_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_logout_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_new_otp_code_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_password_change_request_api_model.dart';
@@ -34,9 +36,7 @@ class SsoRepository {
       final jsonMap = jsonDecode(response.body);
       return SsoUserResponseApiModel.fromJson(jsonMap);
     } else {
-      throw Exception(
-        'Failed to create user: ${response.statusCode} - ${response.body}',
-      );
+      throw _parseApiException(response.body, response.statusCode);
     }
   }
 
@@ -81,9 +81,7 @@ class SsoRepository {
       final jsonMap = jsonDecode(response.body);
       return SsoLoginResponse.fromJson(jsonMap);
     } else {
-      throw Exception(
-        'Failed to login user: ${response.statusCode} - ${response.body}',
-      );
+      throw _parseApiException(response.body, response.statusCode);
     }
   }
 
@@ -107,6 +105,20 @@ class SsoRepository {
     if (response.statusCode != 204) {
       throw Exception(
         'Failed to change password: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  ApiException _parseApiException(String body, int statusCode) {
+    try {
+      final json = jsonDecode(body) as Map<String, dynamic>;
+      return ApiException(ProblemDetailsResponseApiModel.fromJson(json));
+    } catch (_) {
+      return ApiException(
+        ProblemDetailsResponseApiModel(
+          status: statusCode,
+          detail: 'An unexpected error occurred.',
+        ),
       );
     }
   }

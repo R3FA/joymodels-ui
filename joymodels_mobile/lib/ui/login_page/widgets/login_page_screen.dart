@@ -71,8 +71,15 @@ class LoginPageScreen extends StatelessWidget {
   ) {
     return TextFormField(
       controller: viewModel.passwordController,
-      decoration: formInputDecoration('Password', Icons.lock_outline),
-      obscureText: true,
+      decoration: formInputDecoration('Password', Icons.lock_outline).copyWith(
+        suffixIcon: IconButton(
+          icon: Icon(
+            viewModel.obscurePassword ? Icons.visibility_off : Icons.visibility,
+          ),
+          onPressed: viewModel.togglePasswordVisibility,
+        ),
+      ),
+      obscureText: viewModel.obscurePassword,
       validator: viewModel.validatePassword,
       maxLength: 50,
       autofillHints: const [AutofillHints.password],

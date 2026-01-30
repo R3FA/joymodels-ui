@@ -3,6 +3,7 @@ import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/models/request_types/model_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/models/response_types/model_response_api_model.dart';
@@ -104,8 +105,8 @@ class MenuDrawerViewModel extends ChangeNotifier
       searchErrorMessage = NetworkException().toString();
       isSearching = false;
       notifyListeners();
-    } catch (e) {
-      searchErrorMessage = e.toString();
+    } on ApiException catch (e) {
+      searchErrorMessage = e.message;
       isSearching = false;
       notifyListeners();
     }
@@ -152,8 +153,8 @@ class MenuDrawerViewModel extends ChangeNotifier
       errorMessage = NetworkException().toString();
       isLoggingOut = false;
       notifyListeners();
-    } catch (e) {
-      errorMessage = 'Logout failed. Please try again.';
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isLoggingOut = false;
       notifyListeners();
     }
@@ -246,8 +247,8 @@ class MenuDrawerViewModel extends ChangeNotifier
       hiddenModelsErrorMessage = NetworkException().toString();
       isHiddenModelsSearching = false;
       notifyListeners();
-    } catch (e) {
-      hiddenModelsErrorMessage = e.toString();
+    } on ApiException catch (e) {
+      hiddenModelsErrorMessage = e.message;
       isHiddenModelsSearching = false;
       notifyListeners();
     }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:joymodels_mobile/data/model/model_availability/response_types/model_availability_response_api_model.dart';
 import 'package:joymodels_mobile/ui/core/ui/access_denied_screen.dart';
+import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
+import 'package:joymodels_mobile/ui/core/ui/currency_input_formatter.dart';
 import 'package:joymodels_mobile/ui/core/ui/form_input_decoration.dart';
 import 'package:joymodels_mobile/ui/core/ui/navigation_bar/widgets/navigation_bar_screen.dart';
 import 'package:joymodels_mobile/ui/menu_drawer/widgets/menu_drawer.dart';
@@ -19,6 +21,14 @@ class ModelCreatePageScreen extends StatefulWidget {
 class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
   late final ModelCreatePageViewModel _viewModel;
 
+  final _nameKey = GlobalKey();
+  final _descriptionKey = GlobalKey();
+  final _photosKey = GlobalKey();
+  final _categoriesKey = GlobalKey();
+  final _availabilityKey = GlobalKey();
+  final _priceKey = GlobalKey();
+  final _modelFileKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -28,6 +38,35 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _viewModel.init();
     });
+  }
+
+  void _scrollToFirstError() {
+    final vm = _viewModel;
+    GlobalKey? targetKey;
+
+    if (vm.nameError != null) {
+      targetKey = _nameKey;
+    } else if (vm.descriptionError != null) {
+      targetKey = _descriptionKey;
+    } else if (vm.photosError != null) {
+      targetKey = _photosKey;
+    } else if (vm.categoriesError != null) {
+      targetKey = _categoriesKey;
+    } else if (vm.availabilityError != null) {
+      targetKey = _availabilityKey;
+    } else if (vm.priceError != null) {
+      targetKey = _priceKey;
+    } else if (vm.modelFileError != null) {
+      targetKey = _modelFileKey;
+    }
+
+    if (targetKey?.currentContext != null) {
+      Scrollable.ensureVisible(
+        targetKey!.currentContext!,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   void _handleSessionExpired() {
@@ -67,7 +106,10 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
               child: ElevatedButton(
                 onPressed: viewModel.isSubmitting || !viewModel.isFormComplete
                     ? null
-                    : () => viewModel.onSubmit(context),
+                    : () async {
+                        final success = await viewModel.onSubmit(context);
+                        if (!success) _scrollToFirstError();
+                      },
                 child: const Text(
                   'Create',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -86,6 +128,14 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    if (viewModel.errorMessage != null) {
+      return ErrorDisplay(
+        message: viewModel.errorMessage!,
+        onRetry: viewModel.clearError,
+        retryButtonText: 'Retry',
+      );
+    }
+
     return Stack(
       children: [
         SingleChildScrollView(
@@ -93,67 +143,52 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (viewModel.errorMessage != null)
-                _buildErrorMessage(viewModel, theme),
-
-              _buildNameField(viewModel, theme),
+              KeyedSubtree(
+                key: _nameKey,
+                child: _buildNameField(viewModel, theme),
+              ),
               const SizedBox(height: 20),
 
-              _buildDescriptionField(viewModel, theme),
+              KeyedSubtree(
+                key: _descriptionKey,
+                child: _buildDescriptionField(viewModel, theme),
+              ),
               const SizedBox(height: 20),
 
-              _buildPhotosSection(viewModel, theme),
+              KeyedSubtree(
+                key: _photosKey,
+                child: _buildPhotosSection(viewModel, theme),
+              ),
               const SizedBox(height: 20),
 
-              _buildCategorySection(viewModel, theme),
+              KeyedSubtree(
+                key: _categoriesKey,
+                child: _buildCategorySection(viewModel, theme),
+              ),
               const SizedBox(height: 20),
 
-              _buildAvailabilitySection(viewModel, theme),
+              KeyedSubtree(
+                key: _availabilityKey,
+                child: _buildAvailabilitySection(viewModel, theme),
+              ),
               const SizedBox(height: 20),
 
-              _buildPriceField(viewModel, theme),
+              KeyedSubtree(
+                key: _priceKey,
+                child: _buildPriceField(viewModel, theme),
+              ),
               const SizedBox(height: 32),
 
-              _buildAddModelFileButton(viewModel, theme),
+              KeyedSubtree(
+                key: _modelFileKey,
+                child: _buildAddModelFileButton(viewModel, theme),
+              ),
             ],
           ),
         ),
 
         if (viewModel.isSubmitting) _buildLoadingOverlay(theme),
       ],
-    );
-  }
-
-  Widget _buildErrorMessage(
-    ModelCreatePageViewModel viewModel,
-    ThemeData theme,
-  ) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.error_outline, color: theme.colorScheme.error),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              viewModel.errorMessage!,
-              style: TextStyle(color: theme.colorScheme.onErrorContainer),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.close, size: 18),
-            onPressed: viewModel.clearError,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
-        ],
-      ),
     );
   }
 
@@ -167,7 +202,7 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
           decoration: formInputDecoration(
             "Name",
             Icons.arrow_forward_ios_rounded,
-          ),
+          ).copyWith(errorText: viewModel.nameError),
           maxLength: 100,
         ),
       ],
@@ -187,7 +222,7 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
           decoration: formInputDecoration(
             "Model description",
             Icons.description,
-          ),
+          ).copyWith(errorText: viewModel.descriptionError),
           maxLines: 10,
           maxLength: 5000,
         ),
@@ -232,6 +267,14 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
               _buildAddPhotoButton(viewModel, theme),
           ],
         ),
+        if (viewModel.photosError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              viewModel.photosError!,
+              style: TextStyle(color: theme.colorScheme.error, fontSize: 12),
+            ),
+          ),
       ],
     );
   }
@@ -347,6 +390,14 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
             );
           },
         ),
+        if (viewModel.categoriesError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              viewModel.categoriesError!,
+              style: TextStyle(color: theme.colorScheme.error, fontSize: 12),
+            ),
+          ),
       ],
     );
   }
@@ -421,6 +472,14 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
               }).toList() ??
               [],
         ),
+        if (viewModel.availabilityError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              viewModel.availabilityError!,
+              style: TextStyle(color: theme.colorScheme.error, fontSize: 12),
+            ),
+          ),
       ],
     );
   }
@@ -471,8 +530,12 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
         const SizedBox(height: 8),
         TextField(
           controller: viewModel.modelPriceController,
-          decoration: formInputDecoration("Price", Icons.attach_money),
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: formInputDecoration(
+            "Price",
+            Icons.attach_money,
+          ).copyWith(errorText: viewModel.priceError),
+          keyboardType: TextInputType.number,
+          inputFormatters: [CurrencyInputFormatter()],
         ),
       ],
     );
@@ -546,6 +609,14 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
               ),
             ),
           ],
+          if (viewModel.modelFileError != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                viewModel.modelFileError!,
+                style: TextStyle(color: theme.colorScheme.error, fontSize: 12),
+              ),
+            ),
         ],
       ),
     );

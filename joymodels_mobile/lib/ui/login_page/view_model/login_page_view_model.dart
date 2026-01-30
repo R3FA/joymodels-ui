@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/model/enums/jwt_claim_key_api_enum.dart';
 import 'package:joymodels_mobile/data/model/enums/user_role_api_enum.dart';
@@ -21,6 +22,12 @@ class LoginPageScreenViewModel with ChangeNotifier {
   final passwordController = TextEditingController();
 
   bool isLoading = false;
+  bool obscurePassword = true;
+
+  void togglePasswordVisibility() {
+    obscurePassword = !obscurePassword;
+    notifyListeners();
+  }
 
   String? errorMessage;
   String? successMessage;
@@ -94,8 +101,8 @@ class LoginPageScreenViewModel with ChangeNotifier {
       isLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = 'Incorrect username or password!';
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isLoading = false;
       notifyListeners();
       return false;

@@ -92,6 +92,7 @@ class ReportsPageViewModel extends ChangeNotifier
         reason: filterReason,
         pageNumber: page,
         pageSize: _pageSize,
+        orderBy: 'CreatedAt:desc',
       );
 
       pagination = await _reportRepository.search(request);

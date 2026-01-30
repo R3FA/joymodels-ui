@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:joymodels_mobile/ui/core/ui/error_display.dart';
 import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/model/enums/report_reason_api_enum.dart';
 import 'package:joymodels_mobile/data/model/enums/report_status_api_enum.dart';
@@ -161,13 +162,10 @@ class _MenuDrawerState extends State<MenuDrawer> {
             ),
             const Spacer(),
             if (viewModel.errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text(
-                  viewModel.errorMessage!,
-                  style: TextStyle(color: theme.colorScheme.error),
-                  textAlign: TextAlign.center,
-                ),
+              ErrorDisplay(
+                message: viewModel.errorMessage!,
+                onRetry: () => viewModel.init(),
+                retryButtonText: 'Retry',
               ),
             const Divider(),
             _buildLogoutButton(viewModel, theme),
@@ -615,23 +613,10 @@ class _MyReportsModalContent extends StatelessWidget {
     }
 
     if (viewModel.errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
-            const SizedBox(height: 16),
-            Text(
-              viewModel.errorMessage!,
-              style: TextStyle(color: theme.colorScheme.error),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => viewModel.loadReports(),
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
+      return ErrorDisplay(
+        message: viewModel.errorMessage!,
+        onRetry: () => viewModel.loadReports(),
+        retryButtonText: 'Retry',
       );
     }
 
