@@ -130,6 +130,12 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
             ),
             body: viewModel.isLoading
                 ? const Center(child: CircularProgressIndicator())
+                : viewModel.errorMessage != null
+                ? ErrorDisplay(
+                    message: viewModel.errorMessage!,
+                    onRetry: viewModel.clearError,
+                    retryButtonText: 'Retry',
+                  )
                 : Stack(
                     children: [
                       SingleChildScrollView(
@@ -137,13 +143,6 @@ class _ModelEditPageScreenState extends State<ModelEditPageScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (viewModel.errorMessage != null)
-                              ErrorDisplay(
-                                message: viewModel.errorMessage!,
-                                onRetry: viewModel.clearError,
-                                retryButtonText: 'Retry',
-                              ),
-
                             KeyedSubtree(
                               key: _nameKey,
                               child: _buildNameField(viewModel, theme),

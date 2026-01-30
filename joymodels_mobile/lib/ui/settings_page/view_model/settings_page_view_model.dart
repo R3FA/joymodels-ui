@@ -42,7 +42,17 @@ class SettingsPageViewModel with ChangeNotifier {
   }
 
   void _onTextChanged() {
+    clearFieldErrors();
     notifyListeners();
+  }
+
+  void clearFieldErrors() {
+    firstNameError = null;
+    lastNameError = null;
+    nicknameError = null;
+    newPasswordError = null;
+    confirmPasswordError = null;
+    deleteConfirmError = null;
   }
 
   bool isLoading = false;
@@ -57,6 +67,13 @@ class SettingsPageViewModel with ChangeNotifier {
 
   String? errorMessage;
   String? successMessage;
+
+  String? firstNameError;
+  String? lastNameError;
+  String? nicknameError;
+  String? newPasswordError;
+  String? confirmPasswordError;
+  String? deleteConfirmError;
 
   String? _originalFirstName;
   String? _originalLastName;
@@ -145,6 +162,52 @@ class SettingsPageViewModel with ChangeNotifier {
     }
   }
 
+  bool _isProfileFormValid() {
+    clearFieldErrors();
+    bool valid = true;
+
+    if (firstNameController.text.isEmpty) {
+      firstNameError = 'First name is required.';
+      valid = false;
+    } else {
+      final validation = RegexValidationViewModel.validateName(
+        firstNameController.text,
+      );
+      if (validation != null) {
+        firstNameError = validation;
+        valid = false;
+      }
+    }
+
+    if (lastNameController.text.isEmpty) {
+      lastNameError = 'Last name is required.';
+      valid = false;
+    } else {
+      final validation = RegexValidationViewModel.validateName(
+        lastNameController.text,
+      );
+      if (validation != null) {
+        lastNameError = validation;
+        valid = false;
+      }
+    }
+
+    if (nicknameController.text.isEmpty) {
+      nicknameError = 'Nickname is required.';
+      valid = false;
+    } else {
+      final validation = RegexValidationViewModel.validateNickname(
+        nicknameController.text,
+      );
+      if (validation != null) {
+        nicknameError = validation;
+        valid = false;
+      }
+    }
+
+    return valid;
+  }
+
   Future<void> saveProfile() async {
     if (userUuid == null) return;
 
@@ -157,47 +220,7 @@ class SettingsPageViewModel with ChangeNotifier {
       return;
     }
 
-    if (firstNameController.text.isEmpty) {
-      errorMessage = 'First name is required.';
-      notifyListeners();
-      return;
-    }
-
-    final firstNameError = RegexValidationViewModel.validateName(
-      firstNameController.text,
-    );
-    if (firstNameError != null) {
-      errorMessage = firstNameError;
-      notifyListeners();
-      return;
-    }
-
-    if (lastNameController.text.isEmpty) {
-      errorMessage = 'Last name is required.';
-      notifyListeners();
-      return;
-    }
-
-    final lastNameError = RegexValidationViewModel.validateName(
-      lastNameController.text,
-    );
-    if (lastNameError != null) {
-      errorMessage = lastNameError;
-      notifyListeners();
-      return;
-    }
-
-    if (nicknameController.text.isEmpty) {
-      errorMessage = 'Nickname is required.';
-      notifyListeners();
-      return;
-    }
-
-    final nicknameError = RegexValidationViewModel.validateNickname(
-      nicknameController.text,
-    );
-    if (nicknameError != null) {
-      errorMessage = nicknameError;
+    if (!_isProfileFormValid()) {
       notifyListeners();
       return;
     }
@@ -266,32 +289,42 @@ class SettingsPageViewModel with ChangeNotifier {
     }
   }
 
+  bool _isPasswordFormValid() {
+    clearFieldErrors();
+    bool valid = true;
+
+    final newPwValidation = RegexValidationViewModel.validatePassword(
+      newPasswordController.text,
+    );
+    if (newPwValidation != null) {
+      newPasswordError = newPwValidation;
+      valid = false;
+    }
+
+    final confirmPwValidation = RegexValidationViewModel.validatePassword(
+      confirmPasswordController.text,
+    );
+    if (confirmPwValidation != null) {
+      confirmPasswordError = confirmPwValidation;
+      valid = false;
+    }
+
+    if (valid && newPasswordController.text != confirmPasswordController.text) {
+      newPasswordError = 'Passwords do not match.';
+      confirmPasswordError = 'Passwords do not match.';
+      valid = false;
+    }
+
+    return valid;
+  }
+
   Future<void> changePassword() async {
     if (userUuid == null) return;
 
     errorMessage = null;
     successMessage = null;
 
-    final newPasswordError = RegexValidationViewModel.validatePassword(
-      newPasswordController.text,
-    );
-    if (newPasswordError != null) {
-      errorMessage = newPasswordError;
-      notifyListeners();
-      return;
-    }
-
-    final confirmPasswordError = RegexValidationViewModel.validatePassword(
-      confirmPasswordController.text,
-    );
-    if (confirmPasswordError != null) {
-      errorMessage = confirmPasswordError;
-      notifyListeners();
-      return;
-    }
-
-    if (newPasswordController.text != confirmPasswordController.text) {
-      errorMessage = 'Passwords do not match.';
+    if (!_isPasswordFormValid()) {
       notifyListeners();
       return;
     }
@@ -347,6 +380,7 @@ class SettingsPageViewModel with ChangeNotifier {
   void clearMessages() {
     errorMessage = null;
     successMessage = null;
+    clearFieldErrors();
     notifyListeners();
   }
 
@@ -362,7 +396,7 @@ class SettingsPageViewModel with ChangeNotifier {
     successMessage = null;
 
     if (!isDeleteConfirmed) {
-      errorMessage =
+      deleteConfirmError =
           'Please confirm that you understand by checking the checkbox.';
       notifyListeners();
       return;

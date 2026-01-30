@@ -128,6 +128,14 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    if (viewModel.errorMessage != null) {
+      return ErrorDisplay(
+        message: viewModel.errorMessage!,
+        onRetry: viewModel.clearError,
+        retryButtonText: 'Retry',
+      );
+    }
+
     return Stack(
       children: [
         SingleChildScrollView(
@@ -135,13 +143,6 @@ class _ModelCreatePageScreenState extends State<ModelCreatePageScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (viewModel.errorMessage != null)
-                ErrorDisplay(
-                  message: viewModel.errorMessage!,
-                  onRetry: viewModel.clearError,
-                  retryButtonText: 'Retry',
-                ),
-
               KeyedSubtree(
                 key: _nameKey,
                 child: _buildNameField(viewModel, theme),

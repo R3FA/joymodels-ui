@@ -122,6 +122,14 @@ class _CommunityPostCreatePageScreenState
       return const Center(child: CircularProgressIndicator());
     }
 
+    if (viewModel.errorMessage != null) {
+      return ErrorDisplay(
+        message: viewModel.errorMessage!,
+        onRetry: viewModel.clearError,
+        retryButtonText: 'Retry',
+      );
+    }
+
     return Stack(
       children: [
         SingleChildScrollView(
@@ -129,13 +137,6 @@ class _CommunityPostCreatePageScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (viewModel.errorMessage != null)
-                ErrorDisplay(
-                  message: viewModel.errorMessage!,
-                  onRetry: viewModel.clearError,
-                  retryButtonText: 'Retry',
-                ),
-
               KeyedSubtree(
                 key: _titleKey,
                 child: _buildTitleField(viewModel, theme),
