@@ -21,6 +21,12 @@ class LoginPageScreenViewModel with ChangeNotifier {
   final passwordController = TextEditingController();
 
   bool isLoading = false;
+  bool obscurePassword = true;
+
+  void togglePasswordVisibility() {
+    obscurePassword = !obscurePassword;
+    notifyListeners();
+  }
 
   String? errorMessage;
   String? successMessage;
