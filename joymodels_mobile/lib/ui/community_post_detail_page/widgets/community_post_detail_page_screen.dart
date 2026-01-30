@@ -220,15 +220,25 @@ class _CommunityPostDetailPageScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                GestureDetector(
-                  onTap: () => _navigateToUserProfile(post.user.uuid),
-                  child: Text(
-                    post.user.nickName,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => _navigateToUserProfile(post.user.uuid),
+                      child: Text(
+                        post.user.nickName,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
                     ),
-                  ),
+                    Text(
+                      '  ·  ${_formatDate(post.createdAt)}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
                 Text(
                   post.communityPostType.communityPostName,

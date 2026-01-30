@@ -150,6 +150,7 @@ class ModelPageViewModel extends ChangeNotifier {
         modelUuid: model.uuid,
         pageNumber: 1,
         pageSize: 5,
+        orderBy: 'CreatedAt:desc',
       );
       final result = await modelFaqSectionRepository.search(request);
       faqList = result.data;
@@ -612,7 +613,7 @@ class ModelPageViewModel extends ChangeNotifier {
     BuildContext context,
     ModelFaqSectionResponseApiModel faq,
   ) async {
-    final result = await Navigator.push<ModelFaqSectionResponseApiModel?>(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => ChangeNotifierProvider(
@@ -622,15 +623,8 @@ class ModelPageViewModel extends ChangeNotifier {
       ),
     );
 
-    if (result != null) {
-      final index = faqList.indexWhere((f) => f.uuid == result.uuid);
-      if (index != -1) {
-        faqList[index] = result;
-        notifyListeners();
-      }
-    } else {
-      faqList.removeWhere((f) => f.uuid == faq.uuid);
-      notifyListeners();
+    if (loadedModel != null) {
+      await loadFAQ(loadedModel!);
     }
   }
 

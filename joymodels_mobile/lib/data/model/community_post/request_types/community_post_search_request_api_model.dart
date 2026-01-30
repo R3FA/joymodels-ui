@@ -9,6 +9,7 @@ class CommunityPostSearchRequestApiModel extends PaginationRequestApiModel {
     this.userUuid,
     required super.pageNumber,
     required super.pageSize,
+    super.orderBy,
   });
 
   @override

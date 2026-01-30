@@ -249,9 +249,7 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
                     theme: theme,
                     name: model.name,
                     description: model.description,
-                    category: model.modelCategories.isNotEmpty
-                        ? model.modelCategories[0].categoryName
-                        : 'Unknown',
+                    category: _getDisplayCategory(model, viewModel),
                     price: model.price,
                   ),
                 ),
@@ -378,6 +376,21 @@ class _ModelsSearchScreenState extends State<ModelsSearchScreen> {
         ),
       ],
     );
+  }
+
+  String _getDisplayCategory(
+    ModelResponseApiModel model,
+    ModelSearchPageViewModel viewModel,
+  ) {
+    if (model.modelCategories.isEmpty) return 'Unknown';
+    final filter = viewModel.selectedFilterCategory;
+    if (filter != null) {
+      final match = model.modelCategories
+          .where((c) => c.categoryName == filter)
+          .firstOrNull;
+      if (match != null) return match.categoryName;
+    }
+    return model.modelCategories[0].categoryName;
   }
 
   bool _shouldShowPagination(ModelSearchPageViewModel viewModel) {

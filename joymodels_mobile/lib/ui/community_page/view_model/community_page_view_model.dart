@@ -72,6 +72,7 @@ class CommunityPageViewModel extends ChangeNotifier
         userUuid: _currentUserUuidForSearch,
         pageNumber: pageNumber,
         pageSize: 5,
+        orderBy: 'CreatedAt:desc',
       ),
     );
   }
@@ -85,7 +86,11 @@ class CommunityPageViewModel extends ChangeNotifier
       await Future.wait([
         _loadReviewTypes(),
         searchPosts(
-          CommunityPostSearchRequestApiModel(pageNumber: 1, pageSize: 5),
+          CommunityPostSearchRequestApiModel(
+            pageNumber: 1,
+            pageSize: 5,
+            orderBy: 'CreatedAt:desc',
+          ),
         ),
       ]);
       isLoading = false;
@@ -225,6 +230,7 @@ class CommunityPageViewModel extends ChangeNotifier
           userUuid: _currentUserUuidForSearch,
           pageNumber: 1,
           pageSize: 5,
+          orderBy: 'CreatedAt:desc',
         ),
       );
     });
@@ -249,6 +255,7 @@ class CommunityPageViewModel extends ChangeNotifier
         userUuid: _currentUserUuidForSearch,
         pageNumber: 1,
         pageSize: 5,
+        orderBy: 'CreatedAt:desc',
       ),
     );
   }
@@ -409,6 +416,7 @@ class CommunityPageViewModel extends ChangeNotifier
       communityPostLikes: post.communityPostLikes + likeDelta,
       communityPostDislikes: post.communityPostDislikes + dislikeDelta,
       communityPostCommentCount: post.communityPostCommentCount,
+      createdAt: post.createdAt,
       communityPostType: post.communityPostType,
       pictureLocations: post.pictureLocations,
     );
@@ -422,6 +430,7 @@ class CommunityPageViewModel extends ChangeNotifier
         userUuid: _currentUserUuidForSearch,
         pageNumber: 1,
         pageSize: 5,
+        orderBy: 'CreatedAt:desc',
       ),
     );
   }

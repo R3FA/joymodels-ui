@@ -13,6 +13,8 @@ class ModelSearchModalSortTypeScreen extends StatefulWidget {
       _ModelSearchModalSortTypeScreenState();
 }
 
+const String _kAllCategory = '__all__';
+
 class _ModelSearchModalSortTypeScreenState
     extends State<ModelSearchModalSortTypeScreen> {
   @override
@@ -31,8 +33,13 @@ class _ModelSearchModalSortTypeScreenState
             const SizedBox(height: 18),
             Text("Category", style: theme.textTheme.bodyMedium),
             const SizedBox(height: 6),
-            InputDecorator(
-              decoration: InputDecoration(
+            DropdownMenu<String>(
+              initialSelection:
+                  viewModel.selectedFilterCategory ?? _kAllCategory,
+              expandedInsets: EdgeInsets.zero,
+              menuHeight: 200,
+              requestFocusOnTap: false,
+              inputDecorationTheme: InputDecorationTheme(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(
@@ -47,31 +54,25 @@ class _ModelSearchModalSortTypeScreenState
                   vertical: 8,
                 ),
               ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: viewModel.selectedFilterCategory,
-                  hint: const Text("Choose category"),
-                  isExpanded: true,
-                  isDense: true,
-                  items: [
-                    const DropdownMenuItem<String>(
-                      value: null,
-                      child: Text("All"),
-                    ),
-                    ...widget.categories.map(
-                      (cat) => DropdownMenuItem<String>(
-                        value: cat.categoryName,
-                        child: Text(cat.categoryName),
-                      ),
-                    ),
-                  ],
-                  onChanged: (cat) {
-                    setState(() {
-                      viewModel.selectedFilterCategory = cat;
-                    });
-                  },
+              onSelected: (cat) {
+                setState(() {
+                  viewModel.selectedFilterCategory = cat == _kAllCategory
+                      ? null
+                      : cat;
+                });
+              },
+              dropdownMenuEntries: [
+                const DropdownMenuEntry<String>(
+                  value: _kAllCategory,
+                  label: 'All',
                 ),
-              ),
+                ...widget.categories.map(
+                  (cat) => DropdownMenuEntry<String>(
+                    value: cat.categoryName,
+                    label: cat.categoryName,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 18),
             Text("Sort by", style: theme.textTheme.bodyMedium),
@@ -109,7 +110,10 @@ class _ModelSearchModalSortTypeScreenState
             Align(
               alignment: Alignment.center,
               child: FilledButton(
-                onPressed: viewModel.onFilterSubmit,
+                onPressed: () {
+                  viewModel.onFilterSubmit();
+                  Navigator.of(context).pop();
+                },
                 child: const Text("Submit"),
               ),
             ),

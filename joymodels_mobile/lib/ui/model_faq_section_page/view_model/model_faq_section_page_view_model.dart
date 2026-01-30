@@ -69,6 +69,7 @@ class ModelFaqSectionPageViewModel extends ChangeNotifier
         isMyFaqSectionFiltered: isMyFaqSectionFiltered,
         pageNumber: pageNumber ?? currentPage,
         pageSize: 10,
+        orderBy: 'CreatedAt:desc',
       );
 
       faqPagination = await modelFaqSectionRepository.search(request);

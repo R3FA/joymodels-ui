@@ -275,6 +275,7 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
       communityPostLikes: post!.communityPostLikes + likeDelta,
       communityPostDislikes: post!.communityPostDislikes + dislikeDelta,
       communityPostCommentCount: post!.communityPostCommentCount,
+      createdAt: post!.createdAt,
       communityPostType: post!.communityPostType,
       pictureLocations: post!.pictureLocations,
     );

@@ -84,6 +84,7 @@ class ShoppingCartPageViewModel extends ChangeNotifier
         modelName: searchQuery.isEmpty ? null : searchQuery,
         pageNumber: pageNumber,
         pageSize: pageSize,
+        orderBy: 'CreatedAt:desc',
       );
 
       _paginationData = await shoppingCartRepository.search(request);

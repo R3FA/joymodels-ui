@@ -482,16 +482,28 @@ class _CommunityPageScreenState extends State<CommunityPageScreen>
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: GestureDetector(
-              onTap: () => _navigateToUserProfile(post.user.uuid),
-              child: Text(
-                post.user.nickName,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.secondary,
-                  fontWeight: FontWeight.w500,
+            child: Row(
+              children: [
+                Flexible(
+                  child: GestureDetector(
+                    onTap: () => _navigateToUserProfile(post.user.uuid),
+                    child: Text(
+                      post.user.nickName,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.secondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ),
-                overflow: TextOverflow.ellipsis,
-              ),
+                Text(
+                  '  ·  ${_formatTimeAgo(post.createdAt)}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ),
           ),
           _buildStatItem(
@@ -589,6 +601,21 @@ class _CommunityPageScreenState extends State<CommunityPageScreen>
         ),
       ],
     );
+  }
+
+  String _formatTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inMinutes < 1) return 'just now';
+    if (difference.inMinutes < 60) return '${difference.inMinutes}m ago';
+    if (difference.inHours < 24) return '${difference.inHours}h ago';
+    if (difference.inDays < 7) return '${difference.inDays}d ago';
+    if (difference.inDays < 30)
+      return '${(difference.inDays / 7).floor()}w ago';
+    if (difference.inDays < 365)
+      return '${(difference.inDays / 30).floor()}mo ago';
+    return '${(difference.inDays / 365).floor()}y ago';
   }
 
   void _navigateToUserProfile(String userUuid) {

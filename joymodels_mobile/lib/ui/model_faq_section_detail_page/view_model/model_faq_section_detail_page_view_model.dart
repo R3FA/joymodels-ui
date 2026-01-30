@@ -61,10 +61,15 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
 
   Future<void> init(ModelFaqSectionResponseApiModel faq) async {
     faqDetail = faq;
+    _sortReplies();
     _displayedRepliesCount = _repliesPerPage;
     currentUserUuid = await TokenStorage.getCurrentUserUuid();
     isAdminOrRoot = await TokenStorage.isAdminOrRoot();
     notifyListeners();
+  }
+
+  void _sortReplies() {
+    faqDetail?.replies?.sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
   Future<bool> submitAnswer(BuildContext context, String messageText) async {
@@ -94,6 +99,7 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
         faqDetail!.uuid,
       );
       faqDetail = updatedFaq;
+      _sortReplies();
       isSubmittingAnswer = false;
       notifyListeners();
 
@@ -174,6 +180,7 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
         faqDetail!.uuid,
       );
       faqDetail = updatedFaq;
+      _sortReplies();
       isEditingFaq = false;
       notifyListeners();
 
@@ -299,6 +306,7 @@ class ModelFaqSectionDetailPageViewModel extends ChangeNotifier {
         faqDetail!.uuid,
       );
       faqDetail = updatedFaq;
+      _sortReplies();
       isDeletingFaq = false;
       notifyListeners();
 

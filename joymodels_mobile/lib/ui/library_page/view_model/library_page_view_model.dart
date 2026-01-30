@@ -78,6 +78,7 @@ class LibraryPageViewModel extends ChangeNotifier
         modelName: searchQuery.isNotEmpty ? searchQuery : null,
         pageNumber: pageNumber ?? currentPage,
         pageSize: _pageSize,
+        orderBy: 'AcquiredAt:desc',
       );
 
       libraryPagination = await _libraryRepository.search(request);

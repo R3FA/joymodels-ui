@@ -220,7 +220,7 @@ class ModelSearchPageViewModel
         arePrivateUserModelsSearched: req.arePrivateUserModelsSearched,
         pageNumber: req.pageNumber,
         pageSize: 10,
-        orderBy: req.orderBy,
+        orderBy: req.orderBy ?? 'CreatedAt:desc',
       );
 
       models = await modelRepository.search(modelRequest);

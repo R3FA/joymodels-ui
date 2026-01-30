@@ -77,6 +77,7 @@ class ModelReviewsPageViewModel extends ChangeNotifier
         isMyReviewFiltered: isMyReviewFiltered,
         pageNumber: pageNumber ?? currentPage,
         pageSize: 10,
+        orderBy: 'CreatedAt:desc',
       );
 
       reviewsPagination = await modelReviewsRepository.search(request);
