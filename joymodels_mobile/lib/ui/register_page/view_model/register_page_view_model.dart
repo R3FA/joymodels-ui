@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_user_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/repositories/sso_repository.dart';
 import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
@@ -151,8 +152,8 @@ class RegisterPageScreenViewModel with ChangeNotifier {
       isLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      responseErrorMessage = e.toString();
+    } on ApiException catch (e) {
+      responseErrorMessage = e.message;
       isLoading = false;
       notifyListeners();
       return false;

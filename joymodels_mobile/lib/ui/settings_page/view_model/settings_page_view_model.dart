@@ -6,6 +6,7 @@ import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_logout_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/sso/request_types/sso_password_change_request_api_model.dart';
@@ -115,8 +116,8 @@ class SettingsPageViewModel with ChangeNotifier {
       errorMessage = NetworkException().toString();
       isLoading = false;
       notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isLoading = false;
       notifyListeners();
     }
@@ -258,8 +259,8 @@ class SettingsPageViewModel with ChangeNotifier {
       errorMessage = NetworkException().toString();
       isSaving = false;
       notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isSaving = false;
       notifyListeners();
     }
@@ -336,8 +337,8 @@ class SettingsPageViewModel with ChangeNotifier {
       errorMessage = NetworkException().toString();
       isChangingPassword = false;
       notifyListeners();
-    } catch (e) {
-      errorMessage = 'Failed to change password. Please try again.';
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isChangingPassword = false;
       notifyListeners();
     }
@@ -393,8 +394,8 @@ class SettingsPageViewModel with ChangeNotifier {
       errorMessage = NetworkException().toString();
       isDeletingAccount = false;
       notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isDeletingAccount = false;
       notifyListeners();
     }

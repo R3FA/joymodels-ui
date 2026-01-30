@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/notification/request_types/notification_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/notification/response_types/notification_response_api_model.dart';
@@ -78,8 +79,8 @@ class NotificationPageViewModel extends ChangeNotifier
       isLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isLoading = false;
       notifyListeners();
       return false;
@@ -97,7 +98,7 @@ class NotificationPageViewModel extends ChangeNotifier
     } on NetworkException {
       unreadCount = 0;
       notifyListeners();
-    } catch (e) {
+    } on ApiException catch (_) {
       unreadCount = 0;
       notifyListeners();
     }
@@ -140,8 +141,8 @@ class NotificationPageViewModel extends ChangeNotifier
       errorMessage = NetworkException().toString();
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       notifyListeners();
       return false;
     }
@@ -192,8 +193,8 @@ class NotificationPageViewModel extends ChangeNotifier
       errorMessage = NetworkException().toString();
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       notifyListeners();
       return false;
     }
@@ -228,8 +229,8 @@ class NotificationPageViewModel extends ChangeNotifier
       errorMessage = NetworkException().toString();
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       notifyListeners();
       return false;
     }

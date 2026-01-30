@@ -6,6 +6,7 @@ import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_user_review_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_user_review_delete_request_api_model.dart';
@@ -93,13 +94,18 @@ class CommunityPageViewModel extends ChangeNotifier
           ),
         ),
       ]);
-      isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
-      isLoading = false;
-      notifyListeners();
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      onSessionExpired?.call();
+    } on ForbiddenException {
+      onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
     }
+    isLoading = false;
+    notifyListeners();
   }
 
   void onTabChanged(int index) {
@@ -146,7 +152,19 @@ class CommunityPageViewModel extends ChangeNotifier
         } else {
           _userReviews.remove(post.uuid);
         }
-      } catch (_) {}
+      } on SessionExpiredException {
+        errorMessage = SessionExpiredException().toString();
+        onSessionExpired?.call();
+        return;
+      } on ForbiddenException {
+        onForbidden?.call();
+        return;
+      } on NetworkException {
+        errorMessage = NetworkException().toString();
+        return;
+      } on ApiException catch (e) {
+        errorMessage = e.message;
+      }
     }
   }
 
@@ -177,8 +195,8 @@ class CommunityPageViewModel extends ChangeNotifier
       arePostsLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       arePostsLoading = false;
       notifyListeners();
       return false;
@@ -349,8 +367,8 @@ class CommunityPageViewModel extends ChangeNotifier
     } on NetworkException {
       errorMessage = NetworkException().toString();
       notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       notifyListeners();
     }
   }
@@ -394,8 +412,8 @@ class CommunityPageViewModel extends ChangeNotifier
     } on NetworkException {
       errorMessage = NetworkException().toString();
       notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       notifyListeners();
     }
   }

@@ -5,6 +5,7 @@ import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/api_constants.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_create_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/community_post/request_types/community_post_patch_request_api_model.dart';
@@ -307,8 +308,8 @@ class CommunityPostEditPageViewModel with ChangeNotifier {
       isPostTypesLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isPostTypesLoading = false;
       notifyListeners();
       return false;
@@ -397,8 +398,8 @@ class CommunityPostEditPageViewModel with ChangeNotifier {
       isSubmitting = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isSubmitting = false;
       notifyListeners();
       return false;

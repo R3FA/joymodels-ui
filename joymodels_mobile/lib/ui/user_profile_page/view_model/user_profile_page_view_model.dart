@@ -5,6 +5,7 @@ import 'package:joymodels_mobile/core/di/di.dart';
 import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
 import 'package:joymodels_mobile/data/model/pagination/response_types/pagination_response_api_model.dart';
 import 'package:joymodels_mobile/data/model/users/request_types/user_follower_search_request_api_model.dart';
@@ -94,8 +95,8 @@ class UserProfilePageViewModel with ChangeNotifier {
       errorMessage = NetworkException().toString();
       isLoading = false;
       notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isLoading = false;
       notifyListeners();
     }
@@ -109,7 +110,18 @@ class UserProfilePageViewModel with ChangeNotifier {
     try {
       final avatar = await _usersRepository.getUserAvatar(userUuid);
       userAvatar = avatar.fileBytes;
-    } catch (_) {
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      userAvatar = null;
+      onSessionExpired?.call();
+    } on ForbiddenException {
+      userAvatar = null;
+      onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      userAvatar = null;
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       userAvatar = null;
     }
   }
@@ -141,8 +153,8 @@ class UserProfilePageViewModel with ChangeNotifier {
       errorMessage = NetworkException().toString();
       isLikedModelsLoading = false;
       notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isLikedModelsLoading = false;
       notifyListeners();
     }
@@ -151,7 +163,18 @@ class UserProfilePageViewModel with ChangeNotifier {
   Future<void> _checkIfFollowing(String userUuid) async {
     try {
       isFollowing = await _usersRepository.isFollowingUser(userUuid);
-    } catch (_) {
+    } on SessionExpiredException {
+      errorMessage = SessionExpiredException().toString();
+      isFollowing = false;
+      onSessionExpired?.call();
+    } on ForbiddenException {
+      isFollowing = false;
+      onForbidden?.call();
+    } on NetworkException {
+      errorMessage = NetworkException().toString();
+      isFollowing = false;
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isFollowing = false;
     }
   }
@@ -190,8 +213,8 @@ class UserProfilePageViewModel with ChangeNotifier {
       errorMessage = NetworkException().toString();
       isLikedCommunityPostsLoading = false;
       notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isLikedCommunityPostsLoading = false;
       notifyListeners();
     }
@@ -240,8 +263,8 @@ class UserProfilePageViewModel with ChangeNotifier {
       errorMessage = NetworkException().toString();
       isFollowLoading = false;
       notifyListeners();
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isFollowLoading = false;
       notifyListeners();
     }
@@ -306,8 +329,8 @@ class UserProfilePageViewModel with ChangeNotifier {
       followModalErrorMessage = NetworkException().toString();
       isFollowModalLoading = false;
       notifyListeners();
-    } catch (e) {
-      followModalErrorMessage = e.toString();
+    } on ApiException catch (e) {
+      followModalErrorMessage = e.message;
       isFollowModalLoading = false;
       notifyListeners();
     }
@@ -350,8 +373,8 @@ class UserProfilePageViewModel with ChangeNotifier {
       followModalErrorMessage = NetworkException().toString();
       isFollowModalLoading = false;
       notifyListeners();
-    } catch (e) {
-      followModalErrorMessage = e.toString();
+    } on ApiException catch (e) {
+      followModalErrorMessage = e.message;
       isFollowModalLoading = false;
       notifyListeners();
     }

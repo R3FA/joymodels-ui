@@ -37,6 +37,18 @@ class ShoppingCartService {
     return response;
   }
 
+  Future<http.Response> isModelInCart(String modelUuid) async {
+    final url = Uri.parse("$shoppingCartUrl/is-model-in-cart/$modelUuid");
+    final token = await TokenStorage.getAccessToken();
+
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    return response;
+  }
+
   Future<http.Response> create(
     ShoppingCartItemAddRequestApiModel request,
   ) async {

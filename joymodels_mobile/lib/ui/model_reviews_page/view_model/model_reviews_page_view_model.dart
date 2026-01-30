@@ -4,6 +4,7 @@ import 'package:joymodels_mobile/data/core/config/token_storage.dart';
 import 'package:joymodels_mobile/data/core/exceptions/forbidden_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/network_exception.dart';
 import 'package:joymodels_mobile/data/core/exceptions/session_expired_exception.dart';
+import 'package:joymodels_mobile/data/core/exceptions/api_exception.dart';
 import 'package:joymodels_mobile/data/model/enums/model_review_enum.dart';
 import 'package:joymodels_mobile/data/model/model_review_type/request_types/model_review_type_search_request_api_model.dart';
 import 'package:joymodels_mobile/data/model/model_review_type/response_types/model_review_type_response_api_model.dart';
@@ -101,8 +102,8 @@ class ModelReviewsPageViewModel extends ChangeNotifier
       isLoading = false;
       notifyListeners();
       return false;
-    } catch (e) {
-      errorMessage = e.toString();
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isLoading = false;
       notifyListeners();
       return false;
@@ -167,7 +168,8 @@ class ModelReviewsPageViewModel extends ChangeNotifier
       isLoadingReviewTypes = false;
       notifyListeners();
       return false;
-    } catch (e) {
+    } on ApiException catch (e) {
+      errorMessage = e.message;
       isLoadingReviewTypes = false;
       notifyListeners();
       return false;
@@ -212,14 +214,14 @@ class ModelReviewsPageViewModel extends ChangeNotifier
       isDeleting = false;
       notifyListeners();
       return false;
-    } catch (e) {
+    } on ApiException catch (e) {
       isDeleting = false;
       notifyListeners();
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to delete review: ${e.toString()}'),
+            content: Text('Failed to delete review: ${e.message}'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),
@@ -286,14 +288,14 @@ class ModelReviewsPageViewModel extends ChangeNotifier
       isEditing = false;
       notifyListeners();
       return false;
-    } catch (e) {
+    } on ApiException catch (e) {
       isEditing = false;
       notifyListeners();
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update review: ${e.toString()}'),
+            content: Text('Failed to update review: ${e.message}'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),

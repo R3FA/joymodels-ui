@@ -20,11 +20,9 @@ class ShoppingCartRepository {
     if (response.statusCode == 200) {
       final jsonMap = jsonDecode(response.body);
       return ShoppingCartItemResponseApiModel.fromJson(jsonMap);
-    } else if (response.statusCode == 404) {
-      return null;
     } else {
       throw Exception(
-        'Failed to fetch shopping cart item by model uuid: ${response.statusCode} - ${response.body}',
+        'Failed to fetch shopping cart item: ${response.statusCode} - ${response.body}',
       );
     }
   }
@@ -35,47 +33,28 @@ class ShoppingCartRepository {
     final response = await _authService.request(() => _service.search(request));
 
     if (response.statusCode == 200) {
-      if (response.body.isEmpty || response.body == 'null') {
-        return PaginationResponseApiModel<ShoppingCartItemResponseApiModel>(
-          data: [],
-          pageNumber: 1,
-          pageSize: request.pageSize,
-          totalPages: 0,
-          totalRecords: 0,
-          hasPreviousPage: false,
-          hasNextPage: false,
-          orderBy: request.orderBy,
-        );
-      }
-
-      try {
-        final decoded = jsonDecode(response.body);
-        if (decoded == null) {
-          return PaginationResponseApiModel<ShoppingCartItemResponseApiModel>(
-            data: [],
-            pageNumber: 1,
-            pageSize: request.pageSize,
-            totalPages: 0,
-            totalRecords: 0,
-            hasPreviousPage: false,
-            hasNextPage: false,
-            orderBy: request.orderBy,
-          );
-        }
-
-        final jsonMap = decoded as Map<String, dynamic>;
-        return PaginationResponseApiModel.fromJson(
-          jsonMap,
-          (json) => ShoppingCartItemResponseApiModel.fromJson(json),
-        );
-      } catch (e) {
-        throw Exception(
-          'Failed to parse shopping cart response: $e\nBody: ${response.body}',
-        );
-      }
+      final jsonMap = jsonDecode(response.body);
+      return PaginationResponseApiModel.fromJson(
+        jsonMap,
+        (json) => ShoppingCartItemResponseApiModel.fromJson(json),
+      );
     } else {
       throw Exception(
         'Failed to fetch shopping cart items: ${response.statusCode} - ${response.body}',
+      );
+    }
+  }
+
+  Future<bool> isModelInCart(String modelUuid) async {
+    final response = await _authService.request(
+      () => _service.isModelInCart(modelUuid),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as bool;
+    } else {
+      throw Exception(
+        'Failed to check if model is in cart: ${response.statusCode} - ${response.body}',
       );
     }
   }
@@ -85,27 +64,9 @@ class ShoppingCartRepository {
   ) async {
     final response = await _authService.request(() => _service.create(request));
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      if (response.body.isEmpty) {
-        throw Exception(
-          'Shopping cart created but no data returned from server',
-        );
-      }
-      final jsonMap = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode == 200) {
+      final jsonMap = jsonDecode(response.body);
       return ShoppingCartItemResponseApiModel.fromJson(jsonMap);
-    } else if (response.statusCode == 404) {
-      if (response.body.contains('Duplicate entry') ||
-          response.body.contains('uq_user_model') ||
-          response.body.contains('does not exist')) {
-        return null;
-      }
-      throw Exception('Not found: ${response.body}');
-    } else if (response.statusCode == 500) {
-      if (response.body.contains('Duplicate entry') ||
-          response.body.contains('uq_user_model')) {
-        return null;
-      }
-      throw Exception('Server error: ${response.body}');
     } else {
       throw Exception(
         'Failed to add item to shopping cart: ${response.statusCode} - ${response.body}',
@@ -118,9 +79,7 @@ class ShoppingCartRepository {
       () => _service.delete(modelUuid),
     );
 
-    if (response.statusCode == 204) {
-      return;
-    } else {
+    if (response.statusCode != 204) {
       throw Exception(
         'Failed to remove item from shopping cart: ${response.statusCode} - ${response.body}',
       );
