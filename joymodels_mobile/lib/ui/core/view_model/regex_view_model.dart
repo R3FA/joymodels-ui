@@ -107,6 +107,9 @@ class RegexValidationViewModel {
     if (parsed <= 0) {
       return 'Price must be greater than 0.';
     }
+    if (parsed > 5000) {
+      return 'Price must not exceed \$5000.';
+    }
 
     return null;
   }

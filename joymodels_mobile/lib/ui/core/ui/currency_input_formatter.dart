@@ -1,5 +1,4 @@
 import 'package:flutter/services.dart';
-import 'package:joymodels_mobile/ui/core/view_model/regex_view_model.dart';
 
 class CurrencyInputFormatter extends TextInputFormatter {
   @override
@@ -9,11 +8,10 @@ class CurrencyInputFormatter extends TextInputFormatter {
   ) {
     final digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
     final cents = int.tryParse(digits) ?? 0;
-    final formatted = (cents / 100).toStringAsFixed(2);
 
-    if (RegexValidationViewModel.validatePrice(formatted) != null) {
-      return oldValue;
-    }
+    if (cents > 999999) return oldValue;
+
+    final formatted = (cents / 100).toStringAsFixed(2);
 
     return TextEditingValue(
       text: formatted,
