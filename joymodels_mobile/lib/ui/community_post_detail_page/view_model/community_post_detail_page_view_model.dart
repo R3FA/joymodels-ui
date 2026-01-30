@@ -329,12 +329,17 @@ class CommunityPostDetailPageViewModel extends ChangeNotifier
           communityPostUuid: post!.uuid,
           pageNumber: pageNumber ?? currentPage,
           pageSize: 50,
+          orderBy: 'CreatedAt:desc',
         ),
       );
 
       final parentQuestions = response.data
           .where((q) => q.parentMessage == null)
           .toList();
+
+      for (final question in parentQuestions) {
+        question.replies?.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      }
 
       questionsPagination =
           PaginationResponseApiModel<
