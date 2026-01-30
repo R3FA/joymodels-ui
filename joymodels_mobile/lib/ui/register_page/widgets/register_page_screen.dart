@@ -44,7 +44,9 @@ class RegisterPageScreen extends StatelessWidget {
                 const SizedBox(height: 12),
                 _buildEmailField(viewModel),
                 const SizedBox(height: 12),
-                _buildPasswordField(viewModel, context),
+                _buildPasswordField(viewModel),
+                const SizedBox(height: 12),
+                _buildConfirmPasswordField(viewModel, context),
                 const SizedBox(height: 24),
                 if (viewModel.responseErrorMessage != null)
                   _buildResponseError(viewModel, theme),
@@ -117,15 +119,44 @@ class RegisterPageScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPasswordField(
+  Widget _buildPasswordField(RegisterPageScreenViewModel viewModel) {
+    return TextFormField(
+      controller: viewModel.passwordController,
+      decoration: formInputDecoration('Password', Icons.lock_outline).copyWith(
+        suffixIcon: IconButton(
+          icon: Icon(
+            viewModel.obscurePassword ? Icons.visibility_off : Icons.visibility,
+          ),
+          onPressed: viewModel.togglePasswordVisibility,
+        ),
+      ),
+      obscureText: viewModel.obscurePassword,
+      validator: viewModel.validatePassword,
+      maxLength: 50,
+      autofillHints: const [AutofillHints.newPassword],
+      textInputAction: TextInputAction.next,
+    );
+  }
+
+  Widget _buildConfirmPasswordField(
     RegisterPageScreenViewModel viewModel,
     BuildContext context,
   ) {
     return TextFormField(
-      controller: viewModel.passwordController,
-      decoration: formInputDecoration('Password', Icons.lock_outline),
-      obscureText: true,
-      validator: viewModel.validatePassword,
+      controller: viewModel.confirmPasswordController,
+      decoration: formInputDecoration('Confirm Password', Icons.lock_outline)
+          .copyWith(
+            suffixIcon: IconButton(
+              icon: Icon(
+                viewModel.obscureConfirmPassword
+                    ? Icons.visibility_off
+                    : Icons.visibility,
+              ),
+              onPressed: viewModel.toggleConfirmPasswordVisibility,
+            ),
+          ),
+      obscureText: viewModel.obscureConfirmPassword,
+      validator: viewModel.validateConfirmPassword,
       maxLength: 50,
       autofillHints: const [AutofillHints.newPassword],
       textInputAction: TextInputAction.done,
