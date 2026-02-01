@@ -16,7 +16,7 @@ class UserModelLikesSearchRequestApiModel extends PaginationRequestApiModel {
     return {
       ...super.toQueryParameters(),
       'userUuid': userUuid,
-      if (modelName != null) 'modelName': modelName!,
+      'modelName': ?modelName,
     };
   }
 }

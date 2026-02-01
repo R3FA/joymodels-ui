@@ -16,7 +16,7 @@ class UserFollowerSearchRequestApiModel extends PaginationRequestApiModel {
     return {
       ...super.toQueryParameters(),
       'targetUserUuid': targetUserUuid,
-      if (nickname != null) 'nickname': nickname!,
+      'nickname': ?nickname,
     };
   }
 }

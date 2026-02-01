@@ -16,8 +16,8 @@ class CommunityPostSearchRequestApiModel extends PaginationRequestApiModel {
   Map<String, String> toQueryParameters() {
     return {
       ...super.toQueryParameters(),
-      if (title != null) 'title': title!,
-      if (userUuid != null) 'userUuid': userUuid!,
+      'title': ?title,
+      'userUuid': ?userUuid,
     };
   }
 }

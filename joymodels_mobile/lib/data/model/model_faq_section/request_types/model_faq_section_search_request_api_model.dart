@@ -19,7 +19,7 @@ class ModelFaqSectionSearchRequestApiModel extends PaginationRequestApiModel {
     return {
       ...super.toQueryParameters(),
       'modelUuid': modelUuid,
-      if (faqMessage != null) 'faqMessage': faqMessage!,
+      'faqMessage': ?faqMessage,
       'isMyFaqSectionFiltered': isMyFaqSectionFiltered.toString(),
     };
   }

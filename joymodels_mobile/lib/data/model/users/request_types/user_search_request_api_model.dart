@@ -12,9 +12,6 @@ class UsersSearchRequestApiModel extends PaginationRequestApiModel {
 
   @override
   Map<String, String> toQueryParameters() {
-    return {
-      ...super.toQueryParameters(),
-      if (nickname != null) 'nickname': nickname!,
-    };
+    return {...super.toQueryParameters(), 'nickname': ?nickname};
   }
 }
