@@ -18,8 +18,8 @@ class ModelSearchRequestApiModel extends PaginationRequestApiModel {
   Map<String, String> toQueryParameters() {
     return {
       ...super.toQueryParameters(),
-      if (modelName != null) 'modelName': modelName!,
-      if (categoryName != null) 'categoryName': categoryName!,
+      'modelName': ?modelName,
+      'categoryName': ?categoryName,
       'arePrivateUserModelsSearched': arePrivateUserModelsSearched.toString(),
     };
   }
