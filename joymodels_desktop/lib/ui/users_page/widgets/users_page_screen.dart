@@ -35,6 +35,10 @@ class _UsersPageScreenState extends State<UsersPageScreen>
   late final TextEditingController _unverifiedNicknameController;
   late final TextEditingController _unverifiedEmailController;
   Timer? _debounce;
+  final ScrollController _verifiedHorizontalScrollController =
+      ScrollController();
+  final ScrollController _unverifiedHorizontalScrollController =
+      ScrollController();
 
   @override
   void initState() {
@@ -73,6 +77,8 @@ class _UsersPageScreenState extends State<UsersPageScreen>
     _verifiedSearchController.dispose();
     _unverifiedNicknameController.dispose();
     _unverifiedEmailController.dispose();
+    _verifiedHorizontalScrollController.dispose();
+    _unverifiedHorizontalScrollController.dispose();
     super.dispose();
   }
 
@@ -179,27 +185,41 @@ class _UsersPageScreenState extends State<UsersPageScreen>
     UsersPageViewModel viewModel,
     ThemeData theme,
   ) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: SingleChildScrollView(
-        child: DataTable(
-          columns: const [
-            DataColumn(label: Text('Avatar')),
-            DataColumn(label: Text('First Name')),
-            DataColumn(label: Text('Last Name')),
-            DataColumn(label: Text('Nickname')),
-            DataColumn(label: Text('Email')),
-            DataColumn(label: Text('Role')),
-            DataColumn(label: Text('Models')),
-            DataColumn(label: Text('Followers')),
-            DataColumn(label: Text('Created')),
-            DataColumn(label: Text('Actions')),
-          ],
-          rows: users
-              .map((user) => _buildVerifiedUserRow(user, viewModel, theme))
-              .toList(),
-        ),
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scrollbar(
+          controller: _verifiedHorizontalScrollController,
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            controller: _verifiedHorizontalScrollController,
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: constraints.maxWidth),
+              child: SingleChildScrollView(
+                child: DataTable(
+                  columns: const [
+                    DataColumn(label: Text('Avatar')),
+                    DataColumn(label: Text('First Name')),
+                    DataColumn(label: Text('Last Name')),
+                    DataColumn(label: Text('Nickname')),
+                    DataColumn(label: Text('Email')),
+                    DataColumn(label: Text('Role')),
+                    DataColumn(label: Text('Models')),
+                    DataColumn(label: Text('Followers')),
+                    DataColumn(label: Text('Created')),
+                    DataColumn(label: Text('Actions')),
+                  ],
+                  rows: users
+                      .map(
+                        (user) => _buildVerifiedUserRow(user, viewModel, theme),
+                      )
+                      .toList(),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -353,25 +373,40 @@ class _UsersPageScreenState extends State<UsersPageScreen>
     UsersPageViewModel viewModel,
     ThemeData theme,
   ) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: SingleChildScrollView(
-        child: DataTable(
-          columns: const [
-            DataColumn(label: Text('Avatar')),
-            DataColumn(label: Text('First Name')),
-            DataColumn(label: Text('Last Name')),
-            DataColumn(label: Text('Nickname')),
-            DataColumn(label: Text('Email')),
-            DataColumn(label: Text('Role')),
-            DataColumn(label: Text('Created')),
-            DataColumn(label: Text('Actions')),
-          ],
-          rows: users
-              .map((user) => _buildUnverifiedUserRow(user, viewModel, theme))
-              .toList(),
-        ),
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scrollbar(
+          controller: _unverifiedHorizontalScrollController,
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            controller: _unverifiedHorizontalScrollController,
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: constraints.maxWidth),
+              child: SingleChildScrollView(
+                child: DataTable(
+                  columns: const [
+                    DataColumn(label: Text('Avatar')),
+                    DataColumn(label: Text('First Name')),
+                    DataColumn(label: Text('Last Name')),
+                    DataColumn(label: Text('Nickname')),
+                    DataColumn(label: Text('Email')),
+                    DataColumn(label: Text('Role')),
+                    DataColumn(label: Text('Created')),
+                    DataColumn(label: Text('Actions')),
+                  ],
+                  rows: users
+                      .map(
+                        (user) =>
+                            _buildUnverifiedUserRow(user, viewModel, theme),
+                      )
+                      .toList(),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 

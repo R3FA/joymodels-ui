@@ -24,6 +24,8 @@ class ReportsPageScreen extends StatefulWidget {
 }
 
 class _ReportsPageScreenState extends State<ReportsPageScreen> {
+  final ScrollController _horizontalScrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -34,6 +36,12 @@ class _ReportsPageScreenState extends State<ReportsPageScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       viewModel.init();
     });
+  }
+
+  @override
+  void dispose() {
+    _horizontalScrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -89,6 +97,7 @@ class _ReportsPageScreenState extends State<ReportsPageScreen> {
         children: [
           Expanded(
             child: DropdownButtonFormField<String>(
+              isExpanded: true,
               initialValue: viewModel.filterStatus,
               decoration: InputDecoration(
                 labelText: 'Status',
@@ -112,6 +121,7 @@ class _ReportsPageScreenState extends State<ReportsPageScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: DropdownButtonFormField<String>(
+              isExpanded: true,
               initialValue: viewModel.filterEntityType,
               decoration: InputDecoration(
                 labelText: 'Entity Type',
@@ -135,6 +145,7 @@ class _ReportsPageScreenState extends State<ReportsPageScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: DropdownButtonFormField<String>(
+              isExpanded: true,
               initialValue: viewModel.filterReason,
               decoration: InputDecoration(
                 labelText: 'Reason',
@@ -167,24 +178,29 @@ class _ReportsPageScreenState extends State<ReportsPageScreen> {
   ) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minWidth: constraints.maxWidth),
-            child: SingleChildScrollView(
-              child: DataTable(
-                columnSpacing: 24,
-                columns: const [
-                  DataColumn(label: Text('Reporter')),
-                  DataColumn(label: Text('Type')),
-                  DataColumn(label: Text('Reason')),
-                  DataColumn(label: Text('Preview')),
-                  DataColumn(label: Text('Status')),
-                  DataColumn(label: Text('Created')),
-                ],
-                rows: reports
-                    .map((r) => _buildReportRow(r, viewModel, theme))
-                    .toList(),
+        return Scrollbar(
+          controller: _horizontalScrollController,
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            controller: _horizontalScrollController,
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: constraints.maxWidth),
+              child: SingleChildScrollView(
+                child: DataTable(
+                  columnSpacing: 24,
+                  columns: const [
+                    DataColumn(label: Text('Reporter')),
+                    DataColumn(label: Text('Type')),
+                    DataColumn(label: Text('Reason')),
+                    DataColumn(label: Text('Preview')),
+                    DataColumn(label: Text('Status')),
+                    DataColumn(label: Text('Created')),
+                  ],
+                  rows: reports
+                      .map((r) => _buildReportRow(r, viewModel, theme))
+                      .toList(),
+                ),
               ),
             ),
           ),
