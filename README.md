@@ -48,7 +48,7 @@ Password: strinG1!
 
 Clone the repository
 ```bash
-git clone https://github.com/R3FA/joymodels-ui
+git clone https://github.com/R3FA/joymodels-ui.git
 ```
 
 Install all required dependencies
