@@ -23,10 +23,17 @@ For test purposes, the API backend provides some test accounts for the client ap
 Username: root1
 Password: strinG1!
 
+#Another root account
+Username: root2
+Password: strinG1!
+
 # Admin account
 Username: admin1
 Password: strinG1!
 
+# Another admin account
+Username: admin2
+Password: strinG1!
 
 # Normal user account
 Username: user1
