@@ -17,6 +17,7 @@ class LoginPageScreenViewModel with ChangeNotifier {
   final passwordController = TextEditingController();
 
   bool isLoading = false;
+  bool _isDisposed = false;
 
   String? errorMessage;
   String? successMessage;
@@ -88,8 +89,16 @@ class LoginPageScreenViewModel with ChangeNotifier {
 
   @override
   void dispose() {
+    _isDisposed = true;
     nicknameController.dispose();
     passwordController.dispose();
     super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_isDisposed) {
+      super.notifyListeners();
+    }
   }
 }

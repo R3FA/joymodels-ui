@@ -506,7 +506,11 @@ class _UsersPageScreenState extends State<UsersPageScreen>
             if (isLoading && roles == null) {
               viewModel.fetchRoles().then((fetchedRoles) {
                 setState(() {
-                  roles = fetchedRoles;
+                  roles = fetchedRoles
+                      .where(
+                        (r) => r.roleName != UserRoleApiEnum.Unverified.name,
+                      )
+                      .toList();
                   selectedRoleUuid = fetchedRoles
                       .where((r) => r.roleName == user.userRole.roleName)
                       .map((r) => r.uuid)

@@ -22,6 +22,7 @@ class CategoriesPageViewModel extends ChangeNotifier
   VoidCallback? onNetworkError;
 
   bool _isInitialized = false;
+  bool _isDisposed = false;
   bool isLoading = false;
   String? errorMessage;
 
@@ -149,9 +150,17 @@ class CategoriesPageViewModel extends ChangeNotifier
 
   @override
   void dispose() {
+    _isDisposed = true;
     onSessionExpired = null;
     onForbidden = null;
     onNetworkError = null;
     super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_isDisposed) {
+      super.notifyListeners();
+    }
   }
 }

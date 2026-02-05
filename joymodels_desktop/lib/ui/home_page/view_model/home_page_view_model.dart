@@ -13,6 +13,7 @@ class HomePageScreenViewModel with ChangeNotifier {
 
   int selectedIndex = 0;
   int usersInitialTabIndex = 0;
+  bool _isDisposed = false;
 
   String? currentUserName;
   String? userUuid;
@@ -91,10 +92,18 @@ class HomePageScreenViewModel with ChangeNotifier {
 
   @override
   void dispose() {
+    _isDisposed = true;
     onLogoutSuccess = null;
     onSessionExpired = null;
     onForbidden = null;
     onNetworkError = null;
     super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_isDisposed) {
+      super.notifyListeners();
+    }
   }
 }

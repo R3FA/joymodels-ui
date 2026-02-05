@@ -27,6 +27,7 @@ class UsersPageViewModel with ChangeNotifier {
   VoidCallback? onNetworkError;
 
   bool _isInitialized = false;
+  bool _isDisposed = false;
   bool isRoot = false;
 
   PaginationResponseApiModel<UsersResponseApiModel>? verifiedPagination;
@@ -223,9 +224,17 @@ class UsersPageViewModel with ChangeNotifier {
 
   @override
   void dispose() {
+    _isDisposed = true;
     onSessionExpired = null;
     onForbidden = null;
     onNetworkError = null;
     super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_isDisposed) {
+      super.notifyListeners();
+    }
   }
 }
