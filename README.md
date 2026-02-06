@@ -42,6 +42,14 @@ Password: strinG1!
 # Another normal user account
 Username: user2
 Password: strinG1!
+
+# Another normal user account
+Username: user3
+Password: strinG1!
+
+# Another normal user account
+Username: user4
+Password: strinG1!
 ```
 
 ### Setup
