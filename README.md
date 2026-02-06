@@ -18,7 +18,7 @@ sudo pacman -S libsecret
 
 For test purposes, the API backend provides some test accounts for the client applications.
 
-### Warning: Root and Admin accounts can be used for desktop and mobile application, while regular accounts with user credentials are only for mobile application.
+# Warning: Root and Admin accounts can be used for desktop and mobile application, while regular accounts with user credentials are only for mobile application.
 
 ```bash
 # Root account
