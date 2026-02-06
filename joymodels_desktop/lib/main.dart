@@ -7,9 +7,25 @@ import 'package:joymodels_desktop/ui/home_page/view_model/home_page_view_model.d
 import 'package:joymodels_desktop/ui/login_page/view_model/login_page_view_model.dart';
 import 'package:joymodels_desktop/ui/login_page/widgets/login_page_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:window_manager/window_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await windowManager.ensureInitialized();
+
+  WindowOptions windowOptions = const WindowOptions(
+    size: Size(1280, 1024),
+    minimumSize: Size(1024, 768),
+    center: true,
+    title: 'JoyModels Desktop',
+  );
+
+  await windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.setMinimumSize(const Size(1024, 768));
+    await windowManager.show();
+    await windowManager.focus();
+  });
 
   dependencyInjectionSetup();
 
