@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:joymodels_mobile/core/di/di.dart';
+import 'package:joymodels_mobile/data/core/config/stripe_config.dart';
 import 'package:joymodels_mobile/ui/community_page/view_model/community_page_view_model.dart';
 import 'package:joymodels_mobile/ui/core/themes/themes.dart';
 import 'package:joymodels_mobile/ui/menu_drawer/view_model/menu_drawer_view_model.dart';
@@ -19,8 +20,7 @@ import 'package:joymodels_mobile/ui/welcome_page/view_model/welcome_page_view_mo
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  Stripe.publishableKey =
-      'pk_test_51SsVVq3NnuJrnIAA4JAfYUUhY9K0LPiJI7X12CljNEbce92iJ1L4az6nYamXKJ1Zy98KeEeom1ycTOSf8EBMOHX500L26sQmLt';
+  Stripe.publishableKey = StripeConfig.stripePublishableKey;
   await Stripe.instance.applySettings();
 
   dependencyInjectionSetup();
