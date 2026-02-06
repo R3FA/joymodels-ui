@@ -64,7 +64,7 @@ Install all required dependencies
 flutter pub get
 ```
 
-To run a client, change into the respective directory (admin_panel or mobile) and run the following
+To run a client, change into the respective directory (joymodels_desktop or joymodels_mobile) and run the following
 ```bash
 flutter run # Debug mode
 flutter run --release # Release mode
